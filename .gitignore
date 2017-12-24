@@ -1,3 +1,20 @@
+# Custom ignores:
+
+node_modules
+.vscode/.ropeproject
+personal
+src/python/.idea
+*.pyc
+.DS_Store
+npm-debug.log.*
+.idea
+.coverage
+
+
+##################################################
+Default python ignore
+##################################################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
