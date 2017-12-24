@@ -1,0 +1,25 @@
+{
+  "name": "arepl-backend",
+  "version": "1.0.0-alpha.1",
+  "description": "JS interface to python evaluator for AREPL",
+  "main": "src/evaluators.js",
+  "scripts": {
+    "test": "mocha --ui tdd src/*.test.js"
+  },
+  "repository": "https://github.com/Almenon/AREPL",
+  "keywords": [
+    "IDE",
+    "python",
+    "real-time",
+    "AREPL"
+  ],
+  "author": "Almenon",
+  "devDependencies": {
+    "@types/mocha": "^2.2.44",
+    "mocha": "^3.5.3",
+    "mocha-appveyor-reporter": "^0.4.0",
+  },
+  "dependencies": {
+    "python-shell": "^0.4.0"
+  }
+}
