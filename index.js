@@ -23,18 +23,12 @@ module.exports.PythonEvaluator = class{
 		this.running = false
 		this.PythonShell = require('python-shell')
 
-		let rootPath = process.cwd()
-		if(rootPath.includes("arepl-win32")){
-		  rootPath = rootPath + '/resources/app'
-		}
-		else if(__dirname.includes("arepl-darwin")){ //mac prod build
-			rootPath = __dirname.replace("/src","")
-
+		if(process.platform == "darwin"){
 			//needed for Mac to prevent ENOENT
 			process.env.PATH = ["/usr/local/bin", process.env.PATH].join(":")
 		}
 
-		this.pythonEvalFolderPath = rootPath + '/src/python/'
+		this.pythonEvalFolderPath = __dirname + '/python/'
 
 		// for non-windows OS it is best to use python3 instead of python
 		// Mac and Ubuntu both have python being v2 by default
