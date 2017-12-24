@@ -6,7 +6,7 @@
 // The module 'assert' provides assertion methods from node
 const assert = require("assert")
 
-const evals = require("./evaluators")
+const evals = require("./index")
 
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new evals.PythonEvaluator()
