@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --ui tdd *.test.js",
-    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js"
+    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
+    "document": "documentation readme index.js --section=API"
   },
   "repository": "https://github.com/Almenon/arepl-backend",
   "bugs": {
