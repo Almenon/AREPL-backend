@@ -16,7 +16,7 @@ module.exports.PythonEvaluator = class{
 
 	
 	/**
-	 * starts pythonEvaluator.py
+	 * starts pythonEvaluator.py 
 	 */
 	constructor(){
 		this.evaling = false
