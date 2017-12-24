@@ -19,8 +19,8 @@ module.exports.PythonEvaluator = class{
 	 * starts pythonEvaluator.py 
 	 */
 	constructor(){
-		this.evaling = false
-		this.running = false
+		this.evaling = false // whether python is busy executing inputted code
+		this.running = false // whether python backend is on/off
 		this.PythonShell = require('python-shell')
 
 		if(process.platform == "darwin"){
@@ -40,7 +40,7 @@ module.exports.PythonEvaluator = class{
 
 	
 	/**
-	 * does not do anything if program is already running
+	 * does not do anything if program is currently evaling code
 	 * @param {{evalCode:string}} code 
 	 */
 	execCode(code){

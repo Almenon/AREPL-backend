@@ -88,11 +88,11 @@ suite("PythonEvaluator Tests", () => {
     test("PythonEvaluator returns result after print", function(done){
         pyEvaluator.onPrint = (stdout)=>{ 
             assert.equal(stdout, "hello world")
-            assert.equal(pyEvaluator.running, true)
+            assert.equal(pyEvaluator.evaling, true)
         }
 
         pyEvaluator.onResult = () => {
-            assert.equal(pyEvaluator.running, false)
+            assert.equal(pyEvaluator.evaling, false)
             done()
         }
 
