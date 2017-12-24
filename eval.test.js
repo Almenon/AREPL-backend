@@ -10,6 +10,7 @@ const evals = require("./index")
 
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new evals.PythonEvaluator()
+    let input = {evalCode:"", savedCode: ""}
 
     test("sanity check: 1+1=2", () => {
         assert.equal(1+1,2)
@@ -21,7 +22,8 @@ suite("PythonEvaluator Tests", () => {
             assert.notEqual(result, null)
             done()
         }
-        pyEvaluator.execCode({evalCode:"x"})
+        input.evalCode = "x"
+        pyEvaluator.execCode(input)
     })
 
     test("PythonEvaluator returns error when bad code", function(done){
@@ -30,7 +32,8 @@ suite("PythonEvaluator Tests", () => {
             assert.notEqual(result.ERROR.trim(), "")
             done()
         }
-        pyEvaluator.execCode({evalCode:"x"})
+        input.evalCode = "x="
+        pyEvaluator.execCode(input)
     })
 
     test("PythonEvaluator returns user variables", function(done){
@@ -38,7 +41,8 @@ suite("PythonEvaluator Tests", () => {
             assert.equal(result.userVariables['x'], 1)
             done()
         }
-        pyEvaluator.execCode({evalCode:"x=1", savedCode: ""})
+        input.evalCode = "x=1"
+        pyEvaluator.execCode(input)
     })
 
     test("PythonEvaluator can print stdout", function(done){
@@ -53,7 +57,8 @@ suite("PythonEvaluator Tests", () => {
             else done()
         }
 
-        pyEvaluator.execCode({evalCode:"print('hello world')", savedCode: ""})
+        input.evalCode = "print('hello world')"
+        pyEvaluator.execCode()
     })
 
     test("PythonEvaluator can print multiple lines", function(done){
@@ -76,7 +81,8 @@ suite("PythonEvaluator Tests", () => {
             else done()
         }
 
-        pyEvaluator.execCode({evalCode:"[print(x) for x in [1,2]]", savedCode: ""})
+        input.evalCode = "[print(x) for x in [1,2]]"
+        pyEvaluator.execCode(input)
     })
 
     test("PythonEvaluator returns result after print", function(done){
@@ -90,7 +96,8 @@ suite("PythonEvaluator Tests", () => {
             done()
         }
 
-        pyEvaluator.execCode({evalCode:"print('hello world')"})
+        input.evalCode = "print('hello world')"
+        pyEvaluator.execCode(input)
     })
 
 })
