@@ -58,7 +58,7 @@ suite("PythonEvaluator Tests", () => {
         }
 
         input.evalCode = "print('hello world')"
-        pyEvaluator.execCode()
+        pyEvaluator.execCode(input)
     })
 
     test("PythonEvaluator can print multiple lines", function(done){
