@@ -1,24 +1,12 @@
-/**
- * @param {string} code 
- */
-module.exports.JSEvaluator = function(code){
-		try {
-			eval(code)
-		} catch (SyntaxError) {
-			//todo
-		}
-}
-
-const identifier = "6q3co7"
-const jsonErrorIdentifier = "6q3co6"
-
 module.exports.PythonEvaluator = class{
-
 	
 	/**
 	 * starts pythonEvaluator.py 
 	 */
 	constructor(){
+		this.identifier = "6q3co7"
+		this.jsonErrorIdentifier = "6q3co6"
+
 		this.evaling = false // whether python is busy executing inputted code
 		this.running = false // whether python backend is on/off
 		this.PythonShell = require('python-shell')
@@ -132,9 +120,9 @@ module.exports.PythonEvaluator = class{
 		}
 
         //result should have identifier, otherwise it is just a printout from users code
-        if(results.startsWith(identifier)){
+        if(results.startsWith(this.identifier)){
 			this.evaling = false
-            results = results.replace(identifier,"")
+            results = results.replace(this.identifier,"")
 			pyResult = JSON.parse(results)
 			
 			pyResult.execTime = pyResult.execTime*1000 // convert into ms
@@ -149,8 +137,8 @@ module.exports.PythonEvaluator = class{
 			pyResult.totalTime = Date.now()-this.startTime
 			this.onResult(pyResult)
 		}
-		else if(results.startsWith(jsonErrorIdentifier)){
-			results = results.replace(jsonErrorIdentifier)
+		else if(results.startsWith(this.jsonErrorIdentifier)){
+			results = results.replace(this.jsonErrorIdentifier)
 			console.warn("error in python evaluator converting stdin to JSON. " +
 			"User probably just sent stdin without input() in his program.\n" + results)
 		}
