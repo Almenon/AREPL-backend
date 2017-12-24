@@ -7,7 +7,10 @@
     "test": "mocha --ui tdd *.test.js",
     "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js & exit 0"
   },
-  "repository": "https://github.com/Almenon/AREPL",
+  "repository": "https://github.com/Almenon/arepl-backend",
+  "bugs": {
+    "url": "https://github.com/Almenon/arepl-backend"
+  },
   "keywords": [
     "IDE",
     "python",
@@ -15,6 +18,7 @@
     "AREPL"
   ],
   "author": "Almenon",
+  "license": "MIT",
   "devDependencies": {
     "@types/mocha": "^2.2.44",
     "mocha": "^3.5.3",
