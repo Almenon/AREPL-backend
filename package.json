@@ -2,10 +2,10 @@
   "name": "arepl-backend",
   "version": "1.0.0-alpha.1",
   "description": "JS interface to python evaluator for AREPL",
-  "main": "src/evaluators.js",
+  "main": "index.js",
   "scripts": {
-    "test": "mocha --ui tdd src/*.test.js",
-    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter src/*.test.js & exit 0"
+    "test": "mocha --ui tdd *.test.js",
+    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js & exit 0"
   },
   "repository": "https://github.com/Almenon/AREPL",
   "keywords": [
