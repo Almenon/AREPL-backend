@@ -1,4 +1,5 @@
-# AREPL-backend
+# AREPL-backend [![Build Status](https://travis-ci.org/Almenon/AREPL-backend.svg?branch=master)](https://travis-ci.org/Almenon/AREPL)
+
 JS interface to python evaluator for AREPL
 
 Although it is meant for AREPL, it is not dependent upon AREPL and can be used by any project.
