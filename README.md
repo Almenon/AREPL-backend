@@ -28,6 +28,7 @@ see <https://github.com/Almenon/AREPL/blob/master/src/app.js> for example useage
 -   [execCode](#execcode)
 -   [sendStdin](#sendstdin)
 -   [restart](#restart)
+-   [stop](#stop)
 -   [onResult](#onresult)
 -   [onPrint](#onprint)
 -   [handleResult](#handleresult)
@@ -60,6 +61,11 @@ After process restarts the callback passed in is invoked
 **Parameters**
 
 -   `callback`   (optional, default `()=>{}`)
+
+### stop
+
+kills python process.  force-kills if necessary after 50ms.
+you can check PythonEvaluator.running to see if process is dead yet
 
 ### onResult
 
