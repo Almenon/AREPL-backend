@@ -9,6 +9,7 @@ module.exports.PythonEvaluator = class{
 
 		this.evaling = false // whether python is busy executing inputted code
 		this.running = false // whether python backend is on/off
+		this.restarting = false
 		this.PythonShell = require('python-shell')
 
 		if(process.platform == "darwin"){
@@ -50,26 +51,34 @@ module.exports.PythonEvaluator = class{
 	 * After process restarts the callback passed in is invoked
 	 */
 	restart(callback=()=>{}){
-		
-		var restarting = false
+
+		this.restarting = false
 
 		// register callback for restart
 		// using childProcess callback instead of pyshell callback
 		// (pyshell callback only happens when process exits voluntarily)
 		this.pyshell.childProcess.on('exit',()=>{
-			restarting = true
+			this.restarting = true
 			this.evaling = false
 			this.startPython()
 			callback()
 		})
 
+		this.stop()
+	}
+
+	/**
+	 * kills python process.  force-kills if necessary after 50ms.
+	 * you can check PythonEvaluator.running to see if process is dead yet
+	 */
+	stop(){
 		// pyshell has 50 ms to die gracefully
 		this.running = !this.pyshell.childProcess.kill()
 		if(this.running) console.info("pyshell refused to die")
 		else this.evaling = false
 
 		setTimeout(()=>{
-			if(this.running && !restarting){
+			if(this.running && !this.restarting){
 				// murder the process with extreme prejudice
 				this.running = !this.pyshell.childProcess.kill('SIGKILL')
 				if(this.running){

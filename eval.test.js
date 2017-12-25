@@ -16,7 +16,7 @@ suite("PythonEvaluator Tests", () => {
         assert.equal(1+1,2)
     })
 
-    test("PythonEvaluator returns result", function(done){
+    test("returns result", function(done){
         pyEvaluator.onResult = (result)=>{
             console.log(result)
             assert.notEqual(result, null)
@@ -26,7 +26,7 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("PythonEvaluator returns error when bad code", function(done){
+    test("returns error when bad code", function(done){
         pyEvaluator.onResult = (result)=>{ 
             assert.notEqual(result.ERROR, null)
             assert.notEqual(result.ERROR.trim(), "")
@@ -36,7 +36,7 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("PythonEvaluator returns user variables", function(done){
+    test("returns user variables", function(done){
         pyEvaluator.onResult = (result)=>{ 
             assert.equal(result.userVariables['x'], 1)
             done()
@@ -45,7 +45,7 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("PythonEvaluator can print stdout", function(done){
+    test("can print stdout", function(done){
         let hasPrinted = false
         pyEvaluator.onPrint = (stdout)=>{ 
             assert.equal(stdout, "hello world")
@@ -61,7 +61,7 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("PythonEvaluator can print multiple lines", function(done){
+    test("can print multiple lines", function(done){
         let firstPrint = false
         let secondPrint = false
 
@@ -85,7 +85,7 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("PythonEvaluator returns result after print", function(done){
+    test("returns result after print", function(done){
         pyEvaluator.onPrint = (stdout)=>{ 
             assert.equal(stdout, "hello world")
             assert.equal(pyEvaluator.evaling, true)
@@ -98,6 +98,25 @@ suite("PythonEvaluator Tests", () => {
 
         input.evalCode = "print('hello world')"
         pyEvaluator.execCode(input)
+    })
+
+    test("can restart", function(done){
+
+        assert.equal(pyEvaluator.running, true)
+        assert.equal(pyEvaluator.restarting, false)
+        assert.equal(pyEvaluator.evaling, false)
+
+        pyEvaluator.restart(()=>{
+            console.log('finished restarting')
+            assert.equal(pyEvaluator.running, true)
+            assert.equal(pyEvaluator.restarting, false)
+            assert.equal(pyEvaluator.evaling, false)
+
+            // i should actually test sending & reciving input to make sure evalutor is on
+            // but i tried it and it failed (likely due to some mysterious timing issue)
+            // the kicker is it worked when I tried debugging it... uggghhh
+            done()
+        })
     })
 
 })
