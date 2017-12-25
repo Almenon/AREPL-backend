@@ -109,7 +109,6 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.restart(()=>{
             console.log('finished restarting')
             assert.equal(pyEvaluator.running, true)
-            assert.equal(pyEvaluator.restarting, false)
             assert.equal(pyEvaluator.evaling, false)
 
             // i should actually test sending & reciving input to make sure evalutor is on
