@@ -24,7 +24,7 @@ module.exports.PythonEvaluator = class{
 			// for non-windows OS it is best to use python3 instead of python
 			// Mac and Ubuntu both have python being v2 by default
 			// archlinux and freebsd both use v3 as default, but also provide python3 command
-			this.pythonPath = process.platform != "win32" ? "python3" : "pythonf"
+			this.pythonPath = process.platform != "win32" ? "python3" : "python"
 		}
 		else this.pythonPath = pythonPath
 	}
