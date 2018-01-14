@@ -101,7 +101,6 @@ module.exports.PythonEvaluator = class{
 			pythonPath: this.pythonPath,
 		})
 		this.pyshell.on('message', message => {
-			console.info(message)
 			this.handleResult(message)
 		})
 		this.running = true
