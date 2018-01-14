@@ -2,8 +2,9 @@ module.exports.PythonEvaluator = class{
 	
 	/**
 	 * starts pythonEvaluator.py 
+	 * @param {string} pythonPath the path to run python.  By default evaluator uses 'python' if on windows or else 'python3'.
 	 */
-	constructor(){
+	constructor(pythonPath=null){
 		this.identifier = "6q3co7"
 		this.jsonErrorIdentifier = "6q3co6"
 
@@ -19,12 +20,13 @@ module.exports.PythonEvaluator = class{
 
 		this.pythonEvalFolderPath = __dirname + '/python/'
 
-		// for non-windows OS it is best to use python3 instead of python
-		// Mac and Ubuntu both have python being v2 by default
-		// archlinux and freebsd both use v3 as default, but also provide python3 command
-		this.pythonPath = process.platform != "win32" ? "python3" : "python"
-
-		this.startPython()
+		if(pythonPath == null){
+			// for non-windows OS it is best to use python3 instead of python
+			// Mac and Ubuntu both have python being v2 by default
+			// archlinux and freebsd both use v3 as default, but also provide python3 command
+			this.pythonPath = process.platform != "win32" ? "python3" : "pythonf"
+		}
+		else this.pythonPath = pythonPath
 	}
 
 	
@@ -89,6 +91,9 @@ module.exports.PythonEvaluator = class{
 		}, 50)
 	}
 
+	/**
+	 * starts pythonEvaluator.py.  will NOT WORK with python 2
+	 */
 	startPython(){
 		console.log("Starting Python...")
 		this.pyshell = new this.PythonShell('pythonEvaluator.py', {

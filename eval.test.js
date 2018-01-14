@@ -11,6 +11,7 @@ const evals = require("./index")
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new evals.PythonEvaluator()
     let input = {evalCode:"", savedCode: ""}
+    pyEvaluator.startPython()
 
     test("sanity check: 1+1=2", () => {
         assert.equal(1+1,2)
