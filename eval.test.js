@@ -19,7 +19,6 @@ suite("PythonEvaluator Tests", () => {
 
     test("returns result", function(done){
         pyEvaluator.onResult = (result)=>{
-            console.log(result)
             assert.notEqual(result, null)
             done()
         }
@@ -108,7 +107,6 @@ suite("PythonEvaluator Tests", () => {
         assert.equal(pyEvaluator.evaling, false)
 
         pyEvaluator.restart(()=>{
-            console.log('finished restarting')
             assert.equal(pyEvaluator.running, true)
             assert.equal(pyEvaluator.evaling, false)
 
@@ -117,6 +115,15 @@ suite("PythonEvaluator Tests", () => {
             // the kicker is it worked when I tried debugging it... uggghhh
             done()
         })
+    })
+
+    test("strips out unnecessary error info", function(done){
+        pyEvaluator.onResult = (result)=>{ 
+            assert.equal(result.ERROR, "Traceback (most recent call last):\n  line 1, in <module>\nNameError: name 'x' is not defined\n")
+            done()
+        }
+        input.evalCode = "x"
+        pyEvaluator.execCode(input)
     })
 
 })
