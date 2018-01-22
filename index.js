@@ -2,15 +2,17 @@ module.exports.PythonEvaluator = class{
 	
 	/**
 	 * starts pythonEvaluator.py 
-	 * @param {string} pythonPath the path to run python.  By default evaluator uses 'python' if on windows or else 'python3'.
+	 * @param {string} pythonPath the path to run python. By default evaluator uses 'python' if on windows or else 'python3'.
+	 * @param {[string]} pythonOptions see https://docs.python.org/3/using/cmdline.html#miscellaneous-options.
 	 */
-	constructor(pythonPath=null){
+	constructor(pythonPath=null, pythonOptions=['-u']){
 		this.identifier = "6q3co7"
 		this.jsonErrorIdentifier = "6q3co6"
 
 		this.evaling = false // whether python is busy executing inputted code
 		this.running = false // whether python backend is on/off
 		this.restarting = false
+		this.pythonOptions = pythonOptions
 		this.PythonShell = require('python-shell')
 
 		if(process.platform == "darwin"){
@@ -92,12 +94,13 @@ module.exports.PythonEvaluator = class{
 	}
 
 	/**
-	 * starts pythonEvaluator.py.  will NOT WORK with python 2
+	 * starts pythonEvaluator.py. Will NOT WORK with python 2
 	 */
 	startPython(){
 		console.log("Starting Python...")
 		this.pyshell = new this.PythonShell('pythonEvaluator.py', {
 			scriptPath: this.pythonEvalFolderPath,
+			pythonOptions: this.pythonOptions,
 			pythonPath: this.pythonPath,
 		})
 		this.pyshell.on('message', message => {

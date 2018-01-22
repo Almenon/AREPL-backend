@@ -126,4 +126,16 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("prints in real-time", function(done){
+        let printed = false
+
+        pyEvaluator.onPrint = (stdout)=>{ printed = true }
+        pyEvaluator.onResult = () => { done() }
+
+        setTimeout(()=>{ if(!printed) assert.fail() }, 25)
+
+        input.evalCode = "from time import sleep\nprint('a')\nsleep(.05)\nprint(b)"
+        pyEvaluator.execCode(input)
+    })
+
 })
