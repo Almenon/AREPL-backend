@@ -1,6 +1,8 @@
 # this script based off of https://github.com/tolbertam/mocha-appveyor-reporter/blob/master/appveyor.yml
 # python settings based off of https://github.com/ogrisel/python-appveyor-demo/blob/master/appveyor.yml
 
+image: Visual Studio 2017
+
 environment:
   matrix:
     # we need to specify py3 because py2 is default (AREPL does not support py2)
@@ -9,6 +11,8 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
+  - set path=%programfiles(x86)%\\Microsoft SDKs\TypeScript\2.6;%path%
+
   # Get the latest stable version of Node.js
   - ps: Install-Product node ''
   - npm install
