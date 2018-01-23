@@ -9,7 +9,7 @@
     "compileOnce": "tsc",
     "declaration": "tsc --target es6 --declaration index.ts",
     "test": "mocha --ui tdd *.test.js",
-    "appveyorTest": "npm run compileOnce && mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
+    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
     "document": "documentation readme index.js --section=API"
   },
   "repository": "https://github.com/Almenon/arepl-backend",
