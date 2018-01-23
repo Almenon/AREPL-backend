@@ -25,10 +25,13 @@ see <https://github.com/Almenon/AREPL/blob/master/src/app.js> for example useage
 #### Table of Contents
 
 -   [constructor](#constructor)
+-   [evaling](#evaling)
+-   [running](#running)
 -   [execCode](#execcode)
 -   [sendStdin](#sendstdin)
 -   [restart](#restart)
 -   [stop](#stop)
+-   [startPython](#startpython)
 -   [onResult](#onresult)
 -   [onPrint](#onprint)
 -   [handleResult](#handleresult)
@@ -38,6 +41,19 @@ see <https://github.com/Almenon/AREPL/blob/master/src/app.js> for example useage
 ### constructor
 
 starts pythonEvaluator.py
+
+**Parameters**
+
+-   `pythonPath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** the path to run python. By default evaluator uses 'python' if on windows or else 'python3'. (optional, default `null`)
+-   `pythonOptions` **\[[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)]** see <https://docs.python.org/3/using/cmdline.html#miscellaneous-options>. (optional, default `['-u']`)
+
+### evaling
+
+whether python is busy executing inputted code
+
+### running
+
+whether python backend is on/off
 
 ### execCode
 
@@ -66,6 +82,10 @@ After process restarts the callback passed in is invoked
 
 kills python process.  force-kills if necessary after 50ms.
 you can check PythonEvaluator.running to see if process is dead yet
+
+### startPython
+
+starts pythonEvaluator.py. Will NOT WORK with python 2
 
 ### onResult
 
@@ -101,7 +121,7 @@ checks syntax without executing code
 
 -   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 
 ### formatPythonException
 
