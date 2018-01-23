@@ -6,7 +6,7 @@
   "types": "./index.d.ts",
   "scripts": {
     "compile": "tsc -watch -p ./",
-    "compileOnce": "tsc -p ./",
+    "compileOnce": "tsc",
     "declaration": "tsc --target es6 --declaration index.ts",
     "test": "mocha --ui tdd *.test.js",
     "appveyorTest": "npm run compileOnce && mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
