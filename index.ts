@@ -1,13 +1,38 @@
-module.exports.PythonEvaluator = class{
-	
+import {pythonShellTyping} from './pyShellType'
+
+export class PythonEvaluator{
+    
+    private static readonly identifier = "6q3co7"
+    private static readonly jsonErrorIdentifier = "6q3co6"
+
+    /**
+     * whether python is busy executing inputted code
+     */
+    evaling = false
+
+    /**
+     * whether python backend is on/off
+     */
+    running = false
+
+    restarting = false
+    private pythonOptions: string[]
+    private pythonPath:string
+    private startTime:number
+    private pythonEvalFolderPath = __dirname + '/python/'
+    private PythonShell
+
+    /**
+     * an instance of python-shell. See https://github.com/extrabacon/python-shell
+     */
+    pyshell:pythonShellTyping
+
 	/**
 	 * starts pythonEvaluator.py 
 	 * @param {string} pythonPath the path to run python. By default evaluator uses 'python' if on windows or else 'python3'.
 	 * @param {[string]} pythonOptions see https://docs.python.org/3/using/cmdline.html#miscellaneous-options.
 	 */
-	constructor(pythonPath=null, pythonOptions=['-u']){
-		this.identifier = "6q3co7"
-		this.jsonErrorIdentifier = "6q3co6"
+	constructor(pythonPath:string = null, pythonOptions: string[] = ['-u']){
 
 		this.evaling = false // whether python is busy executing inputted code
 		this.running = false // whether python backend is on/off
@@ -19,8 +44,6 @@ module.exports.PythonEvaluator = class{
 			//needed for Mac to prevent ENOENT
 			process.env.PATH = ["/usr/local/bin", process.env.PATH].join(":")
 		}
-
-		this.pythonEvalFolderPath = __dirname + '/python/'
 
 		if(pythonPath == null){
 			// for non-windows OS it is best to use python3 instead of python
@@ -46,7 +69,7 @@ module.exports.PythonEvaluator = class{
 	/**
 	 * @param {string} message 
 	 */
-	sendStdin(message){
+	sendStdin(message:string){
 		this.pyshell.send(message)
 	}
 
@@ -114,31 +137,32 @@ module.exports.PythonEvaluator = class{
 	 * is called when program fails or completes
 	 * @param {{ERROR:string, userVariables:Object, execTime:number, totalPyTime:number, totalTime:number}} foo
 	 */
-	onResult(foo){}
+	onResult(foo: {ERROR:string, userVariables:Object, execTime:number, totalPyTime:number, totalTime:number}){}
 
 	/**
 	 * Overwrite this with your own handler.
 	 * Is called when program prints
 	 * @param {string} foo
 	 */
-	onPrint(foo){}
+	onPrint(foo: string){}
 
 	/**
 	 * handles pyshell results and calls onResult / onPrint
 	 * @param {string} results 
 	 */
-	handleResult(results) {
+	handleResult(results:string) {
 		let pyResult = {
 			"ERROR":"",
 			"userVariables": "",
-			"execTime":0,
+            "execTime":0,
+            "totalTime":0,
 			"totalPyTime":0
 		}
 
         //result should have identifier, otherwise it is just a printout from users code
-        if(results.startsWith(this.identifier)){
+        if(results.startsWith(PythonEvaluator.identifier)){
 			this.evaling = false
-            results = results.replace(this.identifier,"")
+            results = results.replace(PythonEvaluator.identifier,"")
 			pyResult = JSON.parse(results)
 			
 			pyResult.execTime = pyResult.execTime*1000 // convert into ms
@@ -153,8 +177,8 @@ module.exports.PythonEvaluator = class{
 			pyResult.totalTime = Date.now()-this.startTime
 			this.onResult(pyResult)
 		}
-		else if(results.startsWith(this.jsonErrorIdentifier)){
-			results = results.replace(this.jsonErrorIdentifier)
+		else if(results.startsWith(PythonEvaluator.jsonErrorIdentifier)){
+			results = results.replace(PythonEvaluator.jsonErrorIdentifier,"")
 			console.warn("error in python evaluator converting stdin to JSON. " +
 			"User probably just sent stdin without input() in his program.\n" + results)
 		}
@@ -168,9 +192,9 @@ module.exports.PythonEvaluator = class{
 	/**
 	 * checks syntax without executing code
 	 * @param {string} code
-	 * @returns {Promise}
+	 * @returns {Promise} rejects w/ stderr if syntax failure
 	 */
-	async checkSyntax(code){
+	async checkSyntax(code:string){
 		// note that this should really be done in pythonEvaluator.py
 		// but communication with that happens through just one channel (stdin/stdout)
 		// so for now i prefer to keep this seperate
@@ -198,7 +222,7 @@ module.exports.PythonEvaluator = class{
 	 * NameError: name 'y' is not defined"
 	 * @returns {string}
 	 */
-	formatPythonException(err){
+	formatPythonException(err:string){
 	
 		//unescape newlines
 		err = err.replace(/\\n/g, "\n")
@@ -211,11 +235,12 @@ module.exports.PythonEvaluator = class{
 		//replace File "<string>" (pointless)
 		err = err.replace(/File \"<string>\", /g, "")
 	
-		err = err.split('\n')
+		// it would be nice if typescript let you redefine a type so i didn't have to create a new var :/
+		let errLines: string[] = err.split('\n')
 	
 		// error includes is caught in pythonEvaluator so it includes that stack frame
 		// user should not see it, so remove:
-		err = [err[0]].concat(err.slice(3))		
-		return err.join('\n')
+		errLines = [errLines[0]].concat(errLines.slice(3))		
+		return errLines.join('\n')
 	}
 }

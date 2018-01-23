@@ -7,5 +7,20 @@
         "-p",
         "*Test.py"
     ],
-    "python.unitTest.unittestEnabled": true
+    "python.unitTest.unittestEnabled": false,
+    "python.unitTest.promptToConfigure": false,
+    "python.unitTest.pyTestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false,
+
+    "files.exclude": {
+        "**/.git": true,
+		"**/.DS_Store": true,
+        "**/*.js": {"when": "$(basename).ts"},
+        "**/*.js.map": {"when": "$(basename).ts"}
+    },
+	"search.exclude": {
+		"out": true, // set this to false to include "out" folder in search results
+        "**/*.js": {"when": "$(basename).ts"},
+        "**/*.js.map": {"when": "$(basename).ts"}
+	},
 }

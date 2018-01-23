@@ -1,11 +1,15 @@
 {
   "name": "arepl-backend",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "JS interface to python evaluator for AREPL",
   "main": "index.js",
+  "types": "./index.d.ts",
   "scripts": {
+    "compile": "tsc -watch -p ./",
+    "compileOnce": "tsc -p ./",
+    "declaration": "tsc --target es6 --declaration index.ts",
     "test": "mocha --ui tdd *.test.js",
-    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
+    "appveyorTest": "npm run compileOnce && mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
     "document": "documentation readme index.js --section=API"
   },
   "repository": "https://github.com/Almenon/arepl-backend",
@@ -18,10 +22,19 @@
     "real-time",
     "AREPL"
   ],
+  "files":[
+    "python",
+    "!__pycache__",
+    "*.d.ts",
+    "*.js",
+    "*.js.map",
+    "*.ts"
+  ],
   "author": "Almenon",
   "license": "MIT",
   "devDependencies": {
     "@types/mocha": "^2.2.44",
+    "@types/node": "^9.3.0",
     "mocha": "^3.5.3",
     "mocha-appveyor-reporter": "^0.4.0"
   },
