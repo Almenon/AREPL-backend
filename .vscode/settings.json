@@ -3,12 +3,11 @@
     "python.unitTest.unittestArgs": [
         "-v",
         "-s",
-        ".\\src\\python",
+        "./python",
         "-p",
-        "*Test.py"
+        "*test.py"
     ],
-    "python.unitTest.unittestEnabled": false,
-    "python.unitTest.promptToConfigure": false,
+    "python.unitTest.unittestEnabled": true,
     "python.unitTest.pyTestEnabled": false,
     "python.unitTest.nosetestsEnabled": false,
 
