@@ -1,4 +1,8 @@
 import {pythonShellTyping} from './pyShellType'
+import {writeFileSync} from 'fs'
+import {exec} from 'child_process'
+import {tmpdir} from 'os'
+import {sep} from 'path'
 
 export class PythonEvaluator{
     
@@ -195,20 +199,29 @@ export class PythonEvaluator{
 	 * @returns {Promise} rejects w/ stderr if syntax failure
 	 */
 	async checkSyntax(code:string){
+		let filePath = tmpdir() + sep + "AREPLsyntaxCheck.py"
+		writeFileSync(filePath, code)
+		return this.checkSyntaxFile(filePath)
+	}
+
+	/**
+	 * checks syntax without executing code
+	 * @param {string} filePath
+	 * @returns {Promise} rejects w/ stderr if syntax failure
+	 */
+	async checkSyntaxFile(filePath:string){
 		// note that this should really be done in pythonEvaluator.py
 		// but communication with that happens through just one channel (stdin/stdout)
 		// so for now i prefer to keep this seperate
 
-		code = code.replace(/\n/g,"\\n") // command has to be executed on one line
-		let compileCommand = `${this.pythonPath} -c "compile('${code}','','exec')"`
-		let exec = require('child_process').exec
+		let compileCommand = `${this.pythonPath} -m py_compile ${filePath}`
 
 		return new Promise((resolve, reject) => {
 			exec(compileCommand, (error, stdout, stderr) => {
 				if(error == null) resolve()
 				else reject(stderr)
 			})
-		})
+		})	
 	}
 
 	/**

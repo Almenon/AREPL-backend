@@ -138,4 +138,18 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("checks syntax", function(done){
+        pyEvaluator.checkSyntax("x=").then(()=>{
+            assert.fail()
+        }).catch((err)=>{
+            done()
+        })
+
+        pyEvaluator.checkSyntax("x=1").then(()=>{
+            done()
+        }).catch((err)=>{
+            assert.fail()
+        })
+    })
+
 })
