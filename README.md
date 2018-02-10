@@ -27,6 +27,7 @@ see <https://github.com/Almenon/AREPL/blob/master/src/app.js> for example useage
 -   [constructor](#constructor)
 -   [evaling](#evaling)
 -   [running](#running)
+-   [debounce](#debounce)
 -   [execCode](#execcode)
 -   [sendStdin](#sendstdin)
 -   [restart](#restart)
@@ -55,6 +56,12 @@ whether python is busy executing inputted code
 ### running
 
 whether python backend is on/off
+
+### debounce
+
+delays execution of function by 300ms, resetting clock every time it is called
+Useful for real-time execution so execCode doesn't get called too often
+thanks to <https://stackoverflow.com/a/1909508/6629672>
 
 ### execCode
 
