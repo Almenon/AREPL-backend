@@ -256,4 +256,17 @@ export class PythonEvaluator{
 		errLines = [errLines[0]].concat(errLines.slice(3))		
 		return errLines.join('\n')
 	}
+
+	/**
+	 * delays execution of function by 300ms, resetting clock every time it is called
+	 * Useful for real-time execution so execCode doesn't get called too often
+	 * thanks to https://stackoverflow.com/a/1909508/6629672
+	 */
+	debounce = (function(){
+		let timer:any = 0;
+		return function(callback, ms: number, ...args: any[]){
+			clearTimeout(timer);
+			timer = setTimeout(callback, ms, args);
+		};
+	})();
 }
