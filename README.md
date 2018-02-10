@@ -36,6 +36,7 @@ see <https://github.com/Almenon/AREPL/blob/master/src/app.js> for example useage
 -   [onPrint](#onprint)
 -   [handleResult](#handleresult)
 -   [checkSyntax](#checksyntax)
+-   [checkSyntaxFile](#checksyntaxfile)
 -   [formatPythonException](#formatpythonexception)
 
 ### constructor
@@ -120,6 +121,16 @@ checks syntax without executing code
 **Parameters**
 
 -   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
+
+### checkSyntaxFile
+
+checks syntax without executing code
+
+**Parameters**
+
+-   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 
