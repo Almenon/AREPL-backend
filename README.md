@@ -1,5 +1,7 @@
 # AREPL-backend [![Build Status](https://travis-ci.org/Almenon/AREPL-backend.svg?branch=master)](https://travis-ci.org/Almenon/AREPL) [![Build status](https://ci.appveyor.com/api/projects/status/24o0d29l7ci9bif3?svg=true)](https://ci.appveyor.com/project/Almenon/arepl-backend)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Almenon/AREPL-backend.svg)](https://greenkeeper.io/)
+
 JS interface to python evaluator for AREPL.
 
 Evaluates python code and sends back the user variables and/or any errors.
