@@ -140,10 +140,10 @@ suite("PythonEvaluator Tests", () => {
 
     test("checks syntax", function(done){
         pyEvaluator.checkSyntax("x=").then(()=>{
+            // syntax error, promise should be rejected
+            // and this should never be called
             assert.fail()
-        }).catch((err)=>{
-            done()
-        })
+        }).catch(()=>{})
 
         pyEvaluator.checkSyntax("x=1").then(()=>{
             done()
