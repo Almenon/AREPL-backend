@@ -172,7 +172,7 @@ export class PythonEvaluator{
 			pyResult.execTime = pyResult.execTime*1000 // convert into ms
 			pyResult.totalPyTime = pyResult.totalPyTime*1000
 			
-			if(pyResult.userVariables != "") pyResult.userVariables = JSON.parse(pyResult.userVariables)
+			if(!this.isEmptyObject(pyResult.userVariables)) pyResult.userVariables = JSON.parse(pyResult.userVariables)
 
             if(pyResult.ERROR != ""){
                 pyResult.ERROR = this.formatPythonException(pyResult.ERROR)
@@ -269,4 +269,8 @@ export class PythonEvaluator{
 			timer = setTimeout(callback, ms, args);
 		};
 	})();
+
+	private isEmptyObject(object: {}){
+		return Object.keys(object).length === 0 && object.constructor === Object
+	}
 }
