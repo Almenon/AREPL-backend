@@ -1,6 +1,6 @@
 {
   "name": "arepl-backend",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "JS interface to python evaluator for AREPL",
   "main": "index.js",
   "types": "./index.d.ts",
@@ -11,7 +11,7 @@
     "test": "mocha --ui tdd *.test.js",
     "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
     "document": "documentation readme index.js --section=API",
-    "release": "npm run compileOnce && npm run test && npm run document && npm publish"
+    "prePublish": "npm run compileOnce && npm run test && npm run document"
   },
   "repository": "https://github.com/Almenon/arepl-backend",
   "bugs": {
