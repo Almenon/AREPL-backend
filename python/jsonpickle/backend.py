@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, unicode_literals
 
-from jsonpickle.compat import PY32
-from jsonpickle.compat import unicode
+from .compat import PY32
+from .compat import unicode
 
 
 class JSONBackend(object):

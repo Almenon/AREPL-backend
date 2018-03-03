@@ -9,6 +9,11 @@
 
 """Python library for serializing any arbitrary object graph into JSON.
 
+.. warning::
+
+    jsonpickle can execute arbitrary Python code. Do not load jsonpickles from
+    untrusted / unauthenticated sources.
+
 jsonpickle can take almost any Python object and turn the object into JSON.
 Additionally, it can reconstitute the object back into Python.
 
@@ -32,11 +37,6 @@ Use jsonpickle to recreate a Python object from a JSON string::
 
     thawed = jsonpickle.decode(frozen)
 
-.. warning::
-
-    Loading a JSON string from an untrusted source represents a potential
-    security vulnerability.  jsonpickle makes no attempt to sanitize the input.
-
 The new object has the same type and data, but essentially is now a copy of
 the original.
 
@@ -53,13 +53,15 @@ added to JSON::
     assert obj.name == result['name'] == 'Awesome'
 
 """
-from jsonpickle import pickler
-from jsonpickle import unpickler
-from jsonpickle.backend import JSONBackend
-from jsonpickle.version import VERSION
+from __future__ import absolute_import, division, unicode_literals
+
+from . import pickler
+from . import unpickler
+from .backend import JSONBackend
+from .version import VERSION
 
 # ensure built-in handlers are loaded
-__import__('jsonpickle.handlers')
+from . import handlers as _
 
 __all__ = ('encode', 'decode')
 __version__ = VERSION
@@ -106,19 +108,14 @@ def encode(value,
     :param max_iter: If set to a non-negative integer then jsonpickle will
         consume at most `max_iter` items when pickling iterators.
 
-    >>> encode('my string')
-    '"my string"'
-    >>> encode(36)
-    '36'
-
-    >>> encode({'foo': True})
-    '{"foo": true}'
-
-    >>> encode({'foo': True}, max_depth=0)
-    '"{\\'foo\\': True}"'
-
-    >>> encode({'foo': True}, max_depth=1)
-    '{"foo": "True"}'
+    >>> encode('my string') == '"my string"'
+    True
+    >>> encode(36) == '36'
+    True
+    >>> encode({'foo': True}) == '{"foo": true}'
+    True
+    >>> encode({'foo': True}, max_depth=1) == '{"foo": "True"}'
+    True
 
 
     """
@@ -135,12 +132,18 @@ def encode(value,
                           numeric_keys=numeric_keys)
 
 
-def decode(string, backend=None, keys=False):
+def decode(string, backend=None, keys=False, classes=None):
     """Convert a JSON string into a Python object.
 
     The keyword argument 'keys' defaults to False.
     If set to True then jsonpickle will decode non-string dictionary keys
     into python objects via the jsonpickle protocol.
+
+    The keyword argument 'classes' defaults to None.
+    If set to a single class, or a sequence (list, set, tuple) of classes,
+    then the classes will be made available when constructing objects.  This
+    can be used to give jsonpickle access to local classes that are not
+    available through the global module import scope.
 
     >>> str(decode('"my string"'))
     'my string'
@@ -149,7 +152,7 @@ def decode(string, backend=None, keys=False):
     """
     if backend is None:
         backend = json
-    return unpickler.decode(string, backend=backend, keys=keys)
+    return unpickler.decode(string, backend=backend, keys=keys, classes=classes)
 
 
 # json.load(),loads(), dump(), dumps() compatibility
