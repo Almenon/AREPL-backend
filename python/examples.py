@@ -390,18 +390,3 @@ circleThingy(20,500)
   
   
 turtle.done()
-
-
-
-################################################
-#   unsupported code (causes jsonpickle to fail)
-################################################
-
-import matplotlib.pyplot as plt
-
-# Create new Figure and an Axes which fills it.
-fig = plt.figure(figsize=(1,1))
-ax = fig.add_axes([0,0,0,1])
-
-# above can be fixed by adding numpy support to jsonpickle
-# but still need to check how jsonpickle encodes w/ numpy vs. without
