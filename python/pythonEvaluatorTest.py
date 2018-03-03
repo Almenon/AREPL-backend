@@ -36,7 +36,7 @@ z = float('-infinity')
 
     def test_has_error(self):
         with self.assertRaises(pythonEvaluator.UserError):
-            returnInfo = pythonEvaluator.exec_input("x")
+            pythonEvaluator.exec_input("x")
 
 #   class pickling does work - but not when unit testing for some reason
 #   "Can't pickle <class 'pythonEvaluator.l'>: it's not found as pythonEvaluator.l"
