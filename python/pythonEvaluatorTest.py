@@ -38,7 +38,69 @@ z = float('-infinity')
         with self.assertRaises(pythonEvaluator.UserError):
             pythonEvaluator.exec_input("x")
 
-#   class pickling does work - but not when unit testing for some reason
+    def test_various_types(self):
+        various_types = """
+a = 1
+b = 1.1
+c = 'c'
+d = (1,2)
+def f(x): return x+1
+g = {}
+h = []
+i = [[[]]]
+class l():
+	def __init__(self,x):
+		self.x = x
+m = l(5)
+n = False
+
+        """
+        returnInfo = pythonEvaluator.exec_input(various_types)
+        
+        # functions do not show up on decode so we check the json
+        assert '"f": {"py/function": "pythonEvaluator.f"}' in returnInfo.userVariables
+
+        vars = jsonpickle.decode(returnInfo.userVariables)
+        assert vars['a'] == 1
+        assert vars['b'] == 1.1
+        assert vars['c'] == 'c'
+        assert vars['d'] == (1,2)
+        assert vars['g'] == {}
+        assert vars['h'] == []
+        assert vars['i'] == [[[]]]
+        assert vars['l'] != None
+        assert vars['m'] != None
+        assert vars['n'] == False
+
+    def test_fileIO(self):
+        fileIO = """
+import tempfile
+
+fp = tempfile.TemporaryFile()
+fp.write(b'yo')
+fp.seek(0)
+x = fp.read()
+fp.close()
+        """
+        returnInfo = pythonEvaluator.exec_input(fileIO)
+        vars = jsonpickle.decode(returnInfo.userVariables)
+        assert 'fp' in vars
+        assert vars['x'] == b'yo'
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+
+###########################
+#     WIERD STUFF
+###########################
+
+# lambdas do not show up at all
+
+# file objects show up as None
+
+#   class pickling does work with #$save - but not when unit testing for some reason
 #   "Can't pickle <class 'pythonEvaluator.l'>: it's not found as pythonEvaluator.l"
 #   not sure why it's trying to find the class in pythonEvaluator - it's not going to be there
 #   todo: investigate issue
@@ -52,6 +114,3 @@ z = float('-infinity')
 #         randomVal = jsonpickle.decode(returnInfo['userVariables'])['l']
 #         returnInfo = pythonEvaluator.exec_input("z=3",code)
 #         randomVal = jsonpickle.decode(returnInfo['userVariables'])['l']
-
-if __name__ == '__main__':
-    unittest.main()
