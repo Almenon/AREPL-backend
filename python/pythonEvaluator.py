@@ -1,5 +1,6 @@
 from copy import deepcopy
 from customHandlers import handlers
+import importlib
 import json
 import jsonpickle
 import traceback
@@ -49,6 +50,10 @@ class UserError(Exception):
     def __init__(self, message, varsSoFar={}):
         super().__init__(message)
         self.varsSoFar = pickle_user_vars(varsSoFar)
+
+if importlib.util.find_spec('numpy') is not None:
+    import jsonpickle.ext.numpy as jsonpickle_numpy
+    jsonpickle_numpy.register_handlers()
 
 jsonpickle.pickler.Pickler = customPickler
 jsonpickle.set_encoder_options('json', ensure_ascii=False)
