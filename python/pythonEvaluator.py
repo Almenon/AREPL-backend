@@ -51,7 +51,7 @@ class UserError(Exception):
         super().__init__(message)
         self.varsSoFar = pickle_user_vars(varsSoFar)
 
-if importlib.util.find_spec('numpy') is not None:
+if util.find_spec('numpy') is not None:
     import jsonpickle.ext.numpy as jsonpickle_numpy
     jsonpickle_numpy.register_handlers()
 
