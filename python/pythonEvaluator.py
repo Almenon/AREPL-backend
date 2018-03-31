@@ -8,6 +8,14 @@ from math import isnan
 import ast
 from time import time
 
+#####################################
+"""
+This file is the heart of AREPL.
+It accepts python code through stdin, runs it, and prints out the local variables.
+Along the way I check if I haved saved the locals from a previous run and use those if present
+"""
+#####################################
+
 class execArgs(object):
     def __init__(self, savedCode, evalCode, *args, **kwargs):
         self.savedCode = savedCode
