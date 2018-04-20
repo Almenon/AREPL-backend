@@ -240,7 +240,7 @@ export class PythonEvaluator{
 		//unescape newlines
 		err = err.replace(/\\n/g, "\n")
 	
-		if(err.startsWith("There has been a error when trying to display your variables")){
+		if(err.startsWith("Sorry, AREPL has ran into an error")){
 			// formatting would not work for this exception because it happens outside of exec()
 			return err
 		}
