@@ -206,13 +206,11 @@ if __name__ == '__main__':
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:
-            errorMsg = str(e).replace("\n", "\\n")
-            returnInfo.ERROR = errorMsg
+            returnInfo.ERROR = str(e)
             returnInfo.userVariables = e.varsSoFar
         except Exception:
             errorMsg = traceback.format_exc()
-            errorMsg = errorMsg.replace("\n", "\\n")
-            returnInfo.ERROR = "Sorry, AREPL has ran into an error\\n\\n" + errorMsg
+            returnInfo.ERROR = "Sorry, AREPL has ran into an error\n\n" + errorMsg
 
         returnInfo.totalPyTime = time() - start
 

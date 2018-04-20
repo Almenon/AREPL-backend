@@ -237,9 +237,6 @@ export class PythonEvaluator{
 	 */
 	formatPythonException(err:string){
 	
-		//unescape newlines
-		err = err.replace(/\\n/g, "\n")
-	
 		if(err.startsWith("Sorry, AREPL has ran into an error")){
 			// formatting would not work for this exception because it happens outside of exec()
 			return err
