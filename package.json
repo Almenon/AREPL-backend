@@ -22,7 +22,7 @@
     "real-time",
     "AREPL"
   ],
-  "files":[
+  "files": [
     "python",
     "!__pycache__",
     "*.d.ts",
