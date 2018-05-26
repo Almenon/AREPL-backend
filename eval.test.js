@@ -126,6 +126,49 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("strips out unnecessary error info even with long tracebacks", function(done){
+        pyEvaluator.onResult = (result)=>{
+            // asserting the exact string would result in flaky tests
+            // because internal python code could change & the traceback would be different
+            // so we just do some generic checks
+            assert.equal(result.ERROR.includes("TypeError"), true)
+            assert.equal(result.ERROR.split('File ').length > 1, true)
+            assert.equal(result.ERROR.includes("pythonEvaluator.py"), false)
+            assert.equal(result.ERROR.includes("exec(data['evalCode'], evalLocals)"), false)
+            done()
+        }
+        input.evalCode = "import json;json.dumps(json)"
+        pyEvaluator.execCode(input)
+    })
+
+    test("strips out unnecessary error info even with multiple tracebacks", function(done){
+        pyEvaluator.onResult = (result)=>{ 
+            assert.equal(result.ERROR, `Traceback (most recent call last):
+  line 6, in <module>
+  line 3, in foo
+Exception
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  line 8, in <module>
+NameError: name 'fah' is not defined
+`)
+            done()
+        }
+
+        input.evalCode = `
+def foo():
+    raise Exception
+    
+try:
+    foo()
+except Exception as e:
+    fah`
+
+        pyEvaluator.execCode(input)
+    })
+
     test("prints in real-time", function(done){
         let printed = false
 
