@@ -241,17 +241,23 @@ export class PythonEvaluator{
 			// formatting would not work for this exception because it happens outside of exec()
 			return err
 		}
-	
+
 		//replace File "<string>" (pointless)
 		err = err.replace(/File \"<string>\", /g, "")
+
+		// we need to further modify bottom traceback
+		let index = err.lastIndexOf("Traceback (most recent call last):")
+		let bottomTraceback = err.slice(index)
+		let otherTracebacks = err.slice(0,index)
 	
-		// it would be nice if typescript let you redefine a type so i didn't have to create a new var :/
-		let errLines: string[] = err.split('\n')
+		let errLines = bottomTraceback.split('\n')
 	
-		// error includes is caught in pythonEvaluator so it includes that stack frame
-		// user should not see it, so remove:
+		// error caught in pythonEvaluator so it includes that stack frame
+		// user should not see it, so remove first and second lines:
 		errLines = [errLines[0]].concat(errLines.slice(3))		
-		return errLines.join('\n')
+		bottomTraceback = errLines.join('\n')
+
+		return otherTracebacks + bottomTraceback
 	}
 
 	/**
