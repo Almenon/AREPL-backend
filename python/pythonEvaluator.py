@@ -7,6 +7,7 @@ import traceback
 from math import isnan
 import ast
 from time import time
+import asyncio
 
 #####################################
 """
@@ -171,6 +172,9 @@ def exec_input(codeToExec, savedLines=""):
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
     codeToExec = copy_saved_imports_to_exec(codeToExec, savedLines)
+
+    # repoen revent loop in case user closed it in last run
+    asyncio.set_event_loop(asyncio.new_event_loop()) 
 
     try:
         start = time()
