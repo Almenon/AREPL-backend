@@ -87,6 +87,34 @@ fp.close()
         assert 'fp' in vars
         assert vars['x'] == b'yo'
 
+    def test_eventLoop(self):
+        eventLoopCode = """
+import asyncio
+
+async def async_run():
+    pass
+
+def compile_async_tasks():
+    tasks = []
+
+    tasks.append(
+        asyncio.ensure_future(async_run())
+    )
+    return tasks
+
+tasks = compile_async_tasks()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(asyncio.gather(*tasks))
+loop.close()
+x=1
+        """
+
+        pythonEvaluator.exec_input(eventLoopCode)
+        returnInfo = pythonEvaluator.exec_input(eventLoopCode)
+        vars = jsonpickle.decode(returnInfo.userVariables)
+        assert 'x' in vars
+
 if __name__ == '__main__':
     unittest.main()
 
