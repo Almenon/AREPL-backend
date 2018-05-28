@@ -3,4 +3,6 @@ python:
  - 3.4
  - 3.5
  - 3.6
-script: python python/pythonEvaluatorTest.py
+script:
+ - python python/pythonEvaluatorTest.py
+ - python python/areplTest.py

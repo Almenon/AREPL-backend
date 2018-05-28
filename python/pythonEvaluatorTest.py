@@ -15,6 +15,10 @@ class TestPythonEvaluator(unittest.TestCase):
             returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath)
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
 
+    def test_dump(self):
+        returnInfo = pythonEvaluator.exec_input("from arepl import dump;dump('dump worked');x=1")
+        assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
+
     def test_special_floats(self):
         returnInfo = pythonEvaluator.exec_input("""
 x = float('infinity')
