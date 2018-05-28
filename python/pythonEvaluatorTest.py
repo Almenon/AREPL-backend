@@ -1,7 +1,7 @@
 import unittest
 import pythonEvaluator
 import jsonpickle
-from os import getcwd,pathsep
+from os import getcwd,sep
 from sys import version_info
 
 class TestPythonEvaluator(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestPythonEvaluator(unittest.TestCase):
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
     def test_relative_import(self):
-        filePath = getcwd() + pathsep + "python_ignore" + pathsep + "foo2.py"
+        filePath = getcwd() + sep + "python_ignore" + sep + "foo2.py"
         with open(filePath) as f:
             returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath)
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
