@@ -21,7 +21,7 @@ Along the way I check if I haved saved the locals from a previous run and use th
 #####################################
 
 class execArgs(object):
-    def __init__(self, savedCode, evalCode, filePath, *args, **kwargs):
+    def __init__(self, savedCode, evalCode, filePath='', *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
