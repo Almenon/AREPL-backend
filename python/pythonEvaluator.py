@@ -8,6 +8,9 @@ from math import isnan
 import ast
 from time import time
 import asyncio
+import os
+from sys import path
+from contextlib import contextmanager
 
 #####################################
 """
@@ -18,10 +21,10 @@ Along the way I check if I haved saved the locals from a previous run and use th
 #####################################
 
 class execArgs(object):
-    def __init__(self, savedCode, evalCode, *args, **kwargs):
+    def __init__(self, savedCode, evalCode, filePath, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
-        #self.action = action
+        self.filePath = filePath
 
 class returnInfoJson(object):
     def __init__(self, ERROR, userVariables, execTime, totalTime, *args, **kwargs):
@@ -161,8 +164,26 @@ def copy_saved_imports_to_exec(codeToExec, savedLines):
 
     return codeToExec
 
+@contextmanager
+def script_path(script_dir):
+    """
+        Context manager for adding a dir to the sys path
+        and restoring it afterwards. This trick allows
+        relative imports to work on the target script.
+        if script_dir is empty function will do nothing
+        Slightly modified from wolf's script_path (see https://github.com/Duroktar/Wolf)
+    """
+    if(script_dir is None or script_dir == ""):
+        yield
+    else:
+        original_cwd = os.getcwd()
+        os.chdir(script_dir)
+        path.insert(1, script_dir)
+        yield
+        os.chdir(original_cwd)
+        path.remove(script_dir)
 
-def exec_input(codeToExec, savedLines=""):
+def exec_input(codeToExec, savedLines="", filePath=""):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfoJson
@@ -176,13 +197,14 @@ def exec_input(codeToExec, savedLines=""):
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop()) 
 
-    try:
-        start = time()
-        exec(codeToExec, evalLocals)
-        execTime = time()-start
-    except Exception:
-        errorMsg = traceback.format_exc()        
-        raise UserError(errorMsg, evalLocals)
+    with script_path(os.path.dirname(filePath)):
+        try:
+            start = time()
+            exec(codeToExec, evalLocals)
+            execTime = time()-start
+        except Exception:
+            errorMsg = traceback.format_exc()        
+            raise UserError(errorMsg, evalLocals)
 
     userVariables = pickle_user_vars(evalLocals)
 
@@ -206,7 +228,7 @@ if __name__ == '__main__':
         returnInfo = returnInfoJson("",{},None,None)
 
         try:
-            returnInfo = exec_input(data.evalCode, data.savedCode)
+            returnInfo = exec_input(data.evalCode, data.savedCode, data.filePath)
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:
