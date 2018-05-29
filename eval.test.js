@@ -26,10 +26,23 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("dump returns result", function(done){
+        pyEvaluator.onResult = (result)=>{
+            assert.notEqual(result, null)
+            assert.equal(result.userError, '')
+            assert.equal(result.internalError, null)
+            assert.equal(result.userVariables['dump output'], 5)
+            assert.equal(result.caller, '<module>')
+            done()
+        }
+        input.evalCode = "from arepl import dump;dump(5)"
+        pyEvaluator.execCode(input)
+    })
+
     test("returns error when bad code", function(done){
         pyEvaluator.onResult = (result)=>{ 
-            assert.notEqual(result.ERROR, null)
-            assert.notEqual(result.ERROR.trim(), "")
+            assert.notEqual(result.userError, null)
+            assert.notEqual(result.userError.trim(), "")
             done()
         }
         input.evalCode = "x="
@@ -119,7 +132,7 @@ suite("PythonEvaluator Tests", () => {
 
     test("strips out unnecessary error info", function(done){
         pyEvaluator.onResult = (result)=>{ 
-            assert.equal(result.ERROR, "Traceback (most recent call last):\n  line 1, in <module>\nNameError: name 'x' is not defined\n")
+            assert.equal(result.userError, "Traceback (most recent call last):\n  line 1, in <module>\nNameError: name 'x' is not defined\n")
             done()
         }
         input.evalCode = "x"
@@ -131,10 +144,10 @@ suite("PythonEvaluator Tests", () => {
             // asserting the exact string would result in flaky tests
             // because internal python code could change & the traceback would be different
             // so we just do some generic checks
-            assert.equal(result.ERROR.includes("TypeError"), true)
-            assert.equal(result.ERROR.split('File ').length > 1, true)
-            assert.equal(result.ERROR.includes("pythonEvaluator.py"), false)
-            assert.equal(result.ERROR.includes("exec(data['evalCode'], evalLocals)"), false)
+            assert.equal(result.userError.includes("TypeError"), true)
+            assert.equal(result.userError.split('File ').length > 1, true)
+            assert.equal(result.userError.includes("pythonEvaluator.py"), false)
+            assert.equal(result.userError.includes("exec(data['evalCode'], evalLocals)"), false)
             done()
         }
         input.evalCode = "import json;json.dumps(json)"
@@ -143,7 +156,7 @@ suite("PythonEvaluator Tests", () => {
 
     test("strips out unnecessary error info even with multiple tracebacks", function(done){
         pyEvaluator.onResult = (result)=>{ 
-            assert.equal(result.ERROR, `Traceback (most recent call last):
+            assert.equal(result.userError, `Traceback (most recent call last):
   line 6, in <module>
   line 3, in foo
 Exception
