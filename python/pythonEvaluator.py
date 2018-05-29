@@ -21,17 +21,25 @@ Along the way I check if I haved saved the locals from a previous run and use th
 #####################################
 
 class execArgs(object):
+
+    # HALT! do NOT change this without changing corresponding type in the frontend!
     def __init__(self, savedCode, evalCode, filePath='', *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
 
-class returnInfoJson(object):
-    def __init__(self, ERROR, userVariables, execTime, totalTime, *args, **kwargs):
-        self.ERROR = ERROR
+class returnInfo(object):
+
+    # HALT! do NOT change this without changing corresponding type in the frontend!
+    def __init__(self, userError, userVariables, execTime, totalTime, internalError=None, caller='<module>', lineno=-1, done=True, *args, **kwargs):
+        self.userError = userError
         self.userVariables = userVariables
         self.execTime = execTime
         self.totalTime = totalTime
+        self.internalError = internalError
+        self.caller = caller
+        self.lineno=lineno
+        self.done = done
 
 
 class customPickler(jsonpickle.pickler.Pickler):
@@ -186,7 +194,7 @@ def script_path(script_dir):
 def exec_input(codeToExec, savedLines="", filePath=""):
     """
     returns info about the executed code (local vars, errors, and timing)
-    :rtype: returnInfoJson
+    :rtype: returnInfo
     """
 
     evalLocals = get_eval_locals_from_saved(savedLines)
@@ -208,8 +216,14 @@ def exec_input(codeToExec, savedLines="", filePath=""):
 
     userVariables = pickle_user_vars(evalLocals)
 
-    return returnInfoJson("", userVariables, execTime, None)
+    return returnInfo("", userVariables, execTime, None)
 
+def print_output(output):
+    """
+    turns output into JSON and prints it
+    """
+    # 6q3co7 signifies to frontend that stdout is not due to a print in user's code
+    print('6q3co7' + json.dumps(output, default=lambda x:x.__dict__))
 
 if __name__ == '__main__':
 
@@ -221,24 +235,25 @@ if __name__ == '__main__':
         except json.JSONDecodeError as e:
             # probably just due to user passing in stdin to program without input
             # in which case program completes and we get the stdin, which we ignore
-            print('6q3co6' + str(e))
+            # frontend relies on error message to check for this error so 
+            # don't change without also changing index.ts!
+            print_output(returnInfo("",None,-1,-1,'json error with stdin: ' + str(e), done=False))
             continue
 
         start = time()
-        returnInfo = returnInfoJson("",{},None,None)
+        myReturnInfo = returnInfo("",{},None,None)
 
         try:
-            returnInfo = exec_input(data.evalCode, data.savedCode, data.filePath)
+            myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath)
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:
-            returnInfo.ERROR = str(e)
-            returnInfo.userVariables = e.varsSoFar
+            myReturnInfo.userError = str(e)
+            myReturnInfo.userVariables = e.varsSoFar
         except Exception:
             errorMsg = traceback.format_exc()
-            returnInfo.ERROR = "Sorry, AREPL has ran into an error\n\n" + errorMsg
+            myReturnInfo.internalError = "Sorry, AREPL has ran into an error\n\n" + errorMsg
 
-        returnInfo.totalPyTime = time() - start
+        myReturnInfo.totalPyTime = time() - start
 
-        # 6q3co7 signifies to frontend that stdout is not due to a print in user's code
-        print('6q3co7' + json.dumps(returnInfo, default=lambda x:x.__dict__))
+        print_output(myReturnInfo)

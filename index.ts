@@ -138,9 +138,8 @@ export class PythonEvaluator{
 	/**
 	 * Overwrite this with your own handler.
 	 * is called when program fails or completes
-	 * @param {{ERROR:string, userVariables:Object, execTime:number, totalPyTime:number, totalTime:number}} foo
 	 */
-	onResult(foo: {ERROR:string, userVariables:Object, execTime:number, totalPyTime:number, totalTime:number}){}
+	onResult(foo: {userError:string, userVariables:Object, execTime:number, totalPyTime:number, totalTime:number, internalError:string, caller: string, linenno:number, done: boolean}){}
 
 	/**
 	 * Overwrite this with your own handler.
@@ -155,35 +154,40 @@ export class PythonEvaluator{
 	 */
 	handleResult(results:string) {
 		let pyResult = {
-			"ERROR":"",
+			"userError":"",
 			"userVariables": "",
             "execTime":0,
             "totalTime":0,
-			"totalPyTime":0
+			"totalPyTime":0,
+			"internalError":"",
+			"caller":"",
+			"linenno":-1,
+			"done":true
 		}
 
         //result should have identifier, otherwise it is just a printout from users code
         if(results.startsWith(PythonEvaluator.identifier)){
-			this.evaling = false
             results = results.replace(PythonEvaluator.identifier,"")
 			pyResult = JSON.parse(results)
+			this.evaling = !pyResult['done']
+
+			if(pyResult['internalError'] != null && pyResult['internalError'].startsWith('json error with stdin: ')){
+				console.warn("error in python evaluator converting stdin to JSON. " +
+				"User probably just sent stdin without input() in his program.\n" + pyResult['internalError'])
+				return
+			}
 			
 			pyResult.execTime = pyResult.execTime*1000 // convert into ms
 			pyResult.totalPyTime = pyResult.totalPyTime*1000
 			
 			if(!this.isEmptyObject(pyResult.userVariables)) pyResult.userVariables = JSON.parse(pyResult.userVariables)
 
-            if(pyResult.ERROR != ""){
-                pyResult.ERROR = this.formatPythonException(pyResult.ERROR)
+            if(pyResult.userError != ""){
+                pyResult.userError = this.formatPythonException(pyResult.userError)
 			}
 
 			pyResult.totalTime = Date.now()-this.startTime
 			this.onResult(pyResult)
-		}
-		else if(results.startsWith(PythonEvaluator.jsonErrorIdentifier)){
-			results = results.replace(PythonEvaluator.jsonErrorIdentifier,"")
-			console.warn("error in python evaluator converting stdin to JSON. " +
-			"User probably just sent stdin without input() in his program.\n" + results)
 		}
         else{
 			// get rid of \r at end (present in windows)
@@ -235,11 +239,6 @@ export class PythonEvaluator{
 	 * @returns {string}
 	 */
 	formatPythonException(err:string){
-	
-		if(err.startsWith("Sorry, AREPL has ran into an error")){
-			// formatting would not work for this exception because it happens outside of exec()
-			return err
-		}
 
 		//replace File "<string>" (pointless)
 		err = err.replace(/File \"<string>\", /g, "")
