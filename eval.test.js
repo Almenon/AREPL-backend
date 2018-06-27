@@ -35,7 +35,7 @@ suite("PythonEvaluator Tests", () => {
             assert.equal(result.caller, '<module>')
             done()
         }
-        input.evalCode = "from arepl import dump;dump(5)"
+        input.evalCode = "from arepldump import dump;dump(5)"
         pyEvaluator.execCode(input)
     })
 
