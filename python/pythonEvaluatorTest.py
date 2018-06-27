@@ -17,7 +17,7 @@ class TestPythonEvaluator(unittest.TestCase):
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
 
     def test_dump(self):
-        returnInfo = pythonEvaluator.exec_input("from arepl import dump;dump('dump worked');x=1")
+        returnInfo = pythonEvaluator.exec_input("from arepldump import dump;dump('dump worked');x=1")
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
     def test_special_floats(self):
