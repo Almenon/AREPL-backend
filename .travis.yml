@@ -5,4 +5,4 @@ python:
  - 3.6
 script:
  - python python/pythonEvaluatorTest.py
- - python python/areplTest.py
+ - python python/arepldumpTest.py
