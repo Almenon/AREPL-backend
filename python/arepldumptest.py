@@ -1,5 +1,5 @@
 import unittest
-from arepl import dump
+from arepldump import dump
 from json import loads
 
 # this test has to be in main scope
