@@ -10,6 +10,7 @@ from time import time
 import asyncio
 import os
 from sys import path
+from sys import modules
 from contextlib import contextmanager
 
 #####################################
@@ -213,6 +214,14 @@ def exec_input(codeToExec, savedLines="", filePath=""):
         except Exception:
             errorMsg = traceback.format_exc()        
             raise UserError(errorMsg, evalLocals)
+
+    try:
+        # areplDump library keeps state internally
+        # because python caches imports the state is kept inbetween runs
+        # we do not want that, areplDump should reset each run
+        del modules['arepldump']
+    except KeyError:
+        pass # they have not imported it, whatever
 
     userVariables = pickle_user_vars(evalLocals)
 
