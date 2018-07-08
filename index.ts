@@ -12,7 +12,7 @@ export interface PythonResult{
 	totalTime:number,
 	internalError:string,
 	caller: string,
-	linenno:number,
+	lineno:number,
 	done: boolean
 }
 
@@ -173,7 +173,7 @@ export class PythonEvaluator{
 			totalPyTime:0,
 			internalError:"",
 			caller:"",
-			linenno:-1,
+			lineno:-1,
 			done:true
 		}
 

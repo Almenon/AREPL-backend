@@ -33,7 +33,7 @@ suite("PythonEvaluator Tests", () => {
             assert.equal(result.internalError, null)
             assert.equal(result.userVariables['dump output'], 5)
             assert.equal(result.caller, '<module>')
-            assert.equal(result.linenno, 1)
+            assert.equal(result.lineno, 1)
             done()
         }
         input.evalCode = "from arepldump import dump;dump(5)"
