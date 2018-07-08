@@ -4,6 +4,18 @@ import {exec} from 'child_process'
 import {tmpdir} from 'os'
 import {sep} from 'path'
 
+export interface PythonResult{
+	userError:string,
+	userVariables:object,
+	execTime:number,
+	totalPyTime:number,
+	totalTime:number,
+	internalError:string,
+	caller: string,
+	linenno:number,
+	done: boolean
+}
+
 export class PythonEvaluator{
     
     private static readonly identifier = "6q3co7"
@@ -139,7 +151,7 @@ export class PythonEvaluator{
 	 * Overwrite this with your own handler.
 	 * is called when program fails or completes
 	 */
-	onResult(foo: {userError:string, userVariables:Object, execTime:number, totalPyTime:number, totalTime:number, internalError:string, caller: string, linenno:number, done: boolean}){}
+	onResult(foo: PythonResult){}
 
 	/**
 	 * Overwrite this with your own handler.
@@ -153,16 +165,16 @@ export class PythonEvaluator{
 	 * @param {string} results 
 	 */
 	handleResult(results:string) {
-		let pyResult = {
-			"userError":"",
-			"userVariables": "",
-            "execTime":0,
-            "totalTime":0,
-			"totalPyTime":0,
-			"internalError":"",
-			"caller":"",
-			"linenno":-1,
-			"done":true
+		let pyResult:PythonResult = {
+			userError:"",
+			userVariables: {},
+            execTime:0,
+            totalTime:0,
+			totalPyTime:0,
+			internalError:"",
+			caller:"",
+			linenno:-1,
+			done:true
 		}
 
         //result should have identifier, otherwise it is just a printout from users code
@@ -180,7 +192,8 @@ export class PythonEvaluator{
 			pyResult.execTime = pyResult.execTime*1000 // convert into ms
 			pyResult.totalPyTime = pyResult.totalPyTime*1000
 			
-			if(!this.isEmptyObject(pyResult.userVariables)) pyResult.userVariables = JSON.parse(pyResult.userVariables)
+			//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
+			pyResult.userVariables = JSON.parse(pyResult.userVariables)
 
             if(pyResult.userError != ""){
                 pyResult.userError = this.formatPythonException(pyResult.userError)
