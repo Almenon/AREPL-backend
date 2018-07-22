@@ -12,6 +12,8 @@ import os
 from sys import path
 from sys import modules
 from contextlib import contextmanager
+from moduleLogic import getNonUserModules
+from moduleLogic import getImportedModules
 
 #####################################
 """
@@ -92,6 +94,8 @@ for var in specialVars:
     
 oldSavedLines = []
 savedLocals = {}
+
+nonUserModules = getNonUserModules()
 
 def get_imports(parsedText, text):
     """
@@ -220,8 +224,18 @@ def exec_input(codeToExec, savedLines="", filePath=""):
         # because python caches imports the state is kept inbetween runs
         # we do not want that, areplDump should reset each run
         del modules['arepldump']
+
     except KeyError:
         pass # they have not imported it, whatever
+
+    userModules = getImportedModules().difference(nonUserModules)
+
+    # delete 
+    for userModule in userModules:
+        try:
+            del modules[userModule]
+        except KeyError:
+            pass # it's not worth failing AREPL over
 
     userVariables = pickle_user_vars(evalLocals)
 
