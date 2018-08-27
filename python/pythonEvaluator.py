@@ -218,24 +218,25 @@ def exec_input(codeToExec, savedLines="", filePath=""):
         except Exception:
             errorMsg = traceback.format_exc()        
             raise UserError(errorMsg, evalLocals)
+            
+        finally:
+            try:
+                # areplDump library keeps state internally
+                # because python caches imports the state is kept inbetween runs
+                # we do not want that, areplDump should reset each run
+                del modules['arepldump']
 
-    try:
-        # areplDump library keeps state internally
-        # because python caches imports the state is kept inbetween runs
-        # we do not want that, areplDump should reset each run
-        del modules['arepldump']
+            except KeyError:
+                pass # they have not imported it, whatever
 
-    except KeyError:
-        pass # they have not imported it, whatever
+            userModules = getImportedModules(evalLocals).difference(nonUserModules)
 
-    userModules = getImportedModules(evalLocals).difference(nonUserModules)
-
-    # delete 
-    for userModule in userModules:
-        try:
-            del modules[userModule]
-        except KeyError:
-            pass # it's not worth failing AREPL over
+            # delete 
+            for userModule in userModules:
+                try:
+                    del modules[userModule]
+                except KeyError:
+                    pass # it's not worth failing AREPL over
 
     userVariables = pickle_user_vars(evalLocals)
 
