@@ -34,12 +34,12 @@ def getNonUserModules():
             evenMoreBuiltinModules +
             specialCases)
 
-def getImportedModules():
+def getImportedModules(scope):
     """returns a set of imported modules by looking through globals()
     """
     importedModules = set()
 
-    for _, val in globals().items():
+    for _, val in scope.items():
         try:
             # if a user imports a func from a module
             # ex: from json import loads

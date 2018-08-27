@@ -228,7 +228,7 @@ def exec_input(codeToExec, savedLines="", filePath=""):
     except KeyError:
         pass # they have not imported it, whatever
 
-    userModules = getImportedModules().difference(nonUserModules)
+    userModules = getImportedModules(evalLocals).difference(nonUserModules)
 
     # delete 
     for userModule in userModules:

@@ -1,8 +1,8 @@
 import unittest
 import pythonEvaluator
 import jsonpickle
-from os import getcwd,sep
-from sys import version_info
+from os import getcwd,sep, chdir, path
+from sys import version_info,modules
 
 class TestPythonEvaluator(unittest.TestCase):
 
@@ -41,7 +41,7 @@ z = float('-infinity')
         returnInfo = pythonEvaluator.exec_input("z=3","from random import random\nx=random()#$save")
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == randomVal
 
-    def test_import(self): # imports in saved section should be able to be referenced in exec section
+    def test_save_import(self): # imports in saved section should be able to be referenced in exec section
         returnInfo = pythonEvaluator.exec_input("z=math.sin(0)","import math#$save")
         assert jsonpickle.decode(returnInfo.userVariables)['z'] == 0
 
@@ -143,6 +143,42 @@ x=1
         returnInfo = pythonEvaluator.exec_input(eventLoopCode)
         vars = jsonpickle.decode(returnInfo.userVariables)
         assert 'x' in vars
+
+    def test_ImportNotDeleted(self):
+        importStr = """
+import math
+from json import loads
+        """
+        pythonEvaluator.exec_input(importStr)
+        assert 'math' in modules
+        assert 'json' in modules
+
+    def test_userImportDeleted(self):
+
+        filePath = getcwd() + sep + "python_ignore" + sep + "foo.py"
+        filePath2 = getcwd() + sep + "python_ignore" + sep + "foo2.py"
+
+        with open(filePath) as f:
+            origFileText = f.read()
+
+        try:
+            with open(filePath2) as f:
+                returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath2)
+            assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2 # just checking this for later on
+            assert 'foo' not in modules # user import should be deleted!
+
+            # now that import is uncached i should be able to change code, rerun & get different result
+            with open(filePath,'w') as f:
+                f.write('def foo():\n    return 3')
+
+            with open(filePath2) as f:
+                returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath2)
+            assert jsonpickle.decode(returnInfo.userVariables)['x'] == 3
+
+        finally:
+            # restore file back to original
+            with open(filePath,'w') as f:
+                f.write(origFileText)
 
 if __name__ == '__main__':
     unittest.main()
