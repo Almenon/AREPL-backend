@@ -148,6 +148,7 @@ def get_eval_locals_from_saved(savedLines):
 def pickle_user_vars(userVars):
     # filter out non-user vars, no point in showing them
     userVariables = {k:v for k,v in userVars.items() if str(type(v)) != "<class 'module'>"
+                     and str(type(v)) != "<class 'function'>"
                      and k not in specialVars+['__builtins__']}
 
     # json dumps cant handle any object type, so we need to use jsonpickle

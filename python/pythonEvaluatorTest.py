@@ -79,9 +79,6 @@ n = False
 
         """
         returnInfo = pythonEvaluator.exec_input(various_types)
-        
-        # functions do not show up on decode so we check the json
-        assert '"f": {"py/function": "pythonEvaluator.f"}' in returnInfo.userVariables
 
         vars = jsonpickle.decode(returnInfo.userVariables)
         assert vars['a'] == 1
