@@ -12,6 +12,9 @@ environment:
 
 install:
   - set path=%programfiles(x86)%\\Microsoft SDKs\TypeScript\2.6;%path%
+  
+  - ps: '"//registry.npmjs.org/:_authToken=$env:npm_auth_token`n" | out-file "$env:userprofile\.npmrc" -Encoding ASCII'
+  - npm whoami
 
   # Get the latest stable version of Node.js
   - ps: Install-Product node ''
