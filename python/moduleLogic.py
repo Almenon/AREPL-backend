@@ -4,8 +4,6 @@ from sys import modules
 import pkg_resources
 from stdlib_list import stdlib_list
 
-import types
-
 def getNonUserModules():
     """returns a set of all modules not written by the user (aka all builtin and pip modules)
     
@@ -33,22 +31,3 @@ def getNonUserModules():
             moreBuiltinModules +
             evenMoreBuiltinModules +
             specialCases)
-
-def getImportedModules(scope):
-    """returns a set of imported modules by looking through globals()
-    """
-    importedModules = set()
-
-    for _, val in scope.items():
-        try:
-            # if a user imports a func from a module
-            # ex: from json import loads
-            # then we have to look at __module__ to see the import
-            if val.__module__ != "__main__":
-                importedModules.add(val.__module__)
-        except AttributeError:
-            pass 
-        if isinstance(val, types.ModuleType):
-            importedModules.add(val.__name__)
-
-    return importedModules

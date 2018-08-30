@@ -3,6 +3,7 @@ import pythonEvaluator
 import jsonpickle
 from os import getcwd,sep, chdir, path
 from sys import version_info,modules
+from shutil import rmtree
 
 class TestPythonEvaluator(unittest.TestCase):
 
@@ -188,6 +189,38 @@ from json import loads
             # restore file back to original
             with open(filePath,'w') as f:
                 f.write(origFileText)
+
+    def test_userVarImportDeleted(self):
+
+        # __pycache__ will muck up our test on every second run
+        # this problem only happens during unit tests and not in actual useage (not sure why)
+        # so we can safely delete pycache to avoid the problem
+        rmtree(getcwd() + sep + "python_ignore" + sep + "__pycache__")
+
+        varToImportFilePath = getcwd() + sep + "python_ignore" + sep + "varToImport.py"
+        importVarFilePath = getcwd() + sep + "python_ignore" + sep + "importVar.py"
+
+        with open(varToImportFilePath) as f:
+            origVarToImportFileText = f.read()
+
+        try:
+            with open(importVarFilePath) as f:
+                returnInfo = pythonEvaluator.exec_input(f.read(),"",importVarFilePath)
+            assert jsonpickle.decode(returnInfo.userVariables)['myVar'] == 5 # just checking this for later on
+            assert 'varToImport' not in modules # user import should be deleted!
+
+            # now that import is uncached i should be able to change code, rerun & get different result
+            with open(varToImportFilePath,'w') as f:
+                f.write('varToImport = 3')
+
+            with open(importVarFilePath) as f:
+                returnInfo = pythonEvaluator.exec_input(f.read(),"",importVarFilePath)
+            assert jsonpickle.decode(returnInfo.userVariables)['myVar'] == 3
+
+        finally:
+            # restore file back to original
+            with open(varToImportFilePath,'w') as f:
+                f.write(origVarToImportFileText)
 
 if __name__ == '__main__':
     unittest.main()
