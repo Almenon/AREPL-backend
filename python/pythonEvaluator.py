@@ -13,7 +13,6 @@ from sys import path
 from sys import modules
 from contextlib import contextmanager
 from moduleLogic import getNonUserModules
-from moduleLogic import getImportedModules
 
 #####################################
 """
@@ -96,6 +95,7 @@ oldSavedLines = []
 savedLocals = {}
 
 nonUserModules = getNonUserModules()
+origModules = frozenset(modules)
 
 def get_imports(parsedText, text):
     """
@@ -230,7 +230,8 @@ def exec_input(codeToExec, savedLines="", filePath=""):
             except KeyError:
                 pass # they have not imported it, whatever
 
-            userModules = getImportedModules(evalLocals).difference(nonUserModules)
+            importedModules = set(modules) - origModules
+            userModules = importedModules - nonUserModules
 
             # delete 
             for userModule in userModules:
