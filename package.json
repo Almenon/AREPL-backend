@@ -7,7 +7,7 @@
     "compile": "tsc -watch -p ./",
     "compileOnce": "tsc",
     "declaration": "tsc --target es6 --declaration index.ts",
-    "test": "npm run compileOnce && mocha --ui tdd *.test.js",
+    "test": "npm run compileOnce && mocha --ui tdd *.test.js --exit",
     "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
     "document": "documentation readme index.js --section=API",
     "prePublish": "npm run compileOnce && npm run test && npm run document"
@@ -33,10 +33,12 @@
   "author": "Almenon",
   "license": "MIT",
   "devDependencies": {
-    "@types/mocha": "^2.2.44",
+    "@types/mocha": "^5.2.5",
     "@types/node": "^9.3.0",
-    "mocha": "^3.5.3",
-    "mocha-appveyor-reporter": "^0.4.0"
+    "mocha": "^5.2.0",
+    "mocha-appveyor-reporter": "^0.4.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.0.3"
   },
   "dependencies": {
     "python-shell": "^1.0.1"
