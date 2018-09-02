@@ -8,7 +8,7 @@
     "compileOnce": "tsc",
     "declaration": "tsc --target es6 --declaration index.ts",
     "test": "npm run compileOnce && mocha --ui tdd *.test.js --exit",
-    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js",
+    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js --exit",
     "document": "documentation readme index.js --section=API",
     "prePublish": "npm run compileOnce && npm run test && npm run document"
   },
