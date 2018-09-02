@@ -78,6 +78,24 @@ suite("PythonEvaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("can print stderr", function(done){
+        let hasLogged = false
+        pyEvaluator.onStderr = (stderr)=>{ 
+            assert.equal(stderr, "hello world\r")
+            // I have nooo clue why the \r is at the end
+            // for some reason python-shell recieves hello world\r\r\n
+            hasLogged = true
+        }
+
+        pyEvaluator.onResult = (result) => {
+            if(!hasLogged) assert.fail("program has returned result","program should still be logging")
+            else done()
+        }
+
+        input.evalCode = "import sys;sys.stderr.write('hello world\\r\\n')"
+        pyEvaluator.execCode(input)
+    })
+
     test("can print multiple lines", function(done){
         let firstPrint = false
         let secondPrint = false

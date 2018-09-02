@@ -138,6 +138,9 @@ export class PythonEvaluator{
 		this.pyshell.on('message', message => {
 			this.handleResult(message)
 		})
+		this.pyshell.on('stderr', (log)=>{
+			this.onStderr(log)
+		})
 		this.running = true
 	}
 
@@ -153,6 +156,13 @@ export class PythonEvaluator{
 	 * @param {string} foo
 	 */
 	onPrint(foo: string){}
+
+	/**
+	 * Overwrite this with your own handler.
+	 * Is called when program logs stderr
+	 * @param {string} foo
+	 */
+	onStderr(foo: string){}
 
 	/**
 	 * handles pyshell results and calls onResult / onPrint
@@ -197,8 +207,6 @@ export class PythonEvaluator{
 			this.onResult(pyResult)
 		}
         else{
-			// get rid of \r at end (present in windows)
-			if(results.endsWith('\r')) results = results.slice(0, results.length-1);
             this.onPrint(results)
 		}
 	}
