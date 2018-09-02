@@ -1,8 +1,4 @@
 import {PythonShell} from 'python-shell'
-import {writeFileSync} from 'fs'
-import {exec} from 'child_process'
-import {tmpdir} from 'os'
-import {sep} from 'path'
 
 export interface PythonResult{
 	userError:string,
