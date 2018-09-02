@@ -1,4 +1,4 @@
-import {pythonShellTyping} from './pyShellType'
+import {PythonShell} from 'python-shell'
 import {writeFileSync} from 'fs'
 import {exec} from 'child_process'
 import {tmpdir} from 'os'
@@ -36,12 +36,11 @@ export class PythonEvaluator{
     private pythonPath:string
     private startTime:number
     private pythonEvalFolderPath = __dirname + '/python/'
-    private PythonShell
 
     /**
      * an instance of python-shell. See https://github.com/extrabacon/python-shell
      */
-    pyshell:pythonShellTyping
+    pyshell:PythonShell
 
 	/**
 	 * starts pythonEvaluator.py 
@@ -54,7 +53,6 @@ export class PythonEvaluator{
 		this.running = false // whether python backend is on/off
 		this.restarting = false
 		this.pythonOptions = pythonOptions
-		this.PythonShell = require('python-shell')
 
 		if(process.platform == "darwin"){
 			//needed for Mac to prevent ENOENT
@@ -136,7 +134,7 @@ export class PythonEvaluator{
 	 */
 	startPython(){
 		console.log("Starting Python...")
-		this.pyshell = new this.PythonShell('pythonEvaluator.py', {
+		this.pyshell = new PythonShell('pythonEvaluator.py', {
 			scriptPath: this.pythonEvalFolderPath,
 			pythonOptions: this.pythonOptions,
 			pythonPath: this.pythonPath,
@@ -215,9 +213,7 @@ export class PythonEvaluator{
 	 * @returns {Promise} rejects w/ stderr if syntax failure
 	 */
 	async checkSyntax(code:string){
-		let filePath = tmpdir() + sep + "AREPLsyntaxCheck.py"
-		writeFileSync(filePath, code)
-		return this.checkSyntaxFile(filePath)
+		return PythonShell.checkSyntax(code);
 	}
 
 	/**
@@ -230,14 +226,7 @@ export class PythonEvaluator{
 		// but communication with that happens through just one channel (stdin/stdout)
 		// so for now i prefer to keep this seperate
 
-		let compileCommand = `${this.pythonPath} -m py_compile ${filePath}`
-
-		return new Promise((resolve, reject) => {
-			exec(compileCommand, (error, stdout, stderr) => {
-				if(error == null) resolve()
-				else reject(stderr)
-			})
-		})	
+		return PythonShell.checkSyntaxFile(filePath);
 	}
 
 	/**
@@ -272,7 +261,7 @@ export class PythonEvaluator{
 	}
 
 	/**
-	 * delays execution of function by 300ms, resetting clock every time it is called
+	 * delays execution of function by ms millaseconds, resetting clock every time it is called
 	 * Useful for real-time execution so execCode doesn't get called too often
 	 * thanks to https://stackoverflow.com/a/1909508/6629672
 	 */
