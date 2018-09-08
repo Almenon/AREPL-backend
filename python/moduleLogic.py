@@ -4,6 +4,7 @@ from sys import modules
 import pkg_resources
 from stdlib_list import stdlib_list
 
+
 def getNonUserModules():
     """returns a set of all modules not written by the user (aka all builtin and pip modules)
     
@@ -12,7 +13,7 @@ def getNonUserModules():
     """
 
     pipModules = [d.project_name for d in pkg_resources.working_set] # pylint: disable=E1133
-    
+
     specialCases = [
         'pkg_resources', # part of setuptools, but not listed ANYWHERE
         'jsonpickle', # hardcoded as part of AREPL
@@ -26,8 +27,10 @@ def getNonUserModules():
     evenMoreBuiltinModules = [k for k in modules]
     # how many damn modules are there???
 
-    return set(pipModules + 
-            list(builtin_module_names) + 
-            moreBuiltinModules +
-            evenMoreBuiltinModules +
-            specialCases)
+    return set(
+        pipModules
+        + list(builtin_module_names)
+        + moreBuiltinModules
+        + evenMoreBuiltinModules
+        + specialCases
+    )

@@ -5,6 +5,7 @@ from os import getcwd,sep, chdir, path
 from sys import version_info,modules
 from shutil import rmtree
 
+
 class TestPythonEvaluator(unittest.TestCase):
 
     def test_simple_code(self):
@@ -85,7 +86,7 @@ n = False
         assert vars['a'] == 1
         assert vars['b'] == 1.1
         assert vars['c'] == 'c'
-        assert vars['d'] == (1,2)
+        assert vars['d'] == (1, 2)
         assert vars['g'] == {}
         assert vars['h'] == []
         assert vars['i'] == [[[]]]
@@ -131,10 +132,10 @@ loop.close()
 x=1
         """
 
-        # the async def async_run would result 
+        # the async def async_run would result
         # in syntax error in python versions < 3.5
         # so we use different test in that case
-        if version_info < (3,5):
+        if version_info < (3, 5):
             eventLoopCode = """
 import asyncio
 
@@ -187,7 +188,7 @@ from json import loads
 
         finally:
             # restore file back to original
-            with open(filePath,'w') as f:
+            with open(filePath, 'w') as f:
                 f.write(origFileText)
 
     def test_userVarImportDeleted(self):
@@ -219,12 +220,12 @@ from json import loads
 
         finally:
             # restore file back to original
-            with open(varToImportFilePath,'w') as f:
+            with open(varToImportFilePath, 'w') as f:
                 f.write(origVarToImportFileText)
+
 
 if __name__ == '__main__':
     unittest.main()
-
 
 
 ###########################
