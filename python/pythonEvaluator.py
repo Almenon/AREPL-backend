@@ -97,6 +97,31 @@ savedLocals = {}
 nonUserModules = getNonUserModules()
 origModules = frozenset(modules)
 
+# AREPL-vscode does not support stdin yet so help breaks it
+# by overridding help with a non-stdin version we can prevent AREPL-vscode from freezing up
+# just a temp fix untill AREPL-vscode supports stdin
+
+def helpOverload(arg=None):
+    if arg is None: print("""Welcome to python! :)
+If this is your first time using Python, you should definitely check out
+the tutorial on the Internet at https://docs.python.org/3.7/tutorial/.
+
+AREPL uses a custom implementation of help which does not have all the features of the interpreter help. 
+But AREPL's help can still give you information on functions / modules / objects you pass into it.""")
+    else: print(arg.__doc__)
+
+# same thing as above, but with stdin
+
+def inputOverload(*args, **kwargs):
+    print("""AREPL does not support input yet.  Sorry!
+If you want to add this in you can submit a pull request to the source code at https://github.com/Almenon/AREPL-vscode
+Or you can leave a comment on the issue to let me know you want the feature at https://github.com/Almenon/AREPL-vscode/issues/6""")
+    raise Exception("AREPL does not support input yet.  Sorry!")
+
+
+startingLocals['help'] = helpOverload
+startingLocals['input'] = inputOverload
+
 def get_imports(parsedText, text):
     """
     :param parsedText: the result of ast.parse(text)
