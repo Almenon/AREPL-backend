@@ -20,7 +20,7 @@ def getNonUserModules():
         'arepldump' # AREPL registers it as module but not in pipModules for some reason
     ]
 
-    moreBuiltinModules = stdlib_list(version[:3])
+    moreBuiltinModules = stdlib_list(version[:3], fallback=True)
     # moreBuiltinModules contains modules in libs folder, among many others
 
     evenMoreBuiltinModules = [k for k in modules]
