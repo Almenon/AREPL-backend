@@ -22,6 +22,7 @@ Along the way I check if I haved saved the locals from a previous run and use th
 """
 #####################################
 
+
 class execArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
@@ -29,6 +30,7 @@ class execArgs(object):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
+
 
 class returnInfo(object):
 
@@ -40,7 +42,7 @@ class returnInfo(object):
         self.totalTime = totalTime
         self.internalError = internalError
         self.caller = caller
-        self.lineno=lineno
+        self.lineno = lineno
         self.done = done
 
 
@@ -49,6 +51,7 @@ class customPickler(jsonpickle.pickler.Pickler):
     encodes float values like inf / nan as strings to follow JSON spec while keeping meaning
     Im doing this in custom class because handlers do not fire for floats
     """
+
     inf = float('inf')
     negativeInf = float('-inf')
 
@@ -69,9 +72,11 @@ class UserError(Exception):
     Be warned that this exception can throw an exception.  Yes, you read that right.  I apolagize in advance.
     :raises: ValueError (varsSoFar gets pickled into JSON, which may result in any number of errors depending on what types are inside)
     """
+
     def __init__(self, message, varsSoFar={}):
         super().__init__(message)
         self.varsSoFar = pickle_user_vars(varsSoFar)
+
 
 if util.find_spec('numpy') is not None:
     import jsonpickle.ext.numpy as jsonpickle_numpy
@@ -90,7 +95,7 @@ startingLocals = {}
 specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
 for var in specialVars:
     startingLocals[var] = locals()[var]
-    
+
 oldSavedLines = []
 savedLocals = {}
 
@@ -101,6 +106,7 @@ origModules = frozenset(modules)
 # by overridding help with a non-stdin version we can prevent AREPL-vscode from freezing up
 # just a temp fix untill AREPL-vscode supports stdin
 
+
 def helpOverload(arg=None):
     if arg is None: print("""Welcome to python! :)
 If this is your first time using Python, you should definitely check out
@@ -110,7 +116,9 @@ AREPL uses a custom implementation of help which does not have all the features 
 But AREPL's help can still give you information on functions / modules / objects you pass into it.""")
     else: print(arg.__doc__)
 
+
 # same thing as above, but with stdin
+
 
 def inputOverload(*args, **kwargs):
     print("""AREPL does not support input yet.  Sorry!
@@ -121,6 +129,7 @@ Or you can leave a comment on the issue to let me know you want the feature at h
 
 startingLocals['help'] = helpOverload
 startingLocals['input'] = inputOverload
+
 
 def get_imports(parsedText, text):
     """
@@ -133,8 +142,8 @@ def get_imports(parsedText, text):
     imports = []
     savedCode = text.split('\n')
     for node in child_nodes:
-        if(isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom)):
-            importLine = savedCode[node.lineno-1]
+        if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
+            importLine = savedCode[node.lineno - 1]
             imports.append(importLine)
 
     imports = '\n'.join(imports)
@@ -146,9 +155,9 @@ def exec_saved(savedLines):
     try:
         exec(savedLines, savedLocals)
     except Exception:
-        errorMsg = traceback.format_exc()        
+        errorMsg = traceback.format_exc()
         raise UserError(errorMsg, savedLocals)
-    
+
     # deepcopy cant handle imported modules, so remove them
     savedLocals = {k:v for k,v in savedLocals.items() if str(type(v)) != "<class 'module'>"}
 
@@ -167,8 +176,9 @@ def get_eval_locals_from_saved(savedLines):
 
     if savedLines != "":
         return deepcopy(savedLocals)
-    else: 
-        return deepcopy(startingLocals)    
+    else:
+        return deepcopy(startingLocals)
+
 
 def pickle_user_vars(userVars):
     # filter out non-user vars, no point in showing them
@@ -179,7 +189,7 @@ def pickle_user_vars(userVars):
     # json dumps cant handle any object type, so we need to use jsonpickle
     # still has limitations but can handle much more
     return jsonpickle.encode(userVariables, max_depth=100) # any depth above 245 resuls in error and anything above 100 takes too long to process
-    
+
 
 def copy_saved_imports_to_exec(codeToExec, savedLines):
     """
@@ -190,7 +200,7 @@ def copy_saved_imports_to_exec(codeToExec, savedLines):
         try:
             savedCodeAST = ast.parse(savedLines)
         except SyntaxError:
-            errorMsg = traceback.format_exc()        
+            errorMsg = traceback.format_exc()
             raise UserError(errorMsg)
 
         imports = get_imports(savedCodeAST, savedLines)
@@ -203,6 +213,7 @@ def copy_saved_imports_to_exec(codeToExec, savedLines):
 
     return codeToExec
 
+
 @contextmanager
 def script_path(script_dir):
     """
@@ -212,7 +223,7 @@ def script_path(script_dir):
         if script_dir is empty function will do nothing
         Slightly modified from wolf's script_path (see https://github.com/Duroktar/Wolf)
     """
-    if(script_dir is None or script_dir == ""):
+    if script_dir is None or script_dir == "":
         yield
     else:
         original_cwd = os.getcwd()
@@ -221,6 +232,7 @@ def script_path(script_dir):
         yield
         os.chdir(original_cwd)
         path.remove(script_dir)
+
 
 def exec_input(codeToExec, savedLines="", filePath=""):
     """
@@ -234,17 +246,17 @@ def exec_input(codeToExec, savedLines="", filePath=""):
     codeToExec = copy_saved_imports_to_exec(codeToExec, savedLines)
 
     # repoen revent loop in case user closed it in last run
-    asyncio.set_event_loop(asyncio.new_event_loop()) 
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
     with script_path(os.path.dirname(filePath)):
         try:
             start = time()
             exec(codeToExec, evalLocals)
-            execTime = time()-start
+            execTime = time() - start
         except Exception:
-            errorMsg = traceback.format_exc()        
+            errorMsg = traceback.format_exc()
             raise UserError(errorMsg, evalLocals)
-            
+
         finally:
             try:
                 # areplDump library keeps state internally
@@ -258,7 +270,7 @@ def exec_input(codeToExec, savedLines="", filePath=""):
             importedModules = set(modules) - origModules
             userModules = importedModules - nonUserModules
 
-            # delete 
+            # delete
             for userModule in userModules:
                 try:
                     del modules[userModule]
@@ -269,30 +281,32 @@ def exec_input(codeToExec, savedLines="", filePath=""):
 
     return returnInfo("", userVariables, execTime, None)
 
+
 def print_output(output):
     """
     turns output into JSON and prints it
     """
     # 6q3co7 signifies to frontend that stdout is not due to a print in user's code
-    print('6q3co7' + json.dumps(output, default=lambda x:x.__dict__))
+    print('6q3co7' + json.dumps(output, default=lambda x: x.__dict__))
+
 
 if __name__ == '__main__':
 
     while True:
-        
+
         try:
             data = json.loads(input())
             data = execArgs(**data)
         except json.JSONDecodeError as e:
             # probably just due to user passing in stdin to program without input
             # in which case program completes and we get the stdin, which we ignore
-            # frontend relies on error message to check for this error so 
+            # frontend relies on error message to check for this error so
             # don't change without also changing index.ts!
             print_output(returnInfo("",None,-1,-1,'json error with stdin: ' + str(e), done=False))
             continue
 
         start = time()
-        myReturnInfo = returnInfo("",{},None,None)
+        myReturnInfo = returnInfo('', {}, None, None)
 
         try:
             myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath)

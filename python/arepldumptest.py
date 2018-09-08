@@ -6,8 +6,8 @@ from json import loads
 # so we cant run it inside a function
 output = dump(5)
 
-class TestPythonEvaluator(unittest.TestCase):
 
+class TestPythonEvaluator(unittest.TestCase):
     def test_simple_dump(self):
         dumpInfo = dump('yo')
         assert loads(dumpInfo.userVariables)['dump output'] == 'yo'
@@ -26,8 +26,8 @@ class TestPythonEvaluator(unittest.TestCase):
 
     def test_dump_at(self):
         for i in range(10):
-            output = dump("yo")
-            output2 = dump(i,3)
+            output = dump('yo')
+            output2 = dump(i, 3)
             if i is 0:
                 output = output
                 assert loads(output.userVariables)['dump output'] == 'yo'
@@ -36,6 +36,7 @@ class TestPythonEvaluator(unittest.TestCase):
                 assert loads(output2.userVariables)['dump output'] == 3
             else:
                 assert output is None
+
 
 if __name__ == '__main__':
     unittest.main()
