@@ -9,8 +9,7 @@ import ast
 from time import time
 import asyncio
 import os
-from sys import path
-from sys import modules
+from sys import path, modules, argv
 from contextlib import contextmanager
 from moduleLogic import getNonUserModules
 
@@ -247,6 +246,8 @@ def exec_input(codeToExec, savedLines="", filePath=""):
 
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
+
+    argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
 
     with script_path(os.path.dirname(filePath)):
         try:
