@@ -253,7 +253,7 @@ def exec_input(codeToExec, savedLines="", filePath=""):
             start = time()
             exec(codeToExec, evalLocals)
             execTime = time() - start
-        except (Exception, SystemExit):
+        except BaseException:
             errorMsg = traceback.format_exc()
             raise UserError(errorMsg, evalLocals)
 
