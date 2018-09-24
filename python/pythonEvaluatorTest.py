@@ -1,10 +1,11 @@
 import unittest
 import pythonEvaluator
 import jsonpickle
-from os import getcwd,sep, chdir, path
+from os import getcwd, chdir, path, pardir
 from sys import version_info,modules
 from shutil import rmtree
 
+python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "python_ignore")
 
 class TestPythonEvaluator(unittest.TestCase):
 
@@ -13,7 +14,7 @@ class TestPythonEvaluator(unittest.TestCase):
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
     def test_relative_import(self):
-        filePath = getcwd() + sep + "python_ignore" + sep + "foo2.py"
+        filePath = path.join(python_ignore_path, "foo2.py")
         with open(filePath) as f:
             returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath)
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
@@ -166,8 +167,8 @@ from json import loads
 
     def test_userImportDeleted(self):
 
-        filePath = getcwd() + sep + "python_ignore" + sep + "foo.py"
-        filePath2 = getcwd() + sep + "python_ignore" + sep + "foo2.py"
+        filePath = path.join(python_ignore_path, "foo.py")
+        filePath2 = path.join(python_ignore_path, "foo2.py")
 
         with open(filePath) as f:
             origFileText = f.read()
@@ -196,10 +197,10 @@ from json import loads
         # __pycache__ will muck up our test on every second run
         # this problem only happens during unit tests and not in actual useage (not sure why)
         # so we can safely delete pycache to avoid the problem
-        rmtree(getcwd() + sep + "python_ignore" + sep + "__pycache__")
+        rmtree(path.join(python_ignore_path, "__pycache__"))
 
-        varToImportFilePath = getcwd() + sep + "python_ignore" + sep + "varToImport.py"
-        importVarFilePath = getcwd() + sep + "python_ignore" + sep + "importVar.py"
+        varToImportFilePath = path.join(python_ignore_path, "varToImport.py")
+        importVarFilePath = path.join(python_ignore_path, "importVar.py")
 
         with open(varToImportFilePath) as f:
             origVarToImportFileText = f.read()
