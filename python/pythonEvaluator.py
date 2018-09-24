@@ -163,7 +163,12 @@ def exec_saved(savedLines):
     return savedLocals
 
 
-def get_eval_locals_from_saved(savedLines):
+def get_eval_locals(savedLines):
+    """
+    If savedLines is changed, rexecutes saved lines and returns resulting local variables.
+    If savedLines is unchanged, returns the saved locals.
+    If savedLines is empty, simply returns the original startingLocals.
+    """
     global oldSavedLines
     global savedLocals
 
@@ -192,7 +197,8 @@ def pickle_user_vars(userVars):
 
 def copy_saved_imports_to_exec(codeToExec, savedLines):
     """
-    copies imports in savedLines to the top of codeToExec
+    copies imports in savedLines to the top of codeToExec.
+    If savedLines is empty this function does nothing.
     :raises: SyntaxError if err in savedLines
     """
     if savedLines.strip() != "":
@@ -239,15 +245,16 @@ def exec_input(codeToExec, savedLines="", filePath=""):
     :rtype: returnInfo
     """
 
-    evalLocals = get_eval_locals_from_saved(savedLines)
+    argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
+    startingLocals['__file__'] = filePath
+
+    evalLocals = get_eval_locals(savedLines)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
     codeToExec = copy_saved_imports_to_exec(codeToExec, savedLines)
 
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
-
-    argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
 
     with script_path(os.path.dirname(filePath)):
         try:

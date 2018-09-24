@@ -13,6 +13,16 @@ class TestPythonEvaluator(unittest.TestCase):
         returnInfo = pythonEvaluator.exec_input("x = 1")
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
+    def test_file_location(self):
+        code = "from sys import argv;x=argv;y=__file__"
+        returnInfo = pythonEvaluator.exec_input(code)
+        assert jsonpickle.decode(returnInfo.userVariables)['x'] == ['']
+        assert jsonpickle.decode(returnInfo.userVariables)['y'] == ''
+
+        returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
+        assert jsonpickle.decode(returnInfo.userVariables)['x'] == ['test path']
+        assert jsonpickle.decode(returnInfo.userVariables)['y'] == 'test path'
+
     def test_relative_import(self):
         filePath = path.join(python_ignore_path, "foo2.py")
         with open(filePath) as f:
