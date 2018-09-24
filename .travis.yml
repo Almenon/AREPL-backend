@@ -13,9 +13,6 @@ matrix:
         - python: 3.7
           dist: xenial
           sudo: true
-        - python: pypy
-          dist: trusty
-          sudo: false
 script:
  - python python/pythonEvaluatorTest.py
  - python python/arepldumptest.py
