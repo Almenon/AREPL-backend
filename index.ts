@@ -15,7 +15,6 @@ export interface PythonResult{
 export class PythonEvaluator{
     
     private static readonly identifier = "6q3co7"
-    private static readonly jsonErrorIdentifier = "6q3co6"
 
     /**
      * whether python is busy executing inputted code
@@ -276,8 +275,4 @@ export class PythonEvaluator{
 			timer = setTimeout(callback, ms, args);
 		};
 	})();
-
-	private isEmptyObject(object: {}){
-		return Object.keys(object).length === 0 && object.constructor === Object
-	}
 }
