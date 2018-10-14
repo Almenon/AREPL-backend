@@ -1,1 +1,1 @@
-this folder is just for the relative import unit test
+This folder contains test code that the unit tests run to check if arepl is working properly
