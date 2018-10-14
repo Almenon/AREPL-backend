@@ -1,3 +1,4 @@
+import pytest
 from arepldump import dump
 from json import loads
 
@@ -6,23 +7,23 @@ from json import loads
 output = dump(5)
 
 
-def test_simple_dump(self):
+def test_simple_dump():
     dumpInfo = dump('yo')
     assert loads(dumpInfo.userVariables)['dump output'] == 'yo'
     assert dumpInfo.caller == 'test_simple_dump'
     assert dumpInfo.done == False
 
-def test_dump_main_scope(self):
+def test_dump_main_scope():
     global output
     assert loads(output.userVariables)['dump output'] == 5
     assert output.caller == '<module>'
 
-def test_dump_all_vars(self):
+def test_dump_all_vars():
     y = 'hey'
     dumpInfo = dump()
     assert loads(dumpInfo.userVariables)['y'] == 'hey'
 
-def test_dump_at(self):
+def test_dump_at():
     for i in range(10):
         output = dump('yo')
         output2 = dump(i, 3)
