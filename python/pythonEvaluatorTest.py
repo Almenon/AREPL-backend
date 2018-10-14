@@ -5,7 +5,7 @@ from os import getcwd, chdir, path, pardir
 from sys import version_info,modules
 from shutil import rmtree
 
-python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "python_ignore")
+python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 
 class TestPythonEvaluator(unittest.TestCase):
 
