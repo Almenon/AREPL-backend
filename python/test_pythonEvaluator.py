@@ -12,15 +12,21 @@ def test_simple_code():
     returnInfo = pythonEvaluator.exec_input("x = 1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
-def test_file_location():
-    code = "from sys import argv;x=argv;y=__file__"
+def test_argv0ShouldBeFilePath():
+    code = "from sys import argv;args=argv"
     returnInfo = pythonEvaluator.exec_input(code)
-    assert jsonpickle.decode(returnInfo.userVariables)['x'] == ['']
-    assert jsonpickle.decode(returnInfo.userVariables)['y'] == ''
+    assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == ''
 
     returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
-    assert jsonpickle.decode(returnInfo.userVariables)['x'] == ['test path']
-    assert jsonpickle.decode(returnInfo.userVariables)['y'] == 'test path'
+    assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == 'test path'
+
+def test_fileDunderShouldHaveRightPath():
+    code = "fileDunder=__file__"
+    returnInfo = pythonEvaluator.exec_input(code)
+    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == ''
+
+    returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
+    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == 'test path'
 
 def test_relative_import():
     filePath = path.join(python_ignore_path, "foo2.py")
