@@ -6,7 +6,8 @@
             "es6"
         ],
         "sourceMap": true,
-        "rootDir": "."
+        "rootDir": ".",
+        "forceConsistentCasingInFileNames": true
     },
     "exclude": [
         "node_modules",
