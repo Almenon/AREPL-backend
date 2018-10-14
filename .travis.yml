@@ -14,6 +14,7 @@ matrix:
           dist: xenial
           sudo: true
 script:
- - python python/pythonEvaluatorTest.py
- - python python/arepldumptest.py
+ - pip install -r python/requirements.txt
+ - pytest python/test_pythonEvaluator.py
+ - pytest python/test_arepldump.py
  - python -m python.stdlib_list.stdlibTest
