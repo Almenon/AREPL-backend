@@ -24,6 +24,7 @@ cache:
     - ~/.npm
     
 after_success:
+  - npm ci
   - npm run travis-deploy-once "npm run semantic-release"
 branches:
   except:
