@@ -18,3 +18,14 @@ script:
  - pytest python/test_pythonEvaluator.py
  - pytest python/test_arepldump.py
  - python -m python.stdlib_list.stdlibTest
+
+cache:
+  directories:
+    - ~/.npm
+    
+after_success:
+  - npm i
+  - npm run travis-deploy-once "npm run semantic-release"
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/

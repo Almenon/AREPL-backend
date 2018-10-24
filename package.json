@@ -10,7 +10,9 @@
     "test": "npm run compileOnce && mocha --ui tdd *.test.js --exit",
     "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js --exit",
     "document": "documentation readme index.js --section=API",
-    "prePublish": "npm run compileOnce && npm run test && npm run document"
+    "prePublish": "npm run compileOnce && npm run test && npm run document",
+    "semantic-release": "semantic-release",
+    "travis-deploy-once": "travis-deploy-once"
   },
   "repository": "https://github.com/Almenon/arepl-backend",
   "bugs": {
@@ -38,7 +40,9 @@
     "mocha": "^5.2.0",
     "mocha-appveyor-reporter": "^0.4.0",
     "ts-node": "^7.0.1",
-    "typescript": "^3.0.3"
+    "typescript": "^3.0.3",
+    "semantic-release": "^15.10.5",
+    "travis-deploy-once": "^5.0.9"
   },
   "dependencies": {
     "python-shell": "^1.0.6"
