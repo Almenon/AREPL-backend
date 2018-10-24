@@ -1,4 +1,4 @@
-import {PythonShell} from 'python-shell'
+import {PythonShell} from 'python-shell' 
 
 export interface PythonResult{
 	userError:string,
