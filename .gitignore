@@ -16,6 +16,7 @@ pyShellType.js.map
 *.test.js
 *.test.js.map
 *.d.ts
+.pytest_cache
 
 
 ##################################################
