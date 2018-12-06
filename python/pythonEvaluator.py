@@ -12,6 +12,7 @@ import os
 from sys import path, modules, argv
 from contextlib import contextmanager
 from moduleLogic import getNonUserModules
+from howdoi import howdoi
 
 #####################################
 """
@@ -117,17 +118,21 @@ But AREPL's help can still give you information on functions / modules / objects
 
 
 # same thing as above, but with stdin
-
-
 def inputOverload(*args, **kwargs):
     print("""AREPL does not support input yet.  Sorry!
 If you want to add this in you can submit a pull request to the source code at https://github.com/Almenon/AREPL-vscode
 Or you can leave a comment on the issue to let me know you want the feature at https://github.com/Almenon/AREPL-vscode/issues/6""")
     raise Exception("AREPL does not support input yet.  Sorry!")
 
+def howdoiWrapper(strArg):
+    parser = howdoi.get_parser()
+    args = vars(parser.parse_args(strArg.split(' ')))
+    print(howdoi.howdoi(args))
+
 
 startingLocals['help'] = helpOverload
 startingLocals['input'] = inputOverload
+startingLocals['howdoi'] = howdoiWrapper
 
 
 def get_imports(parsedText, text):

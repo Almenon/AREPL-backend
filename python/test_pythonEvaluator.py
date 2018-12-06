@@ -239,6 +239,11 @@ def test_userVarImportDeleted():
         with open(varToImportFilePath, 'w') as f:
             f.write(origVarToImportFileText)
 
+def integrationTestHowdoi():
+    # this requires internet access so it is not official test
+    returnInfo = pythonEvaluator.exec_input("x=howdoi('eat a apple')")
+    print(jsonpickle.decode(returnInfo.userVariables)['x']) # this should print out howdoi results
+    
 
 ###########################
 #     WIERD STUFF
