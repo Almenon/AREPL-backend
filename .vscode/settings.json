@@ -6,8 +6,7 @@
         "-p",
         "*test.py"
     ],
-    "python.unitTest.unittestEnabled": true,
-    "python.unitTest.pyTestEnabled": false,
+    "python.unitTest.pyTestEnabled": true,
     "python.unitTest.nosetestsEnabled": false,
 
     "files.exclude": {
