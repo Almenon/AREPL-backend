@@ -7,6 +7,7 @@ from shutil import rmtree
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 
+# These tests can be run with pytest
 
 def test_simple_code():
     returnInfo = pythonEvaluator.exec_input("x = 1")
