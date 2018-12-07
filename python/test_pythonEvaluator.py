@@ -240,6 +240,10 @@ def test_userVarImportDeleted():
         with open(varToImportFilePath, 'w') as f:
             f.write(origVarToImportFileText)
 
+def test_howdoiArepl():
+    returnInfo = pythonEvaluator.exec_input("x=howdoi('use arepl')")
+    assert jsonpickle.decode(returnInfo.userVariables)['x'] == 'using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki'
+
 def integrationTestHowdoi():
     # this requires internet access so it is not official test
     returnInfo = pythonEvaluator.exec_input("x=howdoi('eat a apple')")

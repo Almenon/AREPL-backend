@@ -124,10 +124,23 @@ If you want to add this in you can submit a pull request to the source code at h
 Or you can leave a comment on the issue to let me know you want the feature at https://github.com/Almenon/AREPL-vscode/issues/6""")
     raise Exception("AREPL does not support input yet.  Sorry!")
 
+
 def howdoiWrapper(strArg):
-    parser = howdoi.get_parser()
-    args = vars(parser.parse_args(strArg.split(' ')))
-    print(howdoi.howdoi(args))
+    """howdoi is meant to be called from the command line - this wrapper lets it be called programatically
+    
+    Arguments:
+        strArg {str} -- search term
+    """
+
+    if strArg.lower() == 'use arepl' or strArg.lower() == 'arepl':
+        returnVal = 'using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki'
+    else:
+        parser = howdoi.get_parser()
+        args = vars(parser.parse_args(strArg.split(' ')))
+        returnVal = howdoi.howdoi(args)
+
+    print(returnVal)
+    return returnVal # not actually necessary but nice for unit testing
 
 
 startingLocals['help'] = helpOverload
