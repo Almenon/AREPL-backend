@@ -13,12 +13,12 @@ import glob
 import os
 import random
 import re
-import requests
+from . import requests
 import sys
 from . import __version__
 
 
-from pyquery import PyQuery as pq
+from .pyquery import PyQuery as pq
 from requests.exceptions import ConnectionError
 from requests.exceptions import SSLError
 
