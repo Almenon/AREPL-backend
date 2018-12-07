@@ -14,34 +14,19 @@ import os
 import random
 import re
 import requests
-import requests_cache
 import sys
 from . import __version__
 
-from pygments import highlight
-from pygments.lexers import guess_lexer, get_lexer_by_name
-from pygments.formatters.terminal import TerminalFormatter
-from pygments.util import ClassNotFound
 
 from pyquery import PyQuery as pq
 from requests.exceptions import ConnectionError
 from requests.exceptions import SSLError
 
-# Handle imports for Python 2 and 3
-if sys.version < '3':
-    import codecs
-    from urllib import quote as url_quote
-    from urllib import getproxies
+from urllib.request import getproxies
+from urllib.parse import quote as url_quote
 
-    # Handling Unicode: http://stackoverflow.com/a/6633040/305414
-    def u(x):
-        return codecs.unicode_escape_decode(x)[0]
-else:
-    from urllib.request import getproxies
-    from urllib.parse import quote as url_quote
-
-    def u(x):
-        return x
+def u(x):
+    return x
 
 
 if os.getenv('HOWDOI_DISABLE_SSL'):  # Set http instead of https
@@ -73,13 +58,10 @@ CACHE_DIR = os.path.join(XDG_CACHE_DIR, 'howdoi')
 CACHE_FILE = os.path.join(CACHE_DIR, 'cache{0}'.format(
     sys.version_info[0] if sys.version_info[0] == 3 else ''))
 
-if os.getenv('HOWDOI_DISABLE_CACHE'):
-    howdoi_session = requests.session()
-else:
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR)
-    howdoi_session = requests_cache.CachedSession(CACHE_FILE)
+howdoi_session = requests.session()
 
+last_request = ''
+last_request_answer = ''
 
 def get_proxies():
     proxies = getproxies()
@@ -164,32 +146,6 @@ def get_link_at_pos(links, position):
     return link
 
 
-def _format_output(code, args):
-    if not args['color']:
-        return code
-    lexer = None
-
-    # try to find a lexer using the StackOverflow tags
-    # or the query arguments
-    for keyword in args['query'].split() + args['tags']:
-        try:
-            lexer = get_lexer_by_name(keyword)
-            break
-        except ClassNotFound:
-            pass
-
-    # no lexer found above, use the guesser
-    if not lexer:
-        try:
-            lexer = guess_lexer(code)
-        except ClassNotFound:
-            return code
-
-    return highlight(code,
-                     lexer,
-                     TerminalFormatter(bg='dark'))
-
-
 def _is_question(link):
     return re.search('questions/\d+/', link)
 
@@ -220,12 +176,12 @@ def _get_answer(args, links):
             current_text = get_text(html_tag)
             if current_text:
                 if html_tag[0].tag in ['pre', 'code']:
-                    texts.append(_format_output(current_text, args))
+                    texts.append(current_text)
                 else:
                     texts.append(current_text)
         text = '\n'.join(texts)
     else:
-        text = _format_output(get_text(instructions.eq(0)), args)
+        text = get_text(instructions.eq(0))
     if text is None:
         text = NO_ANSWER_MSG
     text = text.strip()
@@ -269,15 +225,20 @@ def format_answer(link, answer, star_headers):
     return answer
 
 
-def _clear_cache():
-    for cache in glob.iglob('{0}*'.format(CACHE_FILE)):
-        os.remove(cache)
-
-
 def howdoi(args):
+    global last_request
+    global last_request_answer
+
     args['query'] = ' '.join(args['query']).replace('?', '')
     try:
-        return _get_instructions(args) or 'Sorry, couldn\'t find any help with that topic\n'
+        if args['query'] == last_request:
+            return last_request_answer
+        else:
+            answer = _get_instructions(args) or 'Sorry, couldn\'t find any help with that topic\n'
+
+        last_request = args['query']
+        last_request_answer = answer
+        return answer
     except (ConnectionError, SSLError):
         return 'Failed to establish network connection\n'
 
@@ -291,11 +252,7 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-l', '--link', help='display only the answer link',
                         action='store_true')
-    parser.add_argument('-c', '--color', help='enable colorized output',
-                        action='store_true')
     parser.add_argument('-n', '--num-answers', help='number of answers to return', default=1, type=int)
-    parser.add_argument('-C', '--clear-cache', help='clear the cache',
-                        action='store_true')
     parser.add_argument('-v', '--version', help='displays the current version of howdoi',
                         action='store_true')
     return parser
@@ -309,24 +266,13 @@ def command_line_runner():
         print(__version__)
         return
 
-    if args['clear_cache']:
-        _clear_cache()
-        print('Cache cleared successfully')
-        return
-
     if not args['query']:
         parser.print_help()
         return
 
-    if os.getenv('HOWDOI_COLORIZE'):
-        args['color'] = True
-
     utf8_result = howdoi(args).encode('utf-8', 'ignore')
-    if sys.version < '3':
-        print(utf8_result)
-    else:
-        # Write UTF-8 to stdout: https://stackoverflow.com/a/3603160
-        sys.stdout.buffer.write(utf8_result)
+    # Write UTF-8 to stdout: https://stackoverflow.com/a/3603160
+    sys.stdout.buffer.write(utf8_result)
     # close the session to release connection
     howdoi_session.close()
 
