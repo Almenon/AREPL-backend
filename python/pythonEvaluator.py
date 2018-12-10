@@ -12,7 +12,10 @@ import os
 from sys import path, modules, argv
 from contextlib import contextmanager
 from moduleLogic import getNonUserModules
-from howdoi import howdoi
+
+
+if util.find_spec('howdoi') is not None:
+    from howdoi import howdoi
 
 #####################################
 """
