@@ -122,9 +122,8 @@ But AREPL's help can still give you information on functions / modules / objects
 
 # same thing as above, but with stdin
 def inputOverload(*args, **kwargs):
-    print("""AREPL does not support input yet.  Sorry!
-If you want to add this in you can submit a pull request to the source code at https://github.com/Almenon/AREPL-vscode
-Or you can leave a comment on the issue to let me know you want the feature at https://github.com/Almenon/AREPL-vscode/issues/6""")
+    print("""I am still working on adding input functionality, sorry!
+    In the meantime you can hardcode input by following instructions here: https://github.com/Almenon/AREPL-vscode/wiki/Using-AREPL-with-stdin""")
     raise Exception("AREPL does not support input yet.  Sorry!")
 
 
