@@ -16,7 +16,7 @@ must have python 3
 
 ## Usage
 
-see <https://github.com/Almenon/AREPL/blob/master/src/app.js> for example useage. 
+see <https://github.com/Almenon/AREPL-vscode> for example useage. 
 
 ## API
 
