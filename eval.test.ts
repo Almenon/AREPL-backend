@@ -11,7 +11,13 @@ import {PythonEvaluator} from './index'
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new PythonEvaluator()
     let input = {evalCode:"", savedCode: "", filePath: ""}
-    pyEvaluator.startPython()
+    const pythonStartupTime = 1500
+
+    suiteSetup(function(done){
+        pyEvaluator.startPython()
+        // wait for for python to start
+        setTimeout(()=>done(), pythonStartupTime)
+    })
 
     test("sanity check: 1+1=2", () => {
         assert.equal(1+1,2)
@@ -137,6 +143,8 @@ suite("PythonEvaluator Tests", () => {
 
     test("can restart", function(done){
 
+        this.timeout(this.timeout()+pythonStartupTime)
+
         assert.equal(pyEvaluator.running, true)
         assert.equal(pyEvaluator.restarting, false)
         assert.equal(pyEvaluator.evaling, false)
@@ -145,10 +153,12 @@ suite("PythonEvaluator Tests", () => {
             assert.equal(pyEvaluator.running, true)
             assert.equal(pyEvaluator.evaling, false)
 
-            // i should actually test sending & reciving input to make sure evalutor is on
-            // but i tried it and it failed (likely due to some mysterious timing issue)
-            // the kicker is it worked when I tried debugging it... uggghhh
-            done()
+            setTimeout(()=>{
+                // by now python should be restarted and accepting input
+                pyEvaluator.onResult = ()=>done()
+                input.evalCode = "x"
+                pyEvaluator.execCode(input)
+            },1500)
         })
     })
 
