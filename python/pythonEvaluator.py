@@ -12,6 +12,7 @@ import os
 from sys import path, modules, argv
 from contextlib import contextmanager
 from moduleLogic import getNonUserModules
+import inspect
 
 
 if util.find_spec('howdoi') is not None:
@@ -120,11 +121,44 @@ But AREPL's help can still give you information on functions / modules / objects
     else: print(arg.__doc__)
 
 
-# same thing as above, but with stdin
-def inputOverload(*args, **kwargs):
-    print("""I am still working on adding input functionality, sorry!
-    In the meantime you can hardcode input by following instructions here: https://github.com/Almenon/AREPL-vscode/wiki/Using-AREPL-with-stdin""")
-    raise Exception("AREPL does not support input yet.  Sorry!")
+areplInputIterator = None
+def inputOverload(prompt=None):
+    """AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input()). You can also hardcode standard_input as a generator or list.
+    
+    Keyword Arguments:
+        prompt {str} --  (default: {None})
+    
+    Raises:
+        StopIteration -- if there is no more input
+    
+    Returns:
+        str
+    """
+    global areplInputIterator
+
+    if prompt is not None: print(prompt)
+    try:
+        if areplInputIterator is not None:
+            try:
+                return next(areplInputIterator)
+            except StopIteration:
+                # give simple user-friendly error, we dont want users worry about error in arepl source code
+                raise StopIteration("There is no more input") from None
+        else:
+
+            callingFrame = inspect.currentframe().f_back
+            standard_input = callingFrame.f_globals['standard_input']
+
+            if type(standard_input) is str:
+                areplInputIterator = iter([line for line in standard_input.split()])
+            elif callable(standard_input):
+                areplInputIterator = standard_input()
+            else:
+                areplInputIterator = iter([line for line in standard_input])
+
+            return next(areplInputIterator)
+    except KeyError:
+        print("AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input())")
 
 
 def howdoiWrapper(strArg):
@@ -264,6 +298,7 @@ def exec_input(codeToExec, savedLines="", filePath=""):
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
+    global areplInputIterator
 
     argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
     startingLocals['__file__'] = filePath
@@ -291,19 +326,22 @@ def exec_input(codeToExec, savedLines="", filePath=""):
                 # because python caches imports the state is kept inbetween runs
                 # we do not want that, areplDump should reset each run
                 del modules['arepldump']
-
             except KeyError:
                 pass # they have not imported it, whatever
 
             importedModules = set(modules) - origModules
             userModules = importedModules - nonUserModules
 
-            # delete
+            # user might have changed user module inbetween arepl runs
+            # so we clear them to reload import each time
             for userModule in userModules:
                 try:
                     del modules[userModule]
                 except KeyError:
                     pass # it's not worth failing AREPL over
+
+            # clear mock stdin for next run
+            areplInputIterator = None
 
     userVariables = pickle_user_vars(evalLocals)
 
