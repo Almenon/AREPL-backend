@@ -258,6 +258,18 @@ def test_script_path_should_work_regardless_of_user_errors():
     # so each run should have same path
     assert jsonpickle.decode(returnInfo)['path'] == jsonpickle.decode(secondReturnInfo)['path']
 
+def test_mock_stdin():
+    returnInfo = pythonEvaluator.exec_input("standard_input = 'hello\\nworld';x=input();y=input()")
+    assert jsonpickle.decode(returnInfo.userVariables)['x'] == 'hello'
+    assert jsonpickle.decode(returnInfo.userVariables)['y'] == 'world'
+
+    returnInfo = pythonEvaluator.exec_input("standard_input = ['hello', 'world'];x=input();y=input()")
+    assert jsonpickle.decode(returnInfo.userVariables)['x'] == 'hello'
+    assert jsonpickle.decode(returnInfo.userVariables)['y'] == 'world'
+
+    with pytest.raises(pythonEvaluator.UserError):
+        pythonEvaluator.exec_input("standard_input = ['hello'];x=input();y=input()")
+
 def integrationTestHowdoi():
     # this requires internet access so it is not official test
     returnInfo = pythonEvaluator.exec_input("x=howdoi('eat a apple')")
