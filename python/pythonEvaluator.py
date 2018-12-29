@@ -288,9 +288,11 @@ def script_path(script_dir):
         original_cwd = os.getcwd()
         os.chdir(script_dir)
         path.insert(1, script_dir)
-        yield
-        os.chdir(original_cwd)
-        path.remove(script_dir)
+        try:
+            yield
+        finally:
+            os.chdir(original_cwd)
+            path.remove(script_dir)
 
 
 def exec_input(codeToExec, savedLines="", filePath=""):
