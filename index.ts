@@ -27,8 +27,6 @@ export class PythonEvaluator{
     running = false
 
     restarting = false
-    private pythonOptions: string[]
-    private pythonPath:string
     private startTime:number
     private pythonEvalFolderPath = __dirname + '/python/'
 
@@ -39,28 +37,17 @@ export class PythonEvaluator{
 
 	/**
 	 * starts pythonEvaluator.py 
-	 * @param {string} pythonPath the path to run python. By default evaluator uses 'python' if on windows or else 'python3'.
+	 * @param {string} pythonPath the path to run python. If null python-shell will determine this for you.
 	 * @param {[string]} pythonOptions see https://docs.python.org/3/using/cmdline.html#miscellaneous-options.
 	 */
-	constructor(pythonPath:string = null, pythonOptions: string[] = ['-u']){
-
-		this.evaling = false // whether python is busy executing inputted code
-		this.running = false // whether python backend is on/off
-		this.restarting = false
-		this.pythonOptions = pythonOptions
+	constructor(private pythonPath:string = null, private pythonOptions: string[] = ['-u']){
 
 		if(process.platform == "darwin"){
 			//needed for Mac to prevent ENOENT
 			process.env.PATH = ["/usr/local/bin", process.env.PATH].join(":")
 		}
 
-		if(pythonPath == null){
-			// for non-windows OS it is best to use python3 instead of python
-			// Mac and Ubuntu both have python being v2 by default
-			// archlinux and freebsd both use v3 as default, but also provide python3 command
-			this.pythonPath = process.platform != "win32" ? "python3" : "python"
-		}
-		else this.pythonPath = pythonPath
+		if(!pythonPath) this.pythonPath = PythonShell.defaultPythonPath
 	}
 
 	
