@@ -244,6 +244,20 @@ def test_howdoiArepl():
     returnInfo = pythonEvaluator.exec_input("x=howdoi('use arepl')")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 'using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki'
 
+def test_script_path_should_work_regardless_of_user_errors():
+    try:
+        pythonEvaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
+    except pythonEvaluator.UserError as e:
+        returnInfo = e.varsSoFar
+    try:
+        pythonEvaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
+    except pythonEvaluator.UserError as e:
+        secondReturnInfo = e.varsSoFar
+
+    # script_path should restore the sys path back to original state after execution
+    # so each run should have same path
+    assert jsonpickle.decode(returnInfo)['path'] == jsonpickle.decode(secondReturnInfo)['path']
+
 def integrationTestHowdoi():
     # this requires internet access so it is not official test
     returnInfo = pythonEvaluator.exec_input("x=howdoi('eat a apple')")
