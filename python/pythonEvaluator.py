@@ -150,7 +150,7 @@ def inputOverload(prompt=None):
             standard_input = callingFrame.f_globals['standard_input']
 
             if type(standard_input) is str:
-                areplInputIterator = iter([line for line in standard_input.split()])
+                areplInputIterator = iter([line for line in standard_input.split('\n')])
             elif callable(standard_input):
                 areplInputIterator = standard_input()
             else:
