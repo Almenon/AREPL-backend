@@ -36,10 +36,14 @@ class execArgs(object):
         self.filePath = filePath
 
 
-class returnInfo(object):
+class returnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
     def __init__(self, userError, userVariables, execTime, totalTime, internalError=None, caller='<module>', lineno=-1, done=True, *args, **kwargs):
+        """
+        :param userVariables: JSON string
+        :type userVariables: str
+        """
         self.userError = userError
         self.userVariables = userVariables
         self.execTime = execTime
@@ -370,11 +374,11 @@ if __name__ == '__main__':
             # in which case program completes and we get the stdin, which we ignore
             # frontend relies on error message to check for this error so
             # don't change without also changing index.ts!
-            print_output(returnInfo("",None,-1,-1,'json error with stdin: ' + str(e), done=False))
+            print_output(returnInfo("", "{}", None, None, 'json error with stdin: ' + str(e), done=False))
             continue
 
         start = time()
-        myReturnInfo = returnInfo('', {}, None, None)
+        myReturnInfo = returnInfo("", "{}", None, None)
 
         try:
             myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath)
