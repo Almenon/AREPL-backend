@@ -169,28 +169,36 @@ export class PythonEvaluator{
 
         //result should have identifier, otherwise it is just a printout from users code
         if(results.startsWith(PythonEvaluator.identifier)){
-            results = results.replace(PythonEvaluator.identifier,"")
-			pyResult = JSON.parse(results)
-			this.evaling = !pyResult['done']
+			try {
+				results = results.replace(PythonEvaluator.identifier,"")
+				pyResult = JSON.parse(results)
+				this.evaling = !pyResult['done']
+	
+				if(pyResult['internalError'] != null && pyResult['internalError'].startsWith('json error with stdin: ')){
+					console.warn("error in python evaluator converting stdin to JSON. " +
+					"User probably just sent stdin without input() in his program.\n" + pyResult['internalError'])
+					return
+				}
+				
+				pyResult.execTime = pyResult.execTime*1000 // convert into ms
+				pyResult.totalPyTime = pyResult.totalPyTime*1000
+				
+				//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
+				pyResult.userVariables = JSON.parse(pyResult.userVariables)
+	
+				if(pyResult.userError != ""){
+					pyResult.userError = this.formatPythonException(pyResult.userError)
+				}
+	
+				pyResult.totalTime = Date.now()-this.startTime
+				this.onResult(pyResult)
 
-			if(pyResult['internalError'] != null && pyResult['internalError'].startsWith('json error with stdin: ')){
-				console.warn("error in python evaluator converting stdin to JSON. " +
-				"User probably just sent stdin without input() in his program.\n" + pyResult['internalError'])
-				return
+			} catch (err) {
+				if (err instanceof Error){
+					err.message = err.message+"\nresults: "+results
+				}
+				throw err
 			}
-			
-			pyResult.execTime = pyResult.execTime*1000 // convert into ms
-			pyResult.totalPyTime = pyResult.totalPyTime*1000
-			
-			//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
-			pyResult.userVariables = JSON.parse(pyResult.userVariables)
-
-            if(pyResult.userError != ""){
-                pyResult.userError = this.formatPythonException(pyResult.userError)
-			}
-
-			pyResult.totalTime = Date.now()-this.startTime
-			this.onResult(pyResult)
 		}
         else{
             this.onPrint(results)
