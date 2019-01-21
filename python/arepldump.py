@@ -30,7 +30,7 @@ def dump(variable=None, atCount=0):
 
     context[key] = count
 
-    if count == atCount:
+    if count == atCount or (type(atCount) is list and count in atCount):
         if variable is None:
             variableDict = callingFrame.f_locals
         else:

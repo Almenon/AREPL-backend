@@ -35,3 +35,15 @@ def test_dump_at():
             assert loads(output2.userVariables)['dump output'] == 3
         else:
             assert output is None
+
+def test_dump_at_list():
+    for i in range(10):
+        output = dump(i, [2,3])
+        if i is 2:
+            output = output
+            assert loads(output.userVariables)['dump output'] == 2
+        elif i is 3:
+            output = output
+            assert loads(output.userVariables)['dump output'] == 3
+        else:
+            assert output is None 
