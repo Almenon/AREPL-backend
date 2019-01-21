@@ -9,8 +9,8 @@ context = {}
 
 def dump(variable=None, atCount=0):
     """
-    dumps specified var to arepl viewer or all vars of calling func if unspecified
-    atCount: when to dump. ex: dump(,3) to dump vars at fourth iteration of loop
+    dumps specified var to arepl viewer or all vars of calling scope if unspecified
+    :param atCount: when to dump. ex: dump(,3) to dump vars at fourth iteration of loop. You can pass in a list of numbers to do multiple dumps.
     """
     startTime = time()
 
@@ -37,7 +37,7 @@ def dump(variable=None, atCount=0):
             variableDict = {"dump output": variable}
 
         variableJson = pickle_user_vars(variableDict)
-        myReturnInfo = returnInfo("", variableJson, -1, time()-startTime, None, caller, callerLine, done=False)
+        myReturnInfo = returnInfo("", variableJson, -1, time()-startTime, None, caller, callerLine, done=False, count=count)
 
         print_output(myReturnInfo)
 

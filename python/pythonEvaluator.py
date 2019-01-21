@@ -39,10 +39,19 @@ class execArgs(object):
 class returnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
-    def __init__(self, userError, userVariables, execTime, totalTime, internalError=None, caller='<module>', lineno=-1, done=True, *args, **kwargs):
+    def __init__(self, userError, userVariables, execTime, totalTime, internalError=None, caller='<module>',
+                 lineno=-1, done=True, count=-1, *args, **kwargs):
         """
         :param userVariables: JSON string
+        :param count: iteration number, used when dumping info at a specific point.
+        :type userError: str
         :type userVariables: str
+        :type execTime: int
+        :type totalTime: int
+        :type internalError: str
+        :type caller: str
+        :type lineno: int
+        :type done: bool
         """
         self.userError = userError
         self.userVariables = userVariables
@@ -52,6 +61,7 @@ class returnInfo:
         self.caller = caller
         self.lineno = lineno
         self.done = done
+        self.count = count
 
 
 class customPickler(jsonpickle.pickler.Pickler):
