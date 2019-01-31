@@ -295,18 +295,28 @@ def script_path(script_dir):
         relative imports to work on the target script.
         if script_dir is empty function will do nothing
         Slightly modified from wolf's script_path (see https://github.com/Duroktar/Wolf)
+        Exception-safe (os.error will not be raised)
     """
     if script_dir is None or script_dir == "":
         yield
     else:
-        original_cwd = os.getcwd()
-        os.chdir(script_dir)
-        path.insert(1, script_dir)
+        try:
+            original_cwd = os.getcwd()
+            os.chdir(script_dir)
+            path.insert(1, script_dir)
+        except os.error:
+            # no idea why this would happen but a user got this error once
+            # this func is not critical to arepl so we dont want error to bubble up
+            pass
+
         try:
             yield
         finally:
-            os.chdir(original_cwd)
-            path.remove(script_dir)
+            try:
+                os.chdir(original_cwd)
+                path.remove(script_dir)
+            except os.error:
+                pass
 
 
 def exec_input(codeToExec, savedLines="", filePath=""):
