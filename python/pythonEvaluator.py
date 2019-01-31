@@ -100,6 +100,10 @@ if util.find_spec('numpy') is not None:
     import jsonpickle.ext.numpy as jsonpickle_numpy
     jsonpickle_numpy.register_handlers()
 
+if util.find_spec('pandas') is not None:
+    import jsonpickle.ext.pandas as jsonpickle_pandas
+    jsonpickle_pandas.register_handlers()
+
 jsonpickle.pickler.Pickler = customPickler
 jsonpickle.set_encoder_options('json', ensure_ascii=False)
 jsonpickle.set_encoder_options('json', allow_nan=False) # nan is not deseriazable by javascript
