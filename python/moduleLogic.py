@@ -1,7 +1,7 @@
 from sys import version
 from sys import builtin_module_names
 from sys import modules
-import pkg_resources
+from pkgutil import iter_modules
 from stdlib_list import stdlib_list
 
 
@@ -12,10 +12,9 @@ def getNonUserModules():
         set -- set of module names
     """
 
-    pipModules = [d.project_name for d in pkg_resources.working_set] # pylint: disable=E1133
+    pipModules = [p.name.lower() for p in iter_modules()] # pylint: disable=E1133
 
     specialCases = [
-        'pkg_resources', # part of setuptools, but not listed ANYWHERE
         'jsonpickle', # hardcoded as part of AREPL
         'stdlib_list', # hardcoded as part of AREPL
         'arepldump' # AREPL registers it as module but not in pipModules for some reason
