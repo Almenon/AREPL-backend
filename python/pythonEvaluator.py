@@ -366,6 +366,12 @@ def exec_input(codeToExec, savedLines="", filePath=""):
             # so we clear them to reload import each time
             for userModule in userModules:
                 try:
+                    # #70: nonUserModules does not list submodules
+                    # so we have to extract base module and use that
+                    # to skip any nonUserModules
+                    baseModule = userModule.split('.')[0]
+                    if len(baseModule) > 1:
+                        if baseModule in nonUserModules: continue
                     del modules[userModule]
                 except KeyError:
                     pass # it's not worth failing AREPL over
