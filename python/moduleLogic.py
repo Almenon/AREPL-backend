@@ -16,8 +16,7 @@ def getNonUserModules():
 
     specialCases = [
         'jsonpickle', # hardcoded as part of AREPL
-        'stdlib_list', # hardcoded as part of AREPL
-        'arepldump' # AREPL registers it as module but not in pipModules for some reason
+        'stdlib_list' # hardcoded as part of AREPL
     ]
 
     moreBuiltinModules = stdlib_list(version[:3], fallback=True)
