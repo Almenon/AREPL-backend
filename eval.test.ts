@@ -11,9 +11,10 @@ import {PythonEvaluator} from './index'
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new PythonEvaluator()
     let input = {evalCode:"", savedCode: "", filePath: ""}
-    const pythonStartupTime = 1500
+    const pythonStartupTime = 2000
 
     suiteSetup(function(done){
+        this.timeout(pythonStartupTime+500)
         pyEvaluator.startPython()
         // wait for for python to start
         setTimeout(()=>done(), pythonStartupTime)
