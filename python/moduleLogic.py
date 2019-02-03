@@ -11,8 +11,8 @@ def getNonUserModules():
     Returns:
         set -- set of module names
     """
-
-    pipModules = [p.name.lower() for p in iter_modules()] # pylint: disable=E1133
+    # p[1] is name
+    pipModules = [p[1].lower() for p in iter_modules()] # pylint: disable=E1133
 
     specialCases = [
         'jsonpickle', # hardcoded as part of AREPL
