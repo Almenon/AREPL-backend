@@ -172,7 +172,7 @@ x=1
     vars = jsonpickle.decode(returnInfo.userVariables)
     assert 'x' in vars
 
-def test_ImportNotDeleted():
+def test_builtinImportNotDeleted():
     importStr = """
 import math
 from json import loads
@@ -180,6 +180,14 @@ from json import loads
     pythonEvaluator.exec_input(importStr)
     assert 'math' in modules
     assert 'json' in modules
+
+def test_pipImportNotDeleted():
+    importStr = """
+import praw
+    """
+    pythonEvaluator.exec_input(importStr)
+    assert 'praw' in modules
+    assert 'praw.models.user' in modules
 
 def test_userImportDeleted():
 

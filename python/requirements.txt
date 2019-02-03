@@ -1,1 +1,2 @@
 pytest==3.8.2
+praw==4.3.0 #not needed for code, just for a test
