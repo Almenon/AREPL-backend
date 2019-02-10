@@ -319,7 +319,7 @@ def script_path(script_dir):
             try:
                 os.chdir(original_cwd)
                 path.remove(script_dir)
-            except os.error:
+            except (os.error, ValueError):
                 pass
 
 
