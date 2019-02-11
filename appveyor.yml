@@ -7,7 +7,7 @@ environment:
   matrix:
     # we need to specify py3 because py2 is default (AREPL does not support py2)
     - PYTHON: "C:\\Python35-x64" # this version of python is pre-installed on appveyor
-      PYTHON_VERSION: "3.4.x" # currently 3.5.3
+      PYTHON_VERSION: "3.5.x" # currently 3.5.3
       PYTHON_ARCH: "64"
 
 install:
