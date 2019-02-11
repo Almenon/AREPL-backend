@@ -111,6 +111,27 @@ n = False
     assert vars['m'] != None
     assert vars['n'] == False
 
+def test_custom_handler():
+    # I have a custom handler for frame (see https://github.com/Almenon/AREPL-backend/issues/26)
+    # otherwise frame returns as simply "py/object": "__builtin__.frame"
+    frameCode = """
+import bdb
+
+f = {}
+
+class areplDebug(bdb.Bdb):
+    # override
+    def user_line(self,frame):
+        global f
+        f = frame
+
+b = areplDebug()
+b.run('x=1+5',{},{})
+    """
+    returnInfo = pythonEvaluator.exec_input(frameCode)
+    vars = jsonpickle.decode(returnInfo.userVariables)
+    assert vars['f']['f_lineno'] == 1
+
 def test_fileIO():
     fileIO = """
 import tempfile
