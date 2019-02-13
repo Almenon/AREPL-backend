@@ -318,7 +318,7 @@ class Pickler(object):
             if has_reduce and not has_reduce_ex:
                 try:
                     reduce_val = obj.__reduce__()
-                except TypeError:
+                except (TypeError, ValueError):
                     # A lot of builtin types have a reduce which
                     # just raises a TypeError
                     # we ignore those
