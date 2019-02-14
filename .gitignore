@@ -2,6 +2,7 @@
 
 node_modules
 .vscode/.ropeproject
+.code-workspace
 personal
 src/python/.idea
 *.pyc
