@@ -10,8 +10,14 @@ matrix:
         - python: 3.7
           dist: xenial
           sudo: true
-      
+
+addons:	
+  apt:	
+    packages:	
+      - freeglut-devel # needed for p5 otherwise it gets:  ImportError: Library "GLU" not found
+
 before_script:
+    # xvfb is needed for the p5 test
   - "Xvfb :99 -screen 0 1400x900x24 > /dev/null 2>&1 &"
   - sleep 3 # give xvfb some time to start
           
