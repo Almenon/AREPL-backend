@@ -14,7 +14,7 @@ matrix:
 addons:	
   apt:	
     packages:	
-      - freeglut-devel # needed for p5 otherwise it gets:  ImportError: Library "GLU" not found
+      - freeglut3-dev # needed for p5 otherwise it gets:  ImportError: Library "GLU" not found
 
 before_script:
     # xvfb is needed for the p5 test
