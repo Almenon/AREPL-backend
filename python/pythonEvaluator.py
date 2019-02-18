@@ -9,7 +9,7 @@ import ast
 from time import time
 import asyncio
 import os
-from sys import path, modules, argv
+from sys import path, modules, argv, version_info
 from contextlib import contextmanager
 from moduleLogic import getNonUserModules
 import inspect
@@ -25,15 +25,6 @@ It accepts python code through stdin, runs it, and prints out the local variable
 Along the way I check if I haved saved the locals from a previous run and use those if present
 """
 #####################################
-
-
-class execArgs(object):
-
-    # HALT! do NOT change this without changing corresponding type in the frontend!
-    def __init__(self, savedCode, evalCode, filePath='', *args, **kwargs):
-        self.savedCode = savedCode
-        self.evalCode = evalCode
-        self.filePath = filePath
 
 
 class returnInfo:
@@ -62,6 +53,20 @@ class returnInfo:
         self.lineno = lineno
         self.done = done
         self.count = count
+
+if version_info[0] < 3:
+    exMsg = "Must be using python 3. You are using " + str(version_info)
+    print(returnInfo("", "{}", None, None, exMsg))
+    raise Exception(exMsg)
+
+
+class execArgs(object):
+
+    # HALT! do NOT change this without changing corresponding type in the frontend!
+    def __init__(self, savedCode, evalCode, filePath='', *args, **kwargs):
+        self.savedCode = savedCode
+        self.evalCode = evalCode
+        self.filePath = filePath
 
 
 class customPickler(jsonpickle.pickler.Pickler):
