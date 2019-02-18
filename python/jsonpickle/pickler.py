@@ -28,7 +28,8 @@ def encode(value,
            warn=False,
            context=None,
            max_iter=None,
-           numeric_keys=False):
+           numeric_keys=False,
+           fail_safe=None):
     """Return a JSON formatted representation of value, a Python object.
 
     :param unpicklable: If set to False then the output will not contain the
@@ -50,6 +51,9 @@ def encode(value,
         (e.g. file descriptors).
     :param max_iter: If set to a non-negative integer then jsonpickle will
         consume at most `max_iter` items when pickling iterators.
+    :param fail_safe: If set to a function exceptions are ignored when pickling 
+        and if a exception happens the function is called and the return value
+        is used as the value for the object that caused the error
 
     >>> encode('my string') == '"my string"'
     True
@@ -71,7 +75,8 @@ def encode(value,
             max_depth=max_depth,
             warn=warn,
             max_iter=max_iter,
-            numeric_keys=numeric_keys)
+            numeric_keys=numeric_keys,
+            fail_safe=fail_safe)
     return backend.encode(context.flatten(value, reset=reset))
 
 
@@ -85,7 +90,8 @@ class Pickler(object):
                  keys=False,
                  warn=False,
                  max_iter=None,
-                 numeric_keys=False):
+                 numeric_keys=False,
+                 fail_safe=None):
         self.unpicklable = unpicklable
         self.make_refs = make_refs
         self.backend = backend or json
@@ -102,6 +108,8 @@ class Pickler(object):
         self._seen = []
         # maximum amount of items to take from a pickled iterator
         self._max_iter = max_iter
+        # ignore exceptions
+        self.fail_safe = fail_safe
 
     def reset(self):
         self._objs = {}
@@ -188,22 +196,30 @@ class Pickler(object):
         self._seen.append(obj)
         max_reached = self._depth == self._max_depth
 
-        in_cycle = (
-            max_reached or (
-                not self.make_refs
-                and id(obj) in self._objs
-            )) and not util.is_primitive(obj)
-        if in_cycle:
-            # break the cycle
-            flatten_func = repr
-        else:
-            flatten_func = self._get_flattener(obj)
+        try:
 
-        if flatten_func is None:
-            self._pickle_warning(obj)
-            return None
+            in_cycle = (
+                max_reached or (
+                    not self.make_refs
+                    and id(obj) in self._objs
+                )) and not util.is_primitive(obj)
+            if in_cycle:
+                # break the cycle
+                flatten_func = repr
+            else:
+                flatten_func = self._get_flattener(obj)
 
-        return flatten_func(obj)
+            if flatten_func is None:
+                self._pickle_warning(obj)
+                return None
+
+            return flatten_func(obj)
+
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as e:
+            if self.fail_safe is None: raise
+            else: return self.fail_safe(e)
 
     def _list_recurse(self, obj):
         return [self._flatten(v) for v in obj]
@@ -318,7 +334,7 @@ class Pickler(object):
             if has_reduce and not has_reduce_ex:
                 try:
                     reduce_val = obj.__reduce__()
-                except (TypeError, ValueError):
+                except TypeError:
                     # A lot of builtin types have a reduce which
                     # just raises a TypeError
                     # we ignore those

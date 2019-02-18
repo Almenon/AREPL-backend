@@ -9,6 +9,15 @@ python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFi
 
 # These tests can be run with pytest
 
+def test_jsonpickle_err_doesnt_break_arepl():
+    returnInfo = pythonEvaluator.exec_input("""
+class foo:
+    def __getstate__(self):
+        a
+f = foo()
+    """)
+    assert jsonpickle.decode(returnInfo.userVariables)['f'] == "AREPL could not pickle this object"
+
 def test_simple_code():
     returnInfo = pythonEvaluator.exec_input("x = 1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1

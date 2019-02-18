@@ -264,7 +264,10 @@ def pickle_user_vars(userVars):
 
     # json dumps cant handle any object type, so we need to use jsonpickle
     # still has limitations but can handle much more
-    return jsonpickle.encode(userVariables, max_depth=100) # any depth above 245 resuls in error and anything above 100 takes too long to process
+    return jsonpickle.encode(userVariables, 
+        max_depth=100, # any depth above 245 resuls in error and anything above 100 takes too long to process
+        fail_safe=lambda x:"AREPL could not pickle this object"
+    ) 
 
 
 def copy_saved_imports_to_exec(codeToExec, savedLines):
