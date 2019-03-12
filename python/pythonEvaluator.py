@@ -368,7 +368,6 @@ def exec_input(codeToExec, savedLines="", filePath=""):
                 pass # they have not imported it, whatever
 
             importedModules = set(modules) - origModules
-            importedModules = set([module.lower() for module in importedModules])
             userModules = importedModules - nonUserModules
 
             # user might have changed user module inbetween arepl runs
