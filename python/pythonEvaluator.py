@@ -115,13 +115,14 @@ jsonpickle.set_encoder_options('json', allow_nan=False) # nan is not deseriazabl
 for handler in handlers:
     jsonpickle.handlers.register(handler['type'], handler['handler'])
 
-cacheVar = None
+# public cache var for user to store their data between runs
+areplStore = None
 
 # copy all special vars (we want execd code to have similar locals as actual code)
 # not copying builtins cause exec adds it in
 # also when specialVars is deepCopied later on deepcopy cant handle builtins anyways
 startingLocals = {}
-specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'cacheVar']
+specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'areplStore']
 for var in specialVars:
     startingLocals[var] = locals()[var]
 
@@ -235,7 +236,7 @@ def get_imports(parsedText, text):
 
 def get_starting_locals():
     starting_locals_copy = deepcopy(startingLocals)
-    starting_locals_copy['areplStore'] = cacheVar
+    starting_locals_copy['areplStore'] = areplStore
     return starting_locals_copy
 
 def exec_saved(savedLines):
@@ -279,6 +280,11 @@ def pickle_user_vars(userVars):
     userVariables = {k:v for k,v in userVars.items() if str(type(v)) != "<class 'module'>"
                      and str(type(v)) != "<class 'function'>"
                      and k not in specialVars+['__builtins__']}
+
+    # but we do want to show areplStore if it has data
+    if userVars.get('areplStore') is not None:
+        userVariables['areplStore'] = userVars['areplStore']
+
 
     # json dumps cant handle any object type, so we need to use jsonpickle
     # still has limitations but can handle much more
@@ -349,7 +355,7 @@ def exec_input(codeToExec, savedLines="", filePath=""):
     :rtype: returnInfo
     """
     global areplInputIterator
-    global cacheVar
+    global areplStore
 
     argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
     startingLocals['__file__'] = filePath
@@ -373,7 +379,7 @@ def exec_input(codeToExec, savedLines="", filePath=""):
 
         finally:
 
-            cacheVar = evalLocals.get('areplStore', None)
+            areplStore = evalLocals.get('areplStore', None)
 
             try:
                 # areplDump library keeps state internally
