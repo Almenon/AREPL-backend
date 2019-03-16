@@ -194,7 +194,13 @@ def howdoiWrapper(strArg):
     if strArg.lower() == 'use arepl' or strArg.lower() == 'arepl':
         returnVal = 'using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki'
     else:
-        parser = howdoi.get_parser()
+        try:
+            parser = howdoi.get_parser()
+        except NameError as e:
+            # alter error to be more readable by user
+            e.args = (['howdoi is not installed'])
+            raise
+            
         args = vars(parser.parse_args(strArg.split(' ')))
         returnVal = howdoi.howdoi(args)
 
