@@ -115,11 +115,13 @@ jsonpickle.set_encoder_options('json', allow_nan=False) # nan is not deseriazabl
 for handler in handlers:
     jsonpickle.handlers.register(handler['type'], handler['handler'])
 
+cacheVar = None
+
 # copy all special vars (we want execd code to have similar locals as actual code)
 # not copying builtins cause exec adds it in
 # also when specialVars is deepCopied later on deepcopy cant handle builtins anyways
 startingLocals = {}
-specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
+specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'cacheVar']
 for var in specialVars:
     startingLocals[var] = locals()[var]
 
@@ -272,7 +274,7 @@ def get_eval_locals(savedLines):
 
 
 def pickle_user_vars(userVars):
-    if userVars.get('areplStore',None) is None: del userVars['areplStore']
+
     # filter out non-user vars, no point in showing them
     userVariables = {k:v for k,v in userVars.items() if str(type(v)) != "<class 'module'>"
                      and str(type(v)) != "<class 'function'>"
@@ -340,8 +342,6 @@ def script_path(script_dir):
                 path.remove(script_dir)
             except (os.error, ValueError):
                 pass
-
-cacheVar = None
 
 def exec_input(codeToExec, savedLines="", filePath=""):
     """
