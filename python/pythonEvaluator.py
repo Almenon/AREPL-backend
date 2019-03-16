@@ -225,9 +225,13 @@ def get_imports(parsedText, text):
     imports = '\n'.join(imports)
     return imports
 
+def get_starting_locals():
+    starting_locals_copy = deepcopy(startingLocals)
+    starting_locals_copy['areplStore'] = cacheVar
+    return starting_locals_copy
 
 def exec_saved(savedLines):
-    savedLocals = deepcopy(startingLocals)
+    savedLocals = get_starting_locals()
     try:
         exec(savedLines, savedLocals)
     except Exception:
@@ -258,10 +262,11 @@ def get_eval_locals(savedLines):
     if savedLines != "":
         return deepcopy(savedLocals)
     else:
-        return deepcopy(startingLocals)
+        return get_starting_locals()
 
 
 def pickle_user_vars(userVars):
+    if userVars.get('areplStore',None) is None: del userVars['areplStore']
     # filter out non-user vars, no point in showing them
     userVariables = {k:v for k,v in userVars.items() if str(type(v)) != "<class 'module'>"
                      and str(type(v)) != "<class 'function'>"
@@ -330,6 +335,7 @@ def script_path(script_dir):
             except (os.error, ValueError):
                 pass
 
+cacheVar = None
 
 def exec_input(codeToExec, savedLines="", filePath=""):
     """
@@ -337,6 +343,7 @@ def exec_input(codeToExec, savedLines="", filePath=""):
     :rtype: returnInfo
     """
     global areplInputIterator
+    global cacheVar
 
     argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
     startingLocals['__file__'] = filePath
@@ -359,6 +366,9 @@ def exec_input(codeToExec, savedLines="", filePath=""):
             raise UserError(errorMsg, evalLocals)
 
         finally:
+
+            cacheVar = evalLocals.get('areplStore', None)
+
             try:
                 # areplDump library keeps state internally
                 # because python caches imports the state is kept inbetween runs
