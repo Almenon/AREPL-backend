@@ -62,11 +62,12 @@ if version_info[0] < 3:
 
 class execArgs(object):
 
-    # HALT! do NOT change this without changing corresponding type in the frontend!
-    def __init__(self, savedCode, evalCode, filePath='', *args, **kwargs):
+    # HALT! do NOT change this without changing corresponding type in the frontend! <----
+    def __init__(self, savedCode, evalCode, filePath='', usePreviousVariables=True, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
+        self.usePreviousVariables = usePreviousVariables
 
 
 class customPickler(jsonpickle.pickler.Pickler):
@@ -215,6 +216,7 @@ startingLocals['help'] = helpOverload
 startingLocals['input'] = inputOverload
 startingLocals['howdoi'] = howdoiWrapper
 
+evalLocals = deepcopy(startingLocals)
 
 def get_imports(parsedText, text):
     """
@@ -349,18 +351,20 @@ def script_path(script_dir):
             except (os.error, ValueError):
                 pass
 
-def exec_input(codeToExec, savedLines="", filePath=""):
+def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
     global areplInputIterator
     global areplStore
+    global evalLocals
 
     argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
     startingLocals['__file__'] = filePath
 
-    evalLocals = get_eval_locals(savedLines)
+    if not usePreviousVariables:
+        evalLocals = get_eval_locals(savedLines)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
     codeToExec = copy_saved_imports_to_exec(codeToExec, savedLines)
@@ -441,7 +445,7 @@ if __name__ == '__main__':
         myReturnInfo = returnInfo("", "{}", None, None)
 
         try:
-            myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath)
+            myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables)
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:

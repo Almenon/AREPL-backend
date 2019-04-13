@@ -54,7 +54,7 @@ export class PythonEvaluator{
 	/**
 	 * does not do anything if program is currently evaling code
 	 */
-	execCode(code:{evalCode:string,savedCode:string,filePath:string}){
+	execCode(code:{evalCode:string, savedCode:string, filePath:string, usePreviousVariables?:boolean}){
 		if(this.evaling) return
 		this.evaling = true
 		this.startTime = Date.now()

@@ -10,7 +10,7 @@ import {PythonEvaluator} from './index'
 
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new PythonEvaluator()
-    let input = {evalCode:"", savedCode: "", filePath: ""}
+    let input = {evalCode:"", savedCode: "", filePath: "", usePreviousVariables: false}
     const pythonStartupTime = 2000
 
     suiteSetup(function(done){
@@ -67,6 +67,17 @@ suite("PythonEvaluator Tests", () => {
         }
         input.evalCode = "x=1"
         pyEvaluator.execCode(input)
+    })
+
+    test("uses previousRun variables asked", function(done){
+        pyEvaluator.onResult = (result)=>{ 
+            assert.equal(result.userVariables['y'], 1)
+            done()
+        }
+        input.evalCode = "y=x"
+        input.usePreviousVariables = true
+        pyEvaluator.execCode(input)
+        input.usePreviousVariables = false
     })
 
     test("can print stdout", function(done){
