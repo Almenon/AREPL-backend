@@ -30,8 +30,8 @@ Along the way I check if I haved saved the locals from a previous run and use th
 class returnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
-    def __init__(self, userError, userVariables, execTime, totalTime, internalError=None, caller='<module>',
-                 lineno=-1, done=True, count=-1, *args, **kwargs):
+    def __init__(self, userError: str, userVariables: dict, execTime: float, totalTime: float, internalError: str =None, caller: str ='<module>',
+                 lineno: int = -1, done: bool =True, count: int = -1, *args, **kwargs):
         """
         :param userVariables: JSON string
         :param count: iteration number, used when dumping info at a specific point.
@@ -63,7 +63,7 @@ if version_info[0] < 3:
 class execArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
-    def __init__(self, savedCode, evalCode, filePath='', usePreviousVariables=True, *args, **kwargs):
+    def __init__(self, savedCode: str, evalCode: str, filePath: str ='', usePreviousVariables: bool =True, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
@@ -188,14 +188,10 @@ def inputOverload(prompt=None):
         print("AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input())")
 
 
-def howdoiWrapper(strArg):
-    """howdoi is meant to be called from the command line - this wrapper lets it be called programatically
-    
-    Arguments:
-        strArg {str} -- search term
-    """
+def howdoiWrapper(query: str):
+    """howdoi is meant to be called from the command line - this wrapper lets it be called programatically"""
 
-    if strArg.lower() == 'use arepl' or strArg.lower() == 'arepl':
+    if query.lower() == 'use arepl' or query.lower() == 'arepl':
         returnVal = 'using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki'
     else:
         try:
@@ -205,7 +201,7 @@ def howdoiWrapper(strArg):
             e.args = (['howdoi is not installed'])
             raise
             
-        args = vars(parser.parse_args(strArg.split(' ')))
+        args = vars(parser.parse_args(query.split(' ')))
         returnVal = howdoi.howdoi(args)
 
     print(returnVal)
@@ -218,7 +214,7 @@ startingLocals['howdoi'] = howdoiWrapper
 
 evalLocals = deepcopy(startingLocals)
 
-def get_imports(parsedText, text):
+def get_imports(parsedText, text: str) -> str:
     """
     :param parsedText: the result of ast.parse(text)
     :returns: empty string if no imports, otherwise string containing all imports
@@ -241,7 +237,7 @@ def get_starting_locals():
     starting_locals_copy['areplStore'] = areplStore
     return starting_locals_copy
 
-def exec_saved(savedLines):
+def exec_saved(savedLines: str):
     savedLocals = get_starting_locals()
     try:
         exec(savedLines, savedLocals)
@@ -255,7 +251,7 @@ def exec_saved(savedLines):
     return savedLocals
 
 
-def get_eval_locals(savedLines):
+def get_eval_locals(savedLines: str):
     """
     If savedLines is changed, rexecutes saved lines and returns resulting local variables.
     If savedLines is unchanged, returns the saved locals.
@@ -276,7 +272,7 @@ def get_eval_locals(savedLines):
         return get_starting_locals()
 
 
-def pickle_user_vars(userVars):
+def pickle_user_vars(userVars: dict):
 
     # filter out non-user vars, no point in showing them
     userVariables = {k:v for k,v in userVars.items() if str(type(v)) != "<class 'module'>"
@@ -296,7 +292,7 @@ def pickle_user_vars(userVars):
     ) 
 
 
-def copy_saved_imports_to_exec(codeToExec, savedLines):
+def copy_saved_imports_to_exec(codeToExec: str, savedLines: str):
     """
     copies imports in savedLines to the top of codeToExec.
     If savedLines is empty this function does nothing.
@@ -321,7 +317,7 @@ def copy_saved_imports_to_exec(codeToExec, savedLines):
 
 
 @contextmanager
-def script_path(script_dir):
+def script_path(script_dir: str):
     """
         Context manager for adding a dir to the sys path
         and restoring it afterwards. This trick allows
@@ -351,7 +347,7 @@ def script_path(script_dir):
             except (os.error, ValueError):
                 pass
 
-def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False):
+def exec_input(codeToExec: str, savedLines: str = "", filePath: str = "", usePreviousVariables: bool = False):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
