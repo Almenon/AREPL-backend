@@ -30,19 +30,11 @@ Along the way I check if I haved saved the locals from a previous run and use th
 class returnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
-    def __init__(self, userError: str, userVariables: dict, execTime: float, totalTime: float, internalError: str =None, caller: str ='<module>',
+    def __init__(self, userError: str, userVariables: dict, execTime: float, totalTime: float, internalError: str = None, caller: str = '<module>',
                  lineno: int = -1, done: bool =True, count: int = -1, *args, **kwargs):
         """
         :param userVariables: JSON string
         :param count: iteration number, used when dumping info at a specific point.
-        :type userError: str
-        :type userVariables: str
-        :type execTime: int
-        :type totalTime: int
-        :type internalError: str
-        :type caller: str
-        :type lineno: int
-        :type done: bool
         """
         self.userError = userError
         self.userVariables = userVariables
