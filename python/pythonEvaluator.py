@@ -430,16 +430,8 @@ if __name__ == '__main__':
 
     while True:
 
-        try:
-            data = json.loads(input())
-            data = execArgs(**data)
-        except json.JSONDecodeError as e:
-            # probably just due to user passing in stdin to program without input
-            # in which case program completes and we get the stdin, which we ignore
-            # frontend relies on error message to check for this error so
-            # don't change without also changing index.ts!
-            print_output(returnInfo("", "{}", None, None, 'json error with stdin: ' + str(e), done=False))
-            continue
+        data = json.loads(input())
+        data = execArgs(**data)
 
         start = time()
         myReturnInfo = returnInfo("", "{}", None, None)

@@ -173,12 +173,6 @@ export class PythonEvaluator{
 				results = results.replace(PythonEvaluator.identifier,"")
 				pyResult = JSON.parse(results)
 				this.evaling = !pyResult['done']
-	
-				if(pyResult['internalError'] != null && pyResult['internalError'].startsWith('json error with stdin: ')){
-					console.warn("error in python evaluator converting stdin to JSON. " +
-					"User probably just sent stdin without input() in his program.\n" + pyResult['internalError'])
-					return
-				}
 				
 				pyResult.execTime = pyResult.execTime*1000 // convert into ms
 				pyResult.totalPyTime = pyResult.totalPyTime*1000
