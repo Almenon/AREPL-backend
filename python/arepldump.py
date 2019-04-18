@@ -7,7 +7,7 @@ from pythonEvaluator import pickle_user_vars, returnInfo, print_output
 context = {}
 
 
-def dump(variable=None, atCount: int = 0):
+def dump(variable=None, atCount=0):
     """
     dumps specified var to arepl viewer or all vars of calling scope if unspecified
     :param atCount: when to dump. ex: dump(,3) to dump vars at fourth iteration of loop. You can pass in a list of numbers to do multiple dumps.
