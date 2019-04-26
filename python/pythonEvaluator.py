@@ -62,6 +62,7 @@ class execArgs(object):
         self.filePath = filePath
         self.usePreviousVariables = usePreviousVariables
         self.showGlobalVars = showGlobalVars
+        # HALT! do NOT change this without changing corresponding type in the frontend! <----
 
 
 class customPickler(jsonpickle.pickler.Pickler):
