@@ -253,7 +253,7 @@ export class PythonEvaluator{
 	}
 
 	/**
-	 * delays execution of function by ms millaseconds, resetting clock every time it is called
+	 * delays execution of function by ms milliseconds, resetting clock every time it is called
 	 * Useful for real-time execution so execCode doesn't get called too often
 	 * thanks to https://stackoverflow.com/a/1909508/6629672
 	 */
