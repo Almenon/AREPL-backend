@@ -35,6 +35,7 @@ see <https://github.com/Almenon/AREPL-vscode> for example useage.
 -   [startPython](#startpython)
 -   [onResult](#onresult)
 -   [onPrint](#onprint)
+-   [onStderr](#onstderr)
 -   [handleResult](#handleresult)
 -   [checkSyntax](#checksyntax)
 -   [checkSyntaxFile](#checksyntaxfile)
@@ -46,7 +47,7 @@ starts pythonEvaluator.py
 
 **Parameters**
 
--   `pythonPath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** the path to run python. By default evaluator uses 'python' if on windows or else 'python3'. (optional, default `null`)
+-   `pythonPath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** the path to run python. If null python-shell will determine this for you. (optional, default `null`)
 -   `pythonOptions` **\[[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)]** see <https://docs.python.org/3/using/cmdline.html#miscellaneous-options>. (optional, default `['-u']`)
 
 ### evaling
@@ -59,7 +60,7 @@ whether python backend is on/off
 
 ### debounce
 
-delays execution of function by 300ms, resetting clock every time it is called
+delays execution of function by ms milliseconds, resetting clock every time it is called
 Useful for real-time execution so execCode doesn't get called too often
 thanks to <https://stackoverflow.com/a/1909508/6629672>
 
@@ -69,7 +70,7 @@ does not do anything if program is currently evaling code
 
 **Parameters**
 
--   `code` **{evalCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}** 
+-   `code`  
 
 ### sendStdin
 
@@ -102,12 +103,21 @@ is called when program fails or completes
 
 **Parameters**
 
--   `foo` **{ERROR: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), userVariables: [Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object), execTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), totalPyTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), totalTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}** 
+-   `foo`  
 
 ### onPrint
 
 Overwrite this with your own handler.
 Is called when program prints
+
+**Parameters**
+
+-   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+### onStderr
+
+Overwrite this with your own handler.
+Is called when program logs stderr
 
 **Parameters**
 
