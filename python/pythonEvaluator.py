@@ -56,11 +56,12 @@ if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 5):
 class execArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
-    def __init__(self, savedCode, evalCode, filePath='', usePreviousVariables=True, *args, **kwargs):
+    def __init__(self, savedCode, evalCode, filePath='', usePreviousVariables=False, showGlobalVars=True, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
         self.usePreviousVariables = usePreviousVariables
+        self.showGlobalVars = showGlobalVars
 
 
 class customPickler(jsonpickle.pickler.Pickler):
@@ -344,7 +345,9 @@ def script_path(script_dir):
             except (os.error, ValueError):
                 pass
 
-def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False):
+noGlobalVarsMsg = {'zz status': 'AREPL is configured to not show global vars'}
+
+def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False, showGlobalVars=True):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
@@ -372,7 +375,10 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             execTime = time() - start
         except BaseException:
             errorMsg = traceback.format_exc()
-            raise UserError(errorMsg, evalLocals)
+            if not showGlobalVars:
+                raise UserError(errorMsg, noGlobalVarsMsg)
+            else:
+                raise UserError(errorMsg, evalLocals)
 
         finally:
 
@@ -406,7 +412,10 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             # clear mock stdin for next run
             areplInputIterator = None
 
-    userVariables = pickle_user_vars(evalLocals)
+    if showGlobalVars:
+        userVariables = pickle_user_vars(evalLocals)
+    else:
+        userVariables = pickle_user_vars(noGlobalVarsMsg)
 
     return returnInfo("", userVariables, execTime, None)
 
@@ -430,7 +439,7 @@ if __name__ == '__main__':
         myReturnInfo = returnInfo("", "{}", None, None)
 
         try:
-            myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables)
+            myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables, data.showGlobalVars)
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:

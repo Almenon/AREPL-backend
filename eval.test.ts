@@ -10,7 +10,7 @@ import {PythonEvaluator} from './index'
 
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new PythonEvaluator()
-    let input = {evalCode:"", savedCode: "", filePath: "", usePreviousVariables: false}
+    let input = {evalCode:"", savedCode: "", filePath: "", usePreviousVariables: false, showGlobalVars: true}
     const pythonStartupTime = 2000
 
     suiteSetup(function(done){

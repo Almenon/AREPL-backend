@@ -22,6 +22,10 @@ def test_simple_code():
     returnInfo = pythonEvaluator.exec_input("x = 1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
+def test_dont_show_global_vars():
+    returnInfo = pythonEvaluator.exec_input("x = 1", showGlobalVars=False)
+    assert jsonpickle.decode(returnInfo.userVariables)['zz status'] == 'AREPL is configured to not show global vars'
+
 def test_argv0ShouldBeFilePath():
     code = "from sys import argv;args=argv"
     returnInfo = pythonEvaluator.exec_input(code)
