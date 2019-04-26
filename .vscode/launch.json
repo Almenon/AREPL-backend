@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "debugStdLib": true
+            "justMyCode": false
         },
         {
             "name": "Python: Remote Attach",
