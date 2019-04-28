@@ -46,9 +46,9 @@ class returnInfo:
         self.done = done
         self.count = count
 
-if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 5):
+if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 4):
     # need at least 3.5 for typing
-    exMsg = "Must be using python 3.5 or later. You are using " + str(version_info)
+    exMsg = "Must be using python 3.4 or later. You are using " + str(version_info)
     print(returnInfo("", "{}", None, None, exMsg))
     raise Exception(exMsg)
 
