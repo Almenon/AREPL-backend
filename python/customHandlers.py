@@ -1,5 +1,6 @@
 import re
 import datetime
+import decimal
 from jsonpickle.handlers import BaseHandler
 from types import FrameType
 from types import CodeType
@@ -12,6 +13,10 @@ class DatetimeHandler(BaseHandler):
         x = {"date/time": str(obj)}
         return x
 
+class DecimalHandler(BaseHandler):
+    def flatten(self, obj, data):
+        x = float(obj)
+        return x
 
 class regexMatchHandler(BaseHandler):
     ### better represention of datetime, see https://github.com/jsonpickle/jsonpickle/issues/109 ###
@@ -71,4 +76,5 @@ handlers = [
     {'type': type(re.search('', '')), 'handler': regexMatchHandler},
     {'type': FrameType, 'handler': frameHandler},
     {'type': CodeType, 'handler': codeHandler},
+    {'type': decimal.Decimal, 'handler': DecimalHandler}
 ]
