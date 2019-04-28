@@ -37,7 +37,7 @@ def dump(variable=None, atCount=0):
             variableDict = {"dump output": variable}
 
         variableJson = pickle_user_vars(variableDict)
-        myReturnInfo = returnInfo("", variableJson, -1, time()-startTime, None, caller, callerLine, done=False, count=count)
+        myReturnInfo = returnInfo("", variableJson, None, time()-startTime, None, caller, callerLine, done=False, count=count)
 
         print_output(myReturnInfo)
 
