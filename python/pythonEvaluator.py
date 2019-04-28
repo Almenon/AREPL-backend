@@ -92,9 +92,10 @@ class UserError(Exception):
     :raises: ValueError (varsSoFar gets pickled into JSON, which may result in any number of errors depending on what types are inside)
     """
 
-    def __init__(self, message, varsSoFar={}):
+    def __init__(self, message, varsSoFar={}, execTime=0):
         super().__init__(message)
         self.varsSoFar = pickle_user_vars(varsSoFar)
+        self.execTime = execTime
 
 
 if util.find_spec('numpy') is not None:
@@ -375,11 +376,12 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             exec(codeToExec, evalLocals)
             execTime = time() - start
         except BaseException:
+            execTime = time() - start
             errorMsg = traceback.format_exc()
             if not showGlobalVars:
-                raise UserError(errorMsg, noGlobalVarsMsg)
+                raise UserError(errorMsg, noGlobalVarsMsg, execTime)
             else:
-                raise UserError(errorMsg, evalLocals)
+                raise UserError(errorMsg, evalLocals, execTime)
 
         finally:
 
@@ -446,6 +448,7 @@ if __name__ == '__main__':
         except UserError as e:
             myReturnInfo.userError = str(e)
             myReturnInfo.userVariables = e.varsSoFar
+            myReturnInfo.execTime = e.execTime
         except Exception:
             errorMsg = traceback.format_exc()
             myReturnInfo.internalError = "Sorry, AREPL has ran into an error\n\n" + errorMsg
