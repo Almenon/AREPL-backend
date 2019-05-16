@@ -125,3 +125,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Vim
+*.swp
+

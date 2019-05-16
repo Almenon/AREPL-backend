@@ -1,9 +1,11 @@
-import pytest
-import pythonEvaluator
-import jsonpickle
 from os import getcwd, chdir, path, pardir
 from sys import version_info,modules
 from shutil import rmtree
+
+import pytest
+import jsonpickle
+
+from . import pythonEvaluator
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 
