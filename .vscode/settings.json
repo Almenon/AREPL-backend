@@ -17,5 +17,6 @@
 		"out": true, // set this to false to include "out" folder in search results
         "**/*.js": {"when": "$(basename).ts"},
         "**/*.js.map": {"when": "$(basename).ts"}
-	},
+    },
+    "python.pythonPath": "python",
 }
