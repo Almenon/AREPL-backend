@@ -15,7 +15,7 @@ suite("PythonEvaluator Tests", () => {
 
     suiteSetup(function(done){
         this.timeout(pythonStartupTime+500)
-        pyEvaluator.startPython()
+        pyEvaluator.start()
         // wait for for python to start
         setTimeout(()=>done(), pythonStartupTime)
     })

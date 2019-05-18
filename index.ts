@@ -82,7 +82,7 @@ export class PythonEvaluator{
 		this.pyshell.childProcess.on('exit',()=>{
 			this.restarting = true
 			this.evaling = false
-			this.startPython()
+			this.start()
 			callback()
 		})
 
@@ -114,7 +114,7 @@ export class PythonEvaluator{
 	/**
 	 * starts pythonEvaluator.py. Will NOT WORK with python 2
 	 */
-	startPython(){
+	start(){
 		console.log("Starting Python...")
 		this.pyshell = new PythonShell('pythonEvaluator.py', {
 			scriptPath: this.pythonEvalFolderPath,
