@@ -42,7 +42,7 @@
     "semantic-release": "^15.13.8",
     "travis-deploy-once": "^5.0.9",
     "ts-node": "^7.0.1",
-    "typescript": "^3.0.3"
+    "typescript": "^3.4.5"
   },
   "dependencies": {
     "python-shell": "^1.0.7"
