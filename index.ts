@@ -95,15 +95,16 @@ export class PythonEvaluator{
 	 */
 	stop(){
 		// pyshell has 50 ms to die gracefully
-		this.running = !this.pyshell.childProcess.kill()
+		this.pyshell.childProcess.kill()
+		this.running = !this.pyshell.childProcess.killed
 		if(this.running) console.info("pyshell refused to die")
 		else this.evaling = false
 
 		setTimeout(()=>{
 			if(this.running && !this.restarting){
 				// murder the process with extreme prejudice
-				this.running = !this.pyshell.childProcess.kill('SIGKILL')
-				if(this.running){
+				this.pyshell.childProcess.kill('SIGKILL')
+				if(this.pyshell.childProcess.killed){
 					console.error("the python process simply cannot be killed!")
 				}
 				else this.evaling = false
