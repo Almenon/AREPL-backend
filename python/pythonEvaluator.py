@@ -233,7 +233,7 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
                 # areplDump library keeps state internally
                 # because python caches imports the state is kept inbetween runs
                 # we do not want that, areplDump should reset each run
-                del modules['arepldump']
+                del modules['areplDump']
             except KeyError:
                 pass # they have not imported it, whatever
 

@@ -46,7 +46,7 @@ suite("PythonEvaluator Tests", () => {
             gotDump = true
             done()
         }
-        input.evalCode = "from arepldump import dump;dump(5)"
+        input.evalCode = "from areplDump import dump;dump(5)"
         pyEvaluator.execCode(input)
     })
 
