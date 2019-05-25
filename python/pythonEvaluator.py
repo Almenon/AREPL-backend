@@ -10,18 +10,18 @@ from contextlib import contextmanager
 from moduleLogic import getNonUserModules
 import inspect
 
-from utils import get_starting_locals
-from utils import exec_saved
-from utils import get_eval_locals
-from utils import get_imports
-from utils import copy_saved_imports_to_exec
-from utils import startingLocals
-from utils import areplStore
-from utils import UserError
+from saved import get_starting_locals
+from saved import exec_saved
+from saved import get_eval_locals
+from saved import get_imports
+from saved import copy_saved_imports_to_exec
+from saved import startingLocals
+from saved import areplStore
 from pickler import specialVars, pickle_user_vars
+from userError import UserError
 
 if util.find_spec('howdoi') is not None:
-    from howdoi import howdoi
+    from howdoi import howdoi # pylint: disable=import-error
 
 #####################################
 """
