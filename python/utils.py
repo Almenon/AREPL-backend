@@ -16,6 +16,9 @@ areplStore = None
 for var in specialVars:
     startingLocals[var] = locals()[var]
 
+# users code should execute under main scope
+startingLocals['__name__'] = '__main__'
+
 
 class UserError(Exception):
     """
