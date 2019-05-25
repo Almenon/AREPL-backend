@@ -1,11 +1,4 @@
 {
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "./python",
-        "-p",
-        "*test.py"
-    ],
     "python.testing.pyTestEnabled": true,
     "files.exclude": {
         "**/.git": true,
@@ -17,5 +10,10 @@
 		"out": true, // set this to false to include "out" folder in search results
         "**/*.js": {"when": "$(basename).ts"},
         "**/*.js.map": {"when": "$(basename).ts"}
-	},
+    },
+    "python.testing.pyTestArgs": [
+        "python"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
 }
