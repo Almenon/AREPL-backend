@@ -4,6 +4,12 @@ import traceback
 from pickler import pickle_user_vars, specialVars
 from userError import UserError
 
+#####################################
+"""
+This file contains code for getting the saved or starting local variables for each run
+"""
+#####################################
+
 savedLocals = {}
 oldSavedLines = []
 startingLocals = {}
