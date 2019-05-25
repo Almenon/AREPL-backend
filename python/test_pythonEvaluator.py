@@ -36,13 +36,16 @@ def test_argv0ShouldBeFilePath():
     returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
     assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == 'test path'
 
-def test_fileDunderShouldHaveRightPath():
-    code = "fileDunder=__file__"
+def test_startingDundersShouldBeCorrect():
+    code = "file_dunder=__file__"
     returnInfo = pythonEvaluator.exec_input(code)
-    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == ''
+    assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == ''
 
     returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
-    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == 'test path'
+    assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == 'test path'
+
+    returnInfo = pythonEvaluator.exec_input("name_dunder=__name__")
+    assert jsonpickle.decode(returnInfo.userVariables)['name_dunder'] == '__main__'
 
 def test_relative_import():
     filePath = path.join(python_ignore_path, "foo2.py")
