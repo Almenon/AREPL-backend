@@ -1,10 +1,7 @@
 from copy import deepcopy
-from customHandlers import handlers
 from importlib import util #https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 import json
-import jsonpickle
 import traceback
-from math import isnan
 from time import time
 import asyncio
 import os
@@ -20,6 +17,8 @@ from utils import get_imports
 from utils import copy_saved_imports_to_exec
 from utils import startingLocals
 from utils import areplStore
+from utils import UserError
+from pickler import specialVars, pickle_user_vars
 
 if util.find_spec('howdoi') is not None:
     from howdoi import howdoi
@@ -69,62 +68,6 @@ class execArgs(object):
         self.usePreviousVariables = usePreviousVariables
         self.showGlobalVars = showGlobalVars
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
-
-
-class customPickler(jsonpickle.pickler.Pickler):
-    """
-    encodes float values like inf / nan as strings to follow JSON spec while keeping meaning
-    Im doing this in custom class because handlers do not fire for floats
-    """
-
-    inf = float('inf')
-    negativeInf = float('-inf')
-
-    def _get_flattener(self, obj):
-        if type(obj) == type(float()):
-            if obj == self.inf:
-                return lambda obj: 'Infinity'
-            if obj == self.negativeInf:
-                return lambda obj: '-Infinity'
-            if isnan(obj):
-                return lambda obj: 'NaN'
-        return super(customPickler, self)._get_flattener(obj)
-
-
-class UserError(Exception):
-    """
-    user errors should be caught and re-thrown with this
-    Be warned that this exception can throw an exception.  Yes, you read that right.  I apolagize in advance.
-    :raises: ValueError (varsSoFar gets pickled into JSON, which may result in any number of errors depending on what types are inside)
-    """
-
-    def __init__(self, message, varsSoFar={}, execTime=0):
-        super().__init__(message)
-        self.varsSoFar = pickle_user_vars(varsSoFar)
-        self.execTime = execTime
-
-
-if util.find_spec('numpy') is not None:
-    import jsonpickle.ext.numpy as jsonpickle_numpy
-    jsonpickle_numpy.register_handlers()
-
-if util.find_spec('pandas') is not None:
-    import jsonpickle.ext.pandas as jsonpickle_pandas
-    jsonpickle_pandas.register_handlers()
-
-jsonpickle.pickler.Pickler = customPickler
-jsonpickle.set_encoder_options('json', ensure_ascii=False)
-jsonpickle.set_encoder_options('json', allow_nan=False) # nan is not deseriazable by javascript
-for handler in handlers:
-    jsonpickle.handlers.register(handler['type'], handler['handler'])
-
-
-# copy all special vars (we want execd code to have similar locals as actual code)
-# not copying builtins cause exec adds it in
-# also when specialVars is deepCopied later on deepcopy cant handle builtins anyways
-specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'areplStore']
-for var in specialVars:
-    startingLocals[var] = locals()[var]
 
 nonUserModules = getNonUserModules()
 origModules = frozenset(modules)
@@ -214,24 +157,7 @@ startingLocals['howdoi'] = howdoiWrapper
 
 evalLocals = deepcopy(startingLocals)
 
-def pickle_user_vars(userVars):
 
-    # filter out non-user vars, no point in showing them
-    userVariables = {k:v for k,v in userVars.items() if str(type(v)) != "<class 'module'>"
-                     and str(type(v)) != "<class 'function'>"
-                     and k not in specialVars+['__builtins__']}
-
-    # but we do want to show areplStore if it has data
-    if userVars.get('areplStore') is not None:
-        userVariables['areplStore'] = userVars['areplStore']
-
-
-    # json dumps cant handle any object type, so we need to use jsonpickle
-    # still has limitations but can handle much more
-    return jsonpickle.encode(userVariables, 
-        max_depth=100, # any depth above 245 resuls in error and anything above 100 takes too long to process
-        fail_safe=lambda x:"AREPL could not pickle this object"
-    ) 
 
 
 @contextmanager

@@ -1,6 +1,7 @@
 import ast
 from copy import deepcopy
 import traceback
+from pickler import pickle_user_vars, specialVars
 
 savedLocals = {}
 oldSavedLines = []
@@ -8,6 +9,27 @@ startingLocals = {}
 
 # public cache var for user to store their data between runs
 areplStore = None
+
+# copy all special vars (we want execd code to have similar locals as actual code)
+# not copying builtins cause exec adds it in
+# also when specialVars is deepCopied later on deepcopy cant handle builtins anyways
+for var in specialVars:
+    startingLocals[var] = locals()[var]
+
+
+class UserError(Exception):
+    """
+    user errors should be caught and re-thrown with this
+    Be warned that this exception can throw an exception.  Yes, you read that right.  I apolagize in advance.
+    :raises: ValueError (varsSoFar gets pickled into JSON, which may result in any number of errors depending on what types are inside)
+    """
+
+    def __init__(self, message, varsSoFar={}, execTime=0):
+        super().__init__(message)
+        self.varsSoFar = pickle_user_vars(varsSoFar)
+        self.execTime = execTime
+
+
 
 def get_starting_locals():
     starting_locals_copy = deepcopy(startingLocals)
