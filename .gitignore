@@ -18,6 +18,7 @@ pyShellType.js.map
 *.test.js.map
 *.d.ts
 .pytest_cache
+.vscode/settings.json
 
 
 ##################################################

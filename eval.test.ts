@@ -11,11 +11,13 @@ import {PythonEvaluator} from './index'
 suite("PythonEvaluator Tests", () => {
     let pyEvaluator = new PythonEvaluator()
     let input = {evalCode:"", savedCode: "", filePath: "", usePreviousVariables: false, showGlobalVars: true}
-    const pythonStartupTime = 2000
+    const pythonStartupTime = 3500
+    // python 3.7 has much faster startup time
+    // when we drop support for 3.6 we can decrease this
 
     suiteSetup(function(done){
         this.timeout(pythonStartupTime+500)
-        pyEvaluator.startPython()
+        pyEvaluator.start()
         // wait for for python to start
         setTimeout(()=>done(), pythonStartupTime)
     })
@@ -32,6 +34,17 @@ suite("PythonEvaluator Tests", () => {
         input.evalCode = "x"
         pyEvaluator.execCode(input)
     })
+
+    // todo: FIX THIS!
+    // test("no encoding errors with utf16", function(done){
+    //     pyEvaluator.onResult = (result)=>{
+    //         assert.equal(result.userError, '')
+    //         assert.equal(result.internalError, null)
+    //         done()
+    //     }
+    //     input.evalCode = "#㍦"
+    //     pyEvaluator.execCode(input)
+    // })
 
     test("dump returns result", function(done){
         let gotDump = false

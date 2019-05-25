@@ -15,18 +15,17 @@ def test_simple_code():
     returnInfo = pythonEvaluator.exec_input("x = 1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
+def test_has_error():
+    with pytest.raises(pythonEvaluator.UserError):
+        pythonEvaluator.exec_input("x")
+
+def test_dict_unpack_error():
+    with pytest.raises(pythonEvaluator.UserError):
+        pythonEvaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
+
 def test_dont_show_global_vars():
     returnInfo = pythonEvaluator.exec_input("x = 1", showGlobalVars=False)
     assert jsonpickle.decode(returnInfo.userVariables)['zz status'] == 'AREPL is configured to not show global vars'
-
-def test_jsonpickle_err_doesnt_break_arepl():
-    returnInfo = pythonEvaluator.exec_input("""
-class foo:
-    def __getstate__(self):
-        a
-f = foo()
-    """)
-    assert jsonpickle.decode(returnInfo.userVariables)['f'] == "AREPL could not pickle this object"
 
 def test_argv0ShouldBeFilePath():
     code = "from sys import argv;args=argv"
@@ -52,6 +51,15 @@ def test_relative_import():
     with open(filePath) as f:
         returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath)
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
+
+def test_jsonpickle_err_doesnt_break_arepl():
+    returnInfo = pythonEvaluator.exec_input("""
+class foo:
+    def __getstate__(self):
+        a
+f = foo()
+    """)
+    assert jsonpickle.decode(returnInfo.userVariables)['f'] == "AREPL could not pickle this object"
 
 def test_dump():
     returnInfo = pythonEvaluator.exec_input("from areplDump import dump;dump('dump worked');x=1")
@@ -93,10 +101,6 @@ def test_save():
 def test_save_import(): # imports in saved section should be able to be referenced in exec section
     returnInfo = pythonEvaluator.exec_input("z=math.sin(0)","import math#$save")
     assert jsonpickle.decode(returnInfo.userVariables)['z'] == 0
-
-def test_has_error():
-    with pytest.raises(pythonEvaluator.UserError):
-        pythonEvaluator.exec_input("x")
 
 def test_various_types():
     various_types = """
