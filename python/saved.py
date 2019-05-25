@@ -7,6 +7,8 @@ from userError import UserError
 #####################################
 """
 This file contains code for getting the saved or starting local variables for each run
+Idea is user can optionally have a block of "saved" code that will retain vars each run
+In practice not sure if this is actually used and its quite buggy :(
 """
 #####################################
 
