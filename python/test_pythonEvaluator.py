@@ -14,6 +14,10 @@ def test_simple_code():
     returnInfo = pythonEvaluator.exec_input("x = 1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
+def test_dict_unpack_error():
+    with pytest.raises(pythonEvaluator.UserError):
+        pythonEvaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
+
 def test_dont_show_global_vars():
     returnInfo = pythonEvaluator.exec_input("x = 1", showGlobalVars=False)
     assert jsonpickle.decode(returnInfo.userVariables)['zz status'] == 'AREPL is configured to not show global vars'
