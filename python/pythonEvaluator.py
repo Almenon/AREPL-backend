@@ -126,8 +126,6 @@ specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '
 for var in specialVars:
     startingLocals[var] = locals()[var]
 
-savedLocals = {}
-
 nonUserModules = getNonUserModules()
 origModules = frozenset(modules)
 

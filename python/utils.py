@@ -1,6 +1,7 @@
 import ast
 from copy import deepcopy
 
+savedLocals = {}
 oldSavedLines = []
 startingLocals = {}
 
