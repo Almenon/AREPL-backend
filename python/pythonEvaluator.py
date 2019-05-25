@@ -13,7 +13,6 @@ import inspect
 from saved import get_starting_locals
 from saved import exec_saved
 from saved import get_eval_locals
-from saved import get_imports
 from saved import copy_saved_imports_to_exec
 from saved import startingLocals
 from saved import areplStore
