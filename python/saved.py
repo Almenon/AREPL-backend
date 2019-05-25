@@ -2,7 +2,7 @@ import ast
 from copy import deepcopy
 import traceback
 from pickler import pickle_user_vars, specialVars
-from userError import UserError
+from user_error import UserError
 
 #####################################
 """

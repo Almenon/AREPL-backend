@@ -16,7 +16,7 @@ from saved import copy_saved_imports_to_exec
 from saved import startingLocals
 from saved import areplStore
 from pickler import specialVars, pickle_user_vars
-from userError import UserError
+from user_error import UserError
 
 if util.find_spec('howdoi') is not None:
     from howdoi import howdoi # pylint: disable=import-error
