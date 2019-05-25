@@ -1,7 +1,7 @@
 import pytest
 from json import loads
 
-from .arepldump import dump
+from arepldump import dump
 
 # this test has to be in main scope
 # so we cant run it inside a function

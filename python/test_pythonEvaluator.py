@@ -5,7 +5,7 @@ from shutil import rmtree
 import pytest
 import jsonpickle
 
-from . import pythonEvaluator
+import pythonEvaluator
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 
