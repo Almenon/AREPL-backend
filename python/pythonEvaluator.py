@@ -1,11 +1,7 @@
 from copy import deepcopy
-from customHandlers import handlers
 from importlib import util #https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 import json
-import jsonpickle
 import traceback
-from math import isnan
-import ast
 from time import time
 import asyncio
 import os
@@ -14,9 +10,16 @@ from contextlib import contextmanager
 from moduleLogic import getNonUserModules
 import inspect
 
+from saved import get_starting_locals
+from saved import get_eval_locals
+from saved import copy_saved_imports_to_exec
+from saved import startingLocals
+from saved import areplStore
+from pickler import specialVars, pickle_user_vars
+from userError import UserError
 
 if util.find_spec('howdoi') is not None:
-    from howdoi import howdoi
+    from howdoi import howdoi # pylint: disable=import-error
 
 #####################################
 """
@@ -63,68 +66,6 @@ class execArgs(object):
         self.usePreviousVariables = usePreviousVariables
         self.showGlobalVars = showGlobalVars
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
-
-
-class customPickler(jsonpickle.pickler.Pickler):
-    """
-    encodes float values like inf / nan as strings to follow JSON spec while keeping meaning
-    Im doing this in custom class because handlers do not fire for floats
-    """
-
-    inf = float('inf')
-    negativeInf = float('-inf')
-
-    def _get_flattener(self, obj):
-        if type(obj) == type(float()):
-            if obj == self.inf:
-                return lambda obj: 'Infinity'
-            if obj == self.negativeInf:
-                return lambda obj: '-Infinity'
-            if isnan(obj):
-                return lambda obj: 'NaN'
-        return super(customPickler, self)._get_flattener(obj)
-
-
-class UserError(Exception):
-    """
-    user errors should be caught and re-thrown with this
-    Be warned that this exception can throw an exception.  Yes, you read that right.  I apolagize in advance.
-    :raises: ValueError (varsSoFar gets pickled into JSON, which may result in any number of errors depending on what types are inside)
-    """
-
-    def __init__(self, message, varsSoFar={}, execTime=0):
-        super().__init__(message)
-        self.varsSoFar = pickle_user_vars(varsSoFar)
-        self.execTime = execTime
-
-
-if util.find_spec('numpy') is not None:
-    import jsonpickle.ext.numpy as jsonpickle_numpy
-    jsonpickle_numpy.register_handlers()
-
-if util.find_spec('pandas') is not None:
-    import jsonpickle.ext.pandas as jsonpickle_pandas
-    jsonpickle_pandas.register_handlers()
-
-jsonpickle.pickler.Pickler = customPickler
-jsonpickle.set_encoder_options('json', ensure_ascii=False)
-jsonpickle.set_encoder_options('json', allow_nan=False) # nan is not deseriazable by javascript
-for handler in handlers:
-    jsonpickle.handlers.register(handler['type'], handler['handler'])
-
-# public cache var for user to store their data between runs
-areplStore = None
-
-# copy all special vars (we want execd code to have similar locals as actual code)
-# not copying builtins cause exec adds it in
-# also when specialVars is deepCopied later on deepcopy cant handle builtins anyways
-startingLocals = {}
-specialVars = ['__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'areplStore']
-for var in specialVars:
-    startingLocals[var] = locals()[var]
-
-oldSavedLines = []
-savedLocals = {}
 
 nonUserModules = getNonUserModules()
 origModules = frozenset(modules)
@@ -214,106 +155,7 @@ startingLocals['howdoi'] = howdoiWrapper
 
 evalLocals = deepcopy(startingLocals)
 
-def get_imports(parsedText, text):
-    """
-    :param parsedText: the result of ast.parse(text)
-    :returns: empty string if no imports, otherwise string containing all imports
-    """
 
-    child_nodes = [l for l in ast.iter_child_nodes(parsedText)]
-
-    imports = []
-    savedCode = text.split('\n')
-    for node in child_nodes:
-        if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
-            importLine = savedCode[node.lineno - 1]
-            imports.append(importLine)
-
-    imports = '\n'.join(imports)
-    return imports
-
-def get_starting_locals():
-    starting_locals_copy = deepcopy(startingLocals)
-    starting_locals_copy['areplStore'] = areplStore
-    return starting_locals_copy
-
-def exec_saved(savedLines):
-    savedLocals = get_starting_locals()
-    try:
-        exec(savedLines, savedLocals)
-    except Exception:
-        errorMsg = traceback.format_exc()
-        raise UserError(errorMsg, savedLocals)
-
-    # deepcopy cant handle imported modules, so remove them
-    savedLocals = {k:v for k,v in savedLocals.items() if str(type(v)) != "<class 'module'>"}
-
-    return savedLocals
-
-
-def get_eval_locals(savedLines):
-    """
-    If savedLines is changed, rexecutes saved lines and returns resulting local variables.
-    If savedLines is unchanged, returns the saved locals.
-    If savedLines is empty, simply returns the original startingLocals.
-    """
-    global oldSavedLines
-    global savedLocals
-
-    # "saved" code we only ever run once and save locals, vs. codeToExec which we exec as the user types
-    # although if saved code has changed we need to re-run it
-    if savedLines != oldSavedLines:
-        savedLocals = exec_saved(savedLines)
-        oldSavedLines = savedLines
-
-    if savedLines != "":
-        return deepcopy(savedLocals)
-    else:
-        return get_starting_locals()
-
-
-def pickle_user_vars(userVars):
-
-    # filter out non-user vars, no point in showing them
-    userVariables = {k:v for k,v in userVars.items() if str(type(v)) != "<class 'module'>"
-                     and str(type(v)) != "<class 'function'>"
-                     and k not in specialVars+['__builtins__']}
-
-    # but we do want to show areplStore if it has data
-    if userVars.get('areplStore') is not None:
-        userVariables['areplStore'] = userVars['areplStore']
-
-
-    # json dumps cant handle any object type, so we need to use jsonpickle
-    # still has limitations but can handle much more
-    return jsonpickle.encode(userVariables, 
-        max_depth=100, # any depth above 245 resuls in error and anything above 100 takes too long to process
-        fail_safe=lambda x:"AREPL could not pickle this object"
-    ) 
-
-
-def copy_saved_imports_to_exec(codeToExec, savedLines):
-    """
-    copies imports in savedLines to the top of codeToExec.
-    If savedLines is empty this function does nothing.
-    :raises: SyntaxError if err in savedLines
-    """
-    if savedLines.strip() != "":
-        try:
-            savedCodeAST = ast.parse(savedLines)
-        except SyntaxError:
-            errorMsg = traceback.format_exc()
-            raise UserError(errorMsg)
-
-        imports = get_imports(savedCodeAST, savedLines)
-        codeToExec = imports + '\n' + codeToExec
-
-        # to make sure line # in errors is right we need to pad codeToExec with newlines
-        numLinesToAdd = len(savedLines.split('\n')) - len(imports.split('\n'))
-        for i in range(numLinesToAdd):
-            codeToExec = '\n' + codeToExec
-
-    return codeToExec
 
 
 @contextmanager
@@ -391,7 +233,7 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
                 # areplDump library keeps state internally
                 # because python caches imports the state is kept inbetween runs
                 # we do not want that, areplDump should reset each run
-                del modules['arepldump']
+                del modules['areplDump']
             except KeyError:
                 pass # they have not imported it, whatever
 

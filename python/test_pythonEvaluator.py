@@ -1,14 +1,15 @@
-import pytest
-import pythonEvaluator
-import jsonpickle
 from os import getcwd, chdir, path, pardir
 from sys import version_info,modules
 from shutil import rmtree
 
+import pytest
+import jsonpickle
+
+import pythonEvaluator
+
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 
 # These tests can be run with pytest
-
 
 def test_simple_code():
     returnInfo = pythonEvaluator.exec_input("x = 1")
@@ -34,13 +35,16 @@ def test_argv0ShouldBeFilePath():
     returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
     assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == 'test path'
 
-def test_fileDunderShouldHaveRightPath():
-    code = "fileDunder=__file__"
+def test_startingDundersShouldBeCorrect():
+    code = "file_dunder=__file__"
     returnInfo = pythonEvaluator.exec_input(code)
-    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == ''
+    assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == ''
 
     returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
-    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == 'test path'
+    assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == 'test path'
+
+    returnInfo = pythonEvaluator.exec_input("name_dunder=__name__")
+    assert jsonpickle.decode(returnInfo.userVariables)['name_dunder'] == '__main__'
 
 def test_relative_import():
     filePath = path.join(python_ignore_path, "foo2.py")
@@ -58,18 +62,18 @@ f = foo()
     assert jsonpickle.decode(returnInfo.userVariables)['f'] == "AREPL could not pickle this object"
 
 def test_dump():
-    returnInfo = pythonEvaluator.exec_input("from arepldump import dump;dump('dump worked');x=1")
+    returnInfo = pythonEvaluator.exec_input("from areplDump import dump;dump('dump worked');x=1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
 def test_dump_when_exception():
     # this test prevents rather specific error case where i forget to uncache dump during exception handling
     # and it causes dump to not work properly second time around (see https://github.com/Almenon/AREPL-vscode/issues/91)
     try:
-        pythonEvaluator.exec_input("from arepldump import dump;dumpOut = dump('dump worked');x=1;raise Exception()")
+        pythonEvaluator.exec_input("from areplDump import dump;dumpOut = dump('dump worked');x=1;raise Exception()")
     except Exception as e:
         assert 'dumpOut' in jsonpickle.decode(e.varsSoFar)
     try:
-        pythonEvaluator.exec_input("from arepldump import dump;dumpOut = dump('dump worked');raise Exception()")
+        pythonEvaluator.exec_input("from areplDump import dump;dumpOut = dump('dump worked');raise Exception()")
     except Exception as e:
         assert 'dumpOut' in jsonpickle.decode(e.varsSoFar) and jsonpickle.decode(e.varsSoFar)['dumpOut'] is not None
 
