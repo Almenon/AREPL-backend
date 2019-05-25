@@ -54,18 +54,18 @@ def test_relative_import():
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
 
 def test_dump():
-    returnInfo = pythonEvaluator.exec_input("from arepldump import dump;dump('dump worked');x=1")
+    returnInfo = pythonEvaluator.exec_input("from areplDump import dump;dump('dump worked');x=1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
 def test_dump_when_exception():
     # this test prevents rather specific error case where i forget to uncache dump during exception handling
     # and it causes dump to not work properly second time around (see https://github.com/Almenon/AREPL-vscode/issues/91)
     try:
-        pythonEvaluator.exec_input("from arepldump import dump;dumpOut = dump('dump worked');x=1;raise Exception()")
+        pythonEvaluator.exec_input("from areplDump import dump;dumpOut = dump('dump worked');x=1;raise Exception()")
     except Exception as e:
         assert 'dumpOut' in jsonpickle.decode(e.varsSoFar)
     try:
-        pythonEvaluator.exec_input("from arepldump import dump;dumpOut = dump('dump worked');raise Exception()")
+        pythonEvaluator.exec_input("from areplDump import dump;dumpOut = dump('dump worked');raise Exception()")
     except Exception as e:
         assert 'dumpOut' in jsonpickle.decode(e.varsSoFar) and jsonpickle.decode(e.varsSoFar)['dumpOut'] is not None
 
