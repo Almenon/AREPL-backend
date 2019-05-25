@@ -14,8 +14,8 @@ matrix:
 script:
  - pip install -r python/requirements.txt
  - export PYTHONPATH=.
- - pytest python/test_pythonEvaluator.py
- - pytest python/test_areplDump.py
+ - pytest python/test_python_evaluator.py
+ - pytest python/test_arepl_dump.py
  - python -m python.stdlib_list.stdlibTest
 
 cache:

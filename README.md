@@ -43,7 +43,7 @@ see <https://github.com/Almenon/AREPL-vscode> for example useage.
 
 ### constructor
 
-starts pythonEvaluator.py
+starts python_evaluator.py
 
 **Parameters**
 
@@ -90,11 +90,11 @@ After process restarts the callback passed in is invoked
 ### stop
 
 kills python process.  force-kills if necessary after 50ms.
-you can check PythonEvaluator.running to see if process is dead yet
+you can check python_evaluator.running to see if process is dead yet
 
 ### startPython
 
-starts pythonEvaluator.py. Will NOT WORK with python 2
+starts python_evaluator.py. Will NOT WORK with python 2
 
 ### onResult
 
@@ -164,7 +164,7 @@ gets rid of unnecessary exception data, among other things
 ```javascript
 err:
 "Traceback (most recent call last):
-  File "pythonEvaluator.py", line 26, in <module>
+  File "python_evaluator.py", line 26, in <module>
 	exec(data['evalCode'], evalLocals)
   line 4, in <module>
 NameError: name 'y' is not defined"

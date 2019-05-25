@@ -7,7 +7,7 @@ import asyncio
 import os
 from sys import path, modules, argv, version_info
 from contextlib import contextmanager
-from moduleLogic import getNonUserModules
+from module_logic import getNonUserModules
 import inspect
 
 from saved import get_starting_locals
@@ -230,10 +230,10 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             areplStore = evalLocals.get('areplStore', None)
 
             try:
-                # areplDump library keeps state internally
+                # arepl_dump library keeps state internally
                 # because python caches imports the state is kept inbetween runs
-                # we do not want that, areplDump should reset each run
-                del modules['areplDump']
+                # we do not want that, arepl_dump should reset each run
+                del modules['arepl_dump']
             except KeyError:
                 pass # they have not imported it, whatever
 

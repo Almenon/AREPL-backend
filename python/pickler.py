@@ -1,7 +1,7 @@
 from importlib import util #https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 from math import isnan
 import jsonpickle
-from customHandlers import handlers
+from custom_handlers import handlers
 
 #####################################
 """

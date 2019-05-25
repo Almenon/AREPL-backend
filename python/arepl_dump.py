@@ -2,7 +2,7 @@ import jsonpickle
 import inspect
 import json
 from time import time
-from pythonEvaluator import pickle_user_vars, returnInfo, print_output
+from python_evaluator import pickle_user_vars, returnInfo, print_output
 
 context = {}
 
