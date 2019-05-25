@@ -3,6 +3,12 @@ from math import isnan
 import jsonpickle
 from customHandlers import handlers
 
+#####################################
+"""
+This file sets up jsonpickle. Jsonpickle is used in pickle_user_vars for picking user variables.
+"""
+#####################################
+
 class customPickler(jsonpickle.pickler.Pickler):
     """
     encodes float values like inf / nan as strings to follow JSON spec while keeping meaning
