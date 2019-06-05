@@ -23,6 +23,7 @@ cache:
     - ~/.npm
     
 after_success:
+  - bash <(curl -s https://codecov.io/bash)
   - npm ci
   - npm run travis-deploy-once "npm run semantic-release"
 branches:
