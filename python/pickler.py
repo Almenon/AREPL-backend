@@ -30,12 +30,20 @@ class customPickler(jsonpickle.pickler.Pickler):
 
 
 if util.find_spec('numpy') is not None:
-    import jsonpickle.ext.numpy as jsonpickle_numpy
-    jsonpickle_numpy.register_handlers()
+    try:
+        import jsonpickle.ext.numpy as jsonpickle_numpy
+        jsonpickle_numpy.register_handlers()
+    except ImportError:
+        # todo: log ImportError
+        pass
 
 if util.find_spec('pandas') is not None:
-    import jsonpickle.ext.pandas as jsonpickle_pandas
-    jsonpickle_pandas.register_handlers()
+    try:
+        import jsonpickle.ext.pandas as jsonpickle_pandas
+        jsonpickle_pandas.register_handlers()
+    except ImportError:
+        # todo: log ImportError
+        pass
 
 jsonpickle.pickler.Pickler = customPickler
 jsonpickle.set_encoder_options('json', ensure_ascii=False)
