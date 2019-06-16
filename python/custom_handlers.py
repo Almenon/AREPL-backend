@@ -4,6 +4,7 @@ import decimal
 from jsonpickle.handlers import BaseHandler
 from types import FrameType
 from types import CodeType
+from os import DirEntry
 
 NOT_SERIALIZABLE_MESSAGE = "not serializable by arepl"
 
@@ -17,6 +18,14 @@ class DecimalHandler(BaseHandler):
     def flatten(self, obj, data):
         x = float(obj)
         return x
+
+class DirEntryHandler(BaseHandler):
+    def flatten(self, obj, data):
+        return {
+            "py/object": "nt.DirEntry",
+            "name": obj.name,
+            "path": obj.path
+        }
 
 class regexMatchHandler(BaseHandler):
     ### better represention of datetime, see https://github.com/jsonpickle/jsonpickle/issues/109 ###
@@ -76,5 +85,6 @@ handlers = [
     {'type': type(re.search('', '')), 'handler': regexMatchHandler},
     {'type': FrameType, 'handler': frameHandler},
     {'type': CodeType, 'handler': codeHandler},
-    {'type': decimal.Decimal, 'handler': DecimalHandler}
+    {'type': decimal.Decimal, 'handler': DecimalHandler},
+    {'type': DirEntry, 'handler': DirEntryHandler}
 ]
