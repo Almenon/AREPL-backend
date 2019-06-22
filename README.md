@@ -32,7 +32,7 @@ see <https://github.com/Almenon/AREPL-vscode> for example useage.
 -   [sendStdin](#sendstdin)
 -   [restart](#restart)
 -   [stop](#stop)
--   [startPython](#startpython)
+-   [start](#start)
 -   [onResult](#onresult)
 -   [onPrint](#onprint)
 -   [onStderr](#onstderr)
@@ -92,7 +92,7 @@ After process restarts the callback passed in is invoked
 kills python process.  force-kills if necessary after 50ms.
 you can check PythonEvaluator.running to see if process is dead yet
 
-### startPython
+### start
 
 starts pythonEvaluator.py. Will NOT WORK with python 2
 
