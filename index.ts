@@ -145,7 +145,7 @@ export class python_evaluator{
 	onPrint(foo: string){}
 
 	/**
-	 * Overwrite this with your own handler.
+	 * Overwrite this with your own handler. 
 	 * Is called when program logs stderr
 	 * @param {string} foo
 	 */
