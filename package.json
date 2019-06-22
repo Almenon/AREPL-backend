@@ -1,6 +1,6 @@
 {
   "name": "arepl-backend",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "JS interface to python evaluator for AREPL",
   "main": "index.js",
   "scripts": {
@@ -39,7 +39,7 @@
     "@types/node": "^10.5.2",
     "mocha": "^5.2.0",
     "mocha-appveyor-reporter": "^0.4.0",
-    "semantic-release": "^15.13.8",
+    "semantic-release": "^15.13.12",
     "travis-deploy-once": "^5.0.9",
     "ts-node": "^8.1.0",
     "typescript": "^3.4.5"

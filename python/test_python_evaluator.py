@@ -1,47 +1,59 @@
-import pytest
-import pythonEvaluator
-import jsonpickle
 from os import getcwd, chdir, path, pardir
 from sys import version_info,modules
 from shutil import rmtree
+
+import pytest
+import jsonpickle
+
+import python_evaluator
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 
 # These tests can be run with pytest
 
-
 def test_simple_code():
-    returnInfo = pythonEvaluator.exec_input("x = 1")
+    returnInfo = python_evaluator.exec_input("x = 1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
+def test_has_error():
+    with pytest.raises(python_evaluator.UserError):
+        python_evaluator.exec_input("x")
+
+def test_dict_unpack_error():
+    with pytest.raises(python_evaluator.UserError):
+        python_evaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
+
 def test_dont_show_global_vars():
-    returnInfo = pythonEvaluator.exec_input("x = 1", showGlobalVars=False)
+    returnInfo = python_evaluator.exec_input("x = 1", showGlobalVars=False)
     assert jsonpickle.decode(returnInfo.userVariables)['zz status'] == 'AREPL is configured to not show global vars'
 
 def test_argv0ShouldBeFilePath():
     code = "from sys import argv;args=argv"
-    returnInfo = pythonEvaluator.exec_input(code)
+    returnInfo = python_evaluator.exec_input(code)
     assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == ''
 
-    returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
+    returnInfo = python_evaluator.exec_input(code, "", filePath="test path")
     assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == 'test path'
 
-def test_fileDunderShouldHaveRightPath():
-    code = "fileDunder=__file__"
-    returnInfo = pythonEvaluator.exec_input(code)
-    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == ''
+def test_startingDundersShouldBeCorrect():
+    code = "file_dunder=__file__"
+    returnInfo = python_evaluator.exec_input(code)
+    assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == ''
 
-    returnInfo = pythonEvaluator.exec_input(code, "", filePath="test path")
-    assert jsonpickle.decode(returnInfo.userVariables)['fileDunder'] == 'test path'
+    returnInfo = python_evaluator.exec_input(code, "", filePath="test path")
+    assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == 'test path'
+
+    returnInfo = python_evaluator.exec_input("name_dunder=__name__")
+    assert jsonpickle.decode(returnInfo.userVariables)['name_dunder'] == '__main__'
 
 def test_relative_import():
     filePath = path.join(python_ignore_path, "foo2.py")
     with open(filePath) as f:
-        returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath)
+        returnInfo = python_evaluator.exec_input(f.read(),"",filePath)
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
 
 def test_jsonpickle_err_doesnt_break_arepl():
-    returnInfo = pythonEvaluator.exec_input("""
+    returnInfo = python_evaluator.exec_input("""
 class foo:
     def __getstate__(self):
         a
@@ -50,23 +62,23 @@ f = foo()
     assert jsonpickle.decode(returnInfo.userVariables)['f'] == "AREPL could not pickle this object"
 
 def test_dump():
-    returnInfo = pythonEvaluator.exec_input("from arepldump import dump;dump('dump worked');x=1")
+    returnInfo = python_evaluator.exec_input("from arepl_dump import dump;dump('dump worked');x=1")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 1
 
 def test_dump_when_exception():
     # this test prevents rather specific error case where i forget to uncache dump during exception handling
     # and it causes dump to not work properly second time around (see https://github.com/Almenon/AREPL-vscode/issues/91)
     try:
-        pythonEvaluator.exec_input("from arepldump import dump;dumpOut = dump('dump worked');x=1;raise Exception()")
+        python_evaluator.exec_input("from arepl_dump import dump;dumpOut = dump('dump worked');x=1;raise Exception()")
     except Exception as e:
         assert 'dumpOut' in jsonpickle.decode(e.varsSoFar)
     try:
-        pythonEvaluator.exec_input("from arepldump import dump;dumpOut = dump('dump worked');raise Exception()")
+        python_evaluator.exec_input("from arepl_dump import dump;dumpOut = dump('dump worked');raise Exception()")
     except Exception as e:
         assert 'dumpOut' in jsonpickle.decode(e.varsSoFar) and jsonpickle.decode(e.varsSoFar)['dumpOut'] is not None
 
 def test_special_floats():
-    returnInfo = pythonEvaluator.exec_input("""
+    returnInfo = python_evaluator.exec_input("""
 x = float('infinity')
 y = float('nan')
 z = float('-infinity')
@@ -77,22 +89,18 @@ z = float('-infinity')
 
 def test_import_does_not_show():
     # we only show local vars to user, no point in showing modules
-    returnInfo = pythonEvaluator.exec_input("import json")
+    returnInfo = python_evaluator.exec_input("import json")
     assert jsonpickle.decode(returnInfo.userVariables) == {}
 
 def test_save():
-    returnInfo = pythonEvaluator.exec_input("","from random import random\nx=random()#$save")
+    returnInfo = python_evaluator.exec_input("","from random import random\nx=random()#$save")
     randomVal = jsonpickle.decode(returnInfo.userVariables)['x']
-    returnInfo = pythonEvaluator.exec_input("z=3","from random import random\nx=random()#$save")
+    returnInfo = python_evaluator.exec_input("z=3","from random import random\nx=random()#$save")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == randomVal
 
 def test_save_import(): # imports in saved section should be able to be referenced in exec section
-    returnInfo = pythonEvaluator.exec_input("z=math.sin(0)","import math#$save")
+    returnInfo = python_evaluator.exec_input("z=math.sin(0)","import math#$save")
     assert jsonpickle.decode(returnInfo.userVariables)['z'] == 0
-
-def test_has_error():
-    with pytest.raises(pythonEvaluator.UserError):
-        pythonEvaluator.exec_input("x")
 
 def test_various_types():
     various_types = """
@@ -111,7 +119,7 @@ m = l(5)
 n = False
 
     """
-    returnInfo = pythonEvaluator.exec_input(various_types)
+    returnInfo = python_evaluator.exec_input(various_types)
 
     vars = jsonpickle.decode(returnInfo.userVariables)
     assert vars['a'] == 1
@@ -142,7 +150,7 @@ class areplDebug(bdb.Bdb):
 b = areplDebug()
 b.run('x=1+5',{},{})
     """
-    returnInfo = pythonEvaluator.exec_input(frameCode)
+    returnInfo = python_evaluator.exec_input(frameCode)
     vars = jsonpickle.decode(returnInfo.userVariables)
     assert vars['f']['f_lineno'] == 1
 
@@ -156,7 +164,7 @@ fp.seek(0)
 x = fp.read()
 fp.close()
     """
-    returnInfo = pythonEvaluator.exec_input(fileIO)
+    returnInfo = python_evaluator.exec_input(fileIO)
     vars = jsonpickle.decode(returnInfo.userVariables)
     assert 'fp' in vars
     assert vars['x'] == b'yo'
@@ -202,8 +210,8 @@ loop.close()
 x=1
     """
 
-    pythonEvaluator.exec_input(eventLoopCode)
-    returnInfo = pythonEvaluator.exec_input(eventLoopCode)
+    python_evaluator.exec_input(eventLoopCode)
+    returnInfo = python_evaluator.exec_input(eventLoopCode)
     vars = jsonpickle.decode(returnInfo.userVariables)
     assert 'x' in vars
 
@@ -212,7 +220,7 @@ def test_builtinImportNotDeleted():
 import math
 from json import loads
     """
-    pythonEvaluator.exec_input(importStr)
+    python_evaluator.exec_input(importStr)
     assert 'math' in modules
     assert 'json' in modules
 
@@ -220,7 +228,7 @@ def test_pipImportNotDeleted():
     importStr = """
 import praw
     """
-    pythonEvaluator.exec_input(importStr)
+    python_evaluator.exec_input(importStr)
     assert 'praw' in modules
     assert 'praw.models.user' in modules
 
@@ -234,7 +242,7 @@ def test_userImportDeleted():
 
     try:
         with open(filePath2) as f:
-            returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath2)
+            returnInfo = python_evaluator.exec_input(f.read(),"",filePath2)
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2 # just checking this for later on
         assert 'foo' not in modules # user import should be deleted!
 
@@ -243,7 +251,7 @@ def test_userImportDeleted():
             f.write('def foo():\n    return 3')
 
         with open(filePath2) as f:
-            returnInfo = pythonEvaluator.exec_input(f.read(),"",filePath2)
+            returnInfo = python_evaluator.exec_input(f.read(),"",filePath2)
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 3
 
     finally:
@@ -266,7 +274,7 @@ def test_userVarImportDeleted():
 
     try:
         with open(importVarFilePath) as f:
-            returnInfo = pythonEvaluator.exec_input(f.read(),"",importVarFilePath)
+            returnInfo = python_evaluator.exec_input(f.read(),"",importVarFilePath)
         assert jsonpickle.decode(returnInfo.userVariables)['myVar'] == 5 # just checking this for later on
         assert 'varToImport' not in modules # user import should be deleted!
 
@@ -275,7 +283,7 @@ def test_userVarImportDeleted():
             f.write('varToImport = 3')
 
         with open(importVarFilePath) as f:
-            returnInfo = pythonEvaluator.exec_input(f.read(),"",importVarFilePath)
+            returnInfo = python_evaluator.exec_input(f.read(),"",importVarFilePath)
         assert jsonpickle.decode(returnInfo.userVariables)['myVar'] == 3
 
     finally:
@@ -284,17 +292,17 @@ def test_userVarImportDeleted():
             f.write(origVarToImportFileText)
 
 def test_howdoiArepl():
-    returnInfo = pythonEvaluator.exec_input("x=howdoi('use arepl')")
+    returnInfo = python_evaluator.exec_input("x=howdoi('use arepl')")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 'using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki'
 
 def test_script_path_should_work_regardless_of_user_errors():
     try:
-        pythonEvaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
-    except pythonEvaluator.UserError as e:
+        python_evaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
+    except python_evaluator.UserError as e:
         returnInfo = e.varsSoFar
     try:
-        pythonEvaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
-    except pythonEvaluator.UserError as e:
+        python_evaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
+    except python_evaluator.UserError as e:
         secondReturnInfo = e.varsSoFar
 
     # script_path should restore the sys path back to original state after execution
@@ -302,20 +310,20 @@ def test_script_path_should_work_regardless_of_user_errors():
     assert jsonpickle.decode(returnInfo)['path'] == jsonpickle.decode(secondReturnInfo)['path']
 
 def test_mock_stdin():
-    returnInfo = pythonEvaluator.exec_input("standard_input = 'hello\\nworld';x=input();y=input()")
+    returnInfo = python_evaluator.exec_input("standard_input = 'hello\\nworld';x=input();y=input()")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 'hello'
     assert jsonpickle.decode(returnInfo.userVariables)['y'] == 'world'
 
-    returnInfo = pythonEvaluator.exec_input("standard_input = ['hello', 'world'];x=input();y=input()")
+    returnInfo = python_evaluator.exec_input("standard_input = ['hello', 'world'];x=input();y=input()")
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 'hello'
     assert jsonpickle.decode(returnInfo.userVariables)['y'] == 'world'
 
-    with pytest.raises(pythonEvaluator.UserError):
-        pythonEvaluator.exec_input("standard_input = ['hello'];x=input();y=input()")
+    with pytest.raises(python_evaluator.UserError):
+        python_evaluator.exec_input("standard_input = ['hello'];x=input();y=input()")
 
 def integrationTestHowdoi():
     # this requires internet access so it is not official test
-    returnInfo = pythonEvaluator.exec_input("x=howdoi('eat a apple')")
+    returnInfo = python_evaluator.exec_input("x=howdoi('eat a apple')")
     print(jsonpickle.decode(returnInfo.userVariables)['x']) # this should print out howdoi results
     
 
@@ -328,8 +336,8 @@ def integrationTestHowdoi():
 # file objects show up as None
 
 #   class pickling does work with #$save - but not when unit testing for some reason
-#   "Can't pickle <class 'pythonEvaluator.l'>: it's not found as pythonEvaluator.l"
-#   not sure why it's trying to find the class in pythonEvaluator - it's not going to be there
+#   "Can't pickle <class 'python_evaluator.l'>: it's not found as python_evaluator.l"
+#   not sure why it's trying to find the class in python_evaluator - it's not going to be there
 #   todo: investigate issue
 
 #    def test_can_pickle_class(self):
@@ -337,7 +345,7 @@ def integrationTestHowdoi():
 # class l():
 # 	def __init__(self,x):
 # 		self.x = x  #$save"""
-#         returnInfo = pythonEvaluator.exec_input("",code)
+#         returnInfo = python_evaluator.exec_input("",code)
 #         randomVal = jsonpickle.decode(returnInfo['userVariables'])['l']
-#         returnInfo = pythonEvaluator.exec_input("z=3",code)
+#         returnInfo = python_evaluator.exec_input("z=3",code)
 #         randomVal = jsonpickle.decode(returnInfo['userVariables'])['l']

@@ -12,7 +12,7 @@ export interface PythonResult{
 	done: boolean
 }
 
-export class PythonEvaluator{
+export class python_evaluator{
     
     private static readonly identifier = "6q3co7"
 
@@ -36,7 +36,7 @@ export class PythonEvaluator{
     pyshell:PythonShell
 
 	/**
-	 * starts pythonEvaluator.py 
+	 * starts python_evaluator.py 
 	 * @param {string} pythonPath the path to run python. If null python-shell will determine this for you.
 	 * @param {[string]} pythonOptions see https://docs.python.org/3/using/cmdline.html#miscellaneous-options.
 	 */
@@ -91,7 +91,7 @@ export class PythonEvaluator{
 
 	/**
 	 * kills python process.  force-kills if necessary after 50ms.
-	 * you can check PythonEvaluator.running to see if process is dead yet
+	 * you can check python_evaluator.running to see if process is dead yet
 	 */
 	stop(){
 		// pyshell has 50 ms to die gracefully
@@ -113,11 +113,11 @@ export class PythonEvaluator{
 	}
 
 	/**
-	 * starts pythonEvaluator.py. Will NOT WORK with python 2
+	 * starts python_evaluator.py. Will NOT WORK with python 2
 	 */
 	start(){
 		console.log("Starting Python...")
-		this.pyshell = new PythonShell('pythonEvaluator.py', {
+		this.pyshell = new PythonShell('python_evaluator.py', {
 			scriptPath: this.pythonEvalFolderPath,
 			pythonOptions: this.pythonOptions,
 			pythonPath: this.pythonPath,
@@ -169,9 +169,9 @@ export class PythonEvaluator{
 		}
 
         //result should have identifier, otherwise it is just a printout from users code
-        if(results.startsWith(PythonEvaluator.identifier)){
+        if(results.startsWith(python_evaluator.identifier)){
 			try {
-				results = results.replace(PythonEvaluator.identifier,"")
+				results = results.replace(python_evaluator.identifier,"")
 				pyResult = JSON.parse(results)
 				this.evaling = !pyResult['done']
 				
@@ -215,7 +215,7 @@ export class PythonEvaluator{
 	 * @returns {Promise} rejects w/ stderr if syntax failure
 	 */
 	async checkSyntaxFile(filePath:string){
-		// note that this should really be done in pythonEvaluator.py
+		// note that this should really be done in python_evaluator.py
 		// but communication with that happens through just one channel (stdin/stdout)
 		// so for now i prefer to keep this seperate
 
@@ -227,7 +227,7 @@ export class PythonEvaluator{
 	 * @param {string} err
 	 * @example err:
 	 * "Traceback (most recent call last):
-	 *   File "pythonEvaluator.py", line 26, in <module>
+	 *   File "python_evaluator.py", line 26, in <module>
 	 * 	exec(data['evalCode'], evalLocals)
 	 *   line 4, in <module>
 	 * NameError: name 'y' is not defined"
@@ -245,7 +245,7 @@ export class PythonEvaluator{
 	
 		let errLines = bottomTraceback.split('\n')
 	
-		// error caught in pythonEvaluator so it includes that stack frame
+		// error caught in python_evaluator so it includes that stack frame
 		// user should not see it, so remove first and second lines:
 		errLines = [errLines[0]].concat(errLines.slice(3))		
 		bottomTraceback = errLines.join('\n')

@@ -1,4 +1,4 @@
-# AREPL-backend [![Build Status](https://travis-ci.org/Almenon/AREPL-backend.svg?branch=master)](https://travis-ci.org/Almenon/AREPL-backend) [![Build status](https://ci.appveyor.com/api/projects/status/24o0d29l7ci9bif3?svg=true)](https://ci.appveyor.com/project/Almenon/arepl-backend)
+# AREPL-backend [![Build Status](https://travis-ci.org/Almenon/AREPL-backend.svg?branch=master)](https://travis-ci.org/Almenon/AREPL-backend) [![Build status](https://ci.appveyor.com/api/projects/status/24o0d29l7ci9bif3?svg=true)](https://ci.appveyor.com/project/Almenon/arepl-backend) [![npm version](https://badge.fury.io/js/arepl-backend.svg)](https://badge.fury.io/js/arepl-backend)
 
 JS interface to python evaluator for AREPL.
 
@@ -43,7 +43,7 @@ see <https://github.com/Almenon/AREPL-vscode> for example useage.
 
 ### constructor
 
-starts pythonEvaluator.py
+starts python_evaluator.py
 
 **Parameters**
 
@@ -90,11 +90,11 @@ After process restarts the callback passed in is invoked
 ### stop
 
 kills python process.  force-kills if necessary after 50ms.
-you can check PythonEvaluator.running to see if process is dead yet
+you can check python_evaluator.running to see if process is dead yet
 
 ### start
 
-starts pythonEvaluator.py. Will NOT WORK with python 2
+starts python_evaluator.py. Will NOT WORK with python 2
 
 ### onResult
 
@@ -164,7 +164,7 @@ gets rid of unnecessary exception data, among other things
 ```javascript
 err:
 "Traceback (most recent call last):
-  File "pythonEvaluator.py", line 26, in <module>
+  File "python_evaluator.py", line 26, in <module>
 	exec(data['evalCode'], evalLocals)
   line 4, in <module>
 NameError: name 'y' is not defined"

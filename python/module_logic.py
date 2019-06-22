@@ -17,7 +17,7 @@ def getNonUserModules():
     specialCases = [
         'jsonpickle', # hardcoded as part of AREPL
         'stdlib_list', # hardcoded as part of AREPL
-        'pythonEvaluator', # hardcoded as part of AREPL
+        'python_evaluator', # hardcoded as part of AREPL
     ]
 
     moreBuiltinModules = stdlib_list(version[:3], fallback=True)

@@ -6,10 +6,10 @@
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert'
 
-import {PythonEvaluator} from './index'
+import {python_evaluator} from './index'
 
-suite("PythonEvaluator Tests", () => {
-    let pyEvaluator = new PythonEvaluator()
+suite("python_evaluator Tests", () => {
+    let pyEvaluator = new python_evaluator()
     let input = {evalCode:"", savedCode: "", filePath: "", usePreviousVariables: false, showGlobalVars: true}
     const pythonStartupTime = 3500
     // python 3.7 has much faster startup time
@@ -59,7 +59,7 @@ suite("PythonEvaluator Tests", () => {
             gotDump = true
             done()
         }
-        input.evalCode = "from arepldump import dump;dump(5)"
+        input.evalCode = "from arepl_dump import dump;dump(5)"
         pyEvaluator.execCode(input)
     })
 
@@ -203,7 +203,7 @@ suite("PythonEvaluator Tests", () => {
             // so we just do some generic checks
             assert.equal(result.userError.includes("TypeError"), true)
             assert.equal(result.userError.split('File ').length > 1, true)
-            assert.equal(result.userError.includes("pythonEvaluator.py"), false)
+            assert.equal(result.userError.includes("python_evaluator.py"), false)
             assert.equal(result.userError.includes("exec(data['evalCode'], evalLocals)"), false)
             done()
         }
