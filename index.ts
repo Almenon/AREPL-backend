@@ -62,7 +62,7 @@ export class python_evaluator{
 	}
 
 	/**
-	 * @param {string} message 
+	 * @param {string} message
 	 */
 	sendStdin(message:string){
 		this.pyshell.send(message)
