@@ -52,7 +52,7 @@ export class python_evaluator{
 
 	
 	/**
-	 * does not do anything if program is currently evaling code
+	 * does not do anything if program is currently evaling code 
 	 */
 	execCode(code:{evalCode:string, savedCode:string, filePath:string, usePreviousVariables?:boolean, showGlobalVars?:boolean}){
 		if(this.evaling) return
