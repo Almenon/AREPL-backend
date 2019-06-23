@@ -69,7 +69,7 @@ export class python_evaluator{
 	}
 
 	/**
-	 * kills python process and restarts.  Force-kills if necessary after 50ms.
+	 * kills python process and restarts.  Force-kills if necessary after 50ms. 
 	 * After process restarts the callback passed in is invoked
 	 */
 	restart(callback=()=>{}){
