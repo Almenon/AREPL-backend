@@ -25,7 +25,7 @@ cache:
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - npm ci
-  - npm compileOnce
+  - npm run compileOnce
   - npm run travis-deploy-once "npm run semantic-release" # todo: replace deploy-once with https://docs.travis-ci.com/user/build-stages/
 branches:
   except:
