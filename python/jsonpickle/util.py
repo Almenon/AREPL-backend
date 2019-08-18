@@ -321,12 +321,7 @@ def is_installed(module):
 
 
 def is_list_like(obj):
-    try:
-        return hasattr(obj, '__getitem__') and hasattr(obj, 'append')
-    except (KeyboardInterrupt, SystemExit):
-        raise
-    except Exception:
-        return False
+    return hasattr(obj, '__getitem__') and hasattr(obj, 'append')
 
 
 def is_iterator(obj):
@@ -516,7 +511,25 @@ def b64decode(payload):
     """
     Decode payload - must be ascii text.
     """
-    return base64.b64decode(payload.encode('ascii'))
+    return base64.b64decode(payload)
+
+
+def b85encode(data):
+    """
+    Encode binary data to ascii text in base85. Data must be bytes.
+    """
+    if PY2:
+        raise NotImplementedError("Python 2 can't encode data in base85.")
+    return base64.b85encode(data).decode('ascii')
+
+
+def b85decode(payload):
+    """
+    Decode payload - must be ascii text.
+    """
+    if PY2:
+        raise NotImplementedError("Python 2 can't decode base85-encoded data.")
+    return base64.b85decode(payload)
 
 
 def itemgetter(obj, getter=operator.itemgetter(0)):
