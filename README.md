@@ -12,7 +12,7 @@ Although it is meant for AREPL, it is not dependent upon AREPL and can be used b
 
 > npm install [arepl-backend](https://www.npmjs.com/package/arepl-backend)
 
-must have python 3
+must have python 3 
 
 ## Usage
 
