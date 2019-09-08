@@ -23,6 +23,14 @@ def test_dict_unpack_error():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
 
+def test_infinite_generator():
+    returnInfo = python_evaluator.exec_input("""
+import itertools
+counter = (x for x in itertools.count())
+x=next(counter)
+    """)
+    assert jsonpickle.decode(returnInfo.userVariables)['x'] == 0   
+
 def test_dont_show_global_vars():
     returnInfo = python_evaluator.exec_input("x = 1", showGlobalVars=False)
     assert jsonpickle.decode(returnInfo.userVariables)['zz status'] == 'AREPL is configured to not show global vars'
