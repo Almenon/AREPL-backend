@@ -36,7 +36,7 @@ class FrameHandler(BaseHandler):
             "py/object": "types.FrameType",
             "f_back": self.flatten(obj.f_back, data),
             "f_builtins": NOT_SERIALIZABLE_MESSAGE,
-            "f_code": codeHandler(None).flatten(obj.f_code, data),
+            "f_code": CodeHandler(None).flatten(obj.f_code, data),
             "f_globals": NOT_SERIALIZABLE_MESSAGE,
             "f_lasti": obj.f_lasti,
             "f_lineno": obj.f_lineno,
