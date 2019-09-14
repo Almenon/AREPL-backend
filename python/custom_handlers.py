@@ -6,18 +6,24 @@ from types import CodeType, FrameType, GeneratorType
 
 NOT_SERIALIZABLE_MESSAGE = "not serializable by arepl"
 
-class DatetimeHandler(BaseHandler):
+class BaseCustomHandler(BaseHandler):
+    """wrapper around BaseHandler for convenient unit testing"""
+    def restore(self, obj):
+        """just for unit testing"""
+        return obj
+
+class DatetimeHandler(BaseCustomHandler):
     ### better represention of datetime, see https://github.com/jsonpickle/jsonpickle/issues/109 ###
     def flatten(self, obj, data):
         x = {"date/time": str(obj)}
         return x
 
-class DecimalHandler(BaseHandler):
+class DecimalHandler(BaseCustomHandler):
     def flatten(self, obj, data):
         x = float(obj)
         return x
 
-class RegexMatchHandler(BaseHandler):
+class RegexMatchHandler(BaseCustomHandler):
     ### better represention of datetime, see https://github.com/jsonpickle/jsonpickle/issues/109 ###
     def flatten(self, obj, data):
         return {
@@ -28,7 +34,7 @@ class RegexMatchHandler(BaseHandler):
         }
 
 
-class FrameHandler(BaseHandler):
+class FrameHandler(BaseCustomHandler):
     ### better represention of frame, see https://github.com/Almenon/AREPL-backend/issues/26 ###
     def flatten(self, obj, data):
         if obj is None: return None
@@ -43,11 +49,7 @@ class FrameHandler(BaseHandler):
             "f_locals": NOT_SERIALIZABLE_MESSAGE
         }
 
-    def restore(self, obj):
-        """just for unit testing"""
-        return obj
-
-class CodeHandler(BaseHandler):
+class CodeHandler(BaseCustomHandler):
     ### better represention of frame, see https://github.com/Almenon/AREPL-backend/issues/26 ###
     def flatten(self, obj, data):
         return {
@@ -68,7 +70,7 @@ class CodeHandler(BaseHandler):
             'co_varnames': obj.co_varnames
         }
 
-class GeneratorHandler(BaseHandler):
+class GeneratorHandler(BaseCustomHandler):
     ### to prevent freeze-up when picking infinite generators, see https://github.com/Almenon/AREPL-backend/issues/96 ###
     def flatten(self, obj, data):
         return {
