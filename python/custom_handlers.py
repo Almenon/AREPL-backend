@@ -2,8 +2,7 @@ import re
 import datetime
 import decimal
 from jsonpickle.handlers import BaseHandler
-from types import FrameType
-from types import CodeType
+from types import CodeType, FrameType, GeneratorType
 
 NOT_SERIALIZABLE_MESSAGE = "not serializable by arepl"
 
@@ -18,7 +17,7 @@ class DecimalHandler(BaseHandler):
         x = float(obj)
         return x
 
-class regexMatchHandler(BaseHandler):
+class RegexMatchHandler(BaseHandler):
     ### better represention of datetime, see https://github.com/jsonpickle/jsonpickle/issues/109 ###
     def flatten(self, obj, data):
         return {
@@ -29,7 +28,7 @@ class regexMatchHandler(BaseHandler):
         }
 
 
-class frameHandler(BaseHandler):
+class FrameHandler(BaseHandler):
     ### better represention of frame, see https://github.com/Almenon/AREPL-backend/issues/26 ###
     def flatten(self, obj, data):
         if obj is None: return None
@@ -48,7 +47,7 @@ class frameHandler(BaseHandler):
         """just for unit testing"""
         return obj
 
-class codeHandler(BaseHandler):
+class CodeHandler(BaseHandler):
     ### better represention of frame, see https://github.com/Almenon/AREPL-backend/issues/26 ###
     def flatten(self, obj, data):
         return {
@@ -69,12 +68,20 @@ class codeHandler(BaseHandler):
             'co_varnames': obj.co_varnames
         }
 
+class GeneratorHandler(BaseHandler):
+    ### to prevent freeze-up when picking infinite generators, see https://github.com/Almenon/AREPL-backend/issues/96 ###
+    def flatten(self, obj, data):
+        return {
+            'py/object': 'builtins.generator',
+        }
+
 handlers = [
     {'type': datetime.date, 'handler': DatetimeHandler},
     {'type': datetime.time, 'handler': DatetimeHandler},
     {'type': datetime.datetime, 'handler': DatetimeHandler},
-    {'type': type(re.search('', '')), 'handler': regexMatchHandler},
-    {'type': FrameType, 'handler': frameHandler},
-    {'type': CodeType, 'handler': codeHandler},
-    {'type': decimal.Decimal, 'handler': DecimalHandler}
+    {'type': type(re.search('', '')), 'handler': RegexMatchHandler},
+    {'type': FrameType, 'handler': FrameHandler},
+    {'type': CodeType, 'handler': CodeHandler},
+    {'type': decimal.Decimal, 'handler': DecimalHandler},
+    {'type': GeneratorType, 'handler': GeneratorHandler}
 ]
