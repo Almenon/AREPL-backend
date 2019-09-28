@@ -5,7 +5,7 @@ import traceback
 from time import time
 import asyncio
 import os
-from sys import path, modules, argv, version_info
+from sys import path, modules, argv, version_info, exc_info
 from contextlib import contextmanager
 from module_logic import getNonUserModules
 import inspect
@@ -219,11 +219,11 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             execTime = time() - start
         except BaseException:
             execTime = time() - start
-            errorMsg = traceback.format_exc()
+            _, exc_obj, exc_tb = exc_info()
             if not showGlobalVars:
-                raise UserError(errorMsg, noGlobalVarsMsg, execTime)
+                raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
-                raise UserError(errorMsg, evalLocals, execTime)
+                raise UserError(exc_obj, exc_tb, evalLocals, execTime)
 
         finally:
 
@@ -288,12 +288,11 @@ if __name__ == '__main__':
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:
-            myReturnInfo.userError = str(e)
+            myReturnInfo.userError = e.traceback_exception
             myReturnInfo.userVariables = e.varsSoFar
             myReturnInfo.execTime = e.execTime
-        except Exception:
-            errorMsg = traceback.format_exc()
-            myReturnInfo.internalError = "Sorry, AREPL has ran into an error\n\n" + errorMsg
+        except Exception as e:
+            myReturnInfo.internalError = "Sorry, AREPL has ran into an error\n\n" + str(e)
 
         myReturnInfo.totalPyTime = time() - start
 

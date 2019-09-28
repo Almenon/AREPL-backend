@@ -19,6 +19,15 @@ def test_has_error():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input("x")
 
+def test_error_has_traceback():
+    try:
+        python_evaluator.exec_input("x")
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except python_evaluator.UserError as e:
+        assert e.traceback_exception.exc_type == NameError
+        assert e.traceback_exception.stack[1].lineno == 1
+
 def test_dict_unpack_error():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
