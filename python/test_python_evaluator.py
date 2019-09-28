@@ -141,10 +141,10 @@ n = False
     assert vars['m'] != None
     assert vars['n'] == False
 
-def test_custom_handler():
+def test_frame_handler():
     # I have a custom handler for frame (see https://github.com/Almenon/AREPL-backend/issues/26)
     # otherwise frame returns as simply "py/object": "__builtin__.frame"
-    frameCode = """
+    frame_code = """
 import bdb
 
 f = {}
@@ -158,9 +158,22 @@ class areplDebug(bdb.Bdb):
 b = areplDebug()
 b.run('x=1+5',{},{})
     """
-    returnInfo = python_evaluator.exec_input(frameCode)
+    returnInfo = python_evaluator.exec_input(frame_code)
     vars = jsonpickle.decode(returnInfo.userVariables)
     assert vars['f']['f_lineno'] == 1
+
+def test_generator_handler():
+    generator_code = """
+def count(start=0):
+    while True:
+        yield start
+        start += 1
+
+counter = count()
+    """
+    returnInfo = python_evaluator.exec_input(generator_code)
+    vars = jsonpickle.decode(returnInfo.userVariables)
+    assert vars['counter']['py/object'] == 'builtins.generator'
 
 def test_fileIO():
     fileIO = """

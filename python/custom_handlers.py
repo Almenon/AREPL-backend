@@ -2,23 +2,28 @@ import re
 import datetime
 import decimal
 from jsonpickle.handlers import BaseHandler
-from types import FrameType
-from types import CodeType
+from types import CodeType, FrameType, GeneratorType
 
 NOT_SERIALIZABLE_MESSAGE = "not serializable by arepl"
 
-class DatetimeHandler(BaseHandler):
+class BaseCustomHandler(BaseHandler):
+    """wrapper around BaseHandler for convenient unit testing"""
+    def restore(self, obj):
+        """just for unit testing"""
+        return obj
+
+class DatetimeHandler(BaseCustomHandler):
     ### better represention of datetime, see https://github.com/jsonpickle/jsonpickle/issues/109 ###
     def flatten(self, obj, data):
         x = {"date/time": str(obj)}
         return x
 
-class DecimalHandler(BaseHandler):
+class DecimalHandler(BaseCustomHandler):
     def flatten(self, obj, data):
         x = float(obj)
         return x
 
-class regexMatchHandler(BaseHandler):
+class RegexMatchHandler(BaseCustomHandler):
     ### better represention of datetime, see https://github.com/jsonpickle/jsonpickle/issues/109 ###
     def flatten(self, obj, data):
         return {
@@ -29,7 +34,7 @@ class regexMatchHandler(BaseHandler):
         }
 
 
-class frameHandler(BaseHandler):
+class FrameHandler(BaseCustomHandler):
     ### better represention of frame, see https://github.com/Almenon/AREPL-backend/issues/26 ###
     def flatten(self, obj, data):
         if obj is None: return None
@@ -37,18 +42,14 @@ class frameHandler(BaseHandler):
             "py/object": "types.FrameType",
             "f_back": self.flatten(obj.f_back, data),
             "f_builtins": NOT_SERIALIZABLE_MESSAGE,
-            "f_code": codeHandler(None).flatten(obj.f_code, data),
+            "f_code": CodeHandler(None).flatten(obj.f_code, data),
             "f_globals": NOT_SERIALIZABLE_MESSAGE,
             "f_lasti": obj.f_lasti,
             "f_lineno": obj.f_lineno,
             "f_locals": NOT_SERIALIZABLE_MESSAGE
         }
 
-    def restore(self, obj):
-        """just for unit testing"""
-        return obj
-
-class codeHandler(BaseHandler):
+class CodeHandler(BaseCustomHandler):
     ### better represention of frame, see https://github.com/Almenon/AREPL-backend/issues/26 ###
     def flatten(self, obj, data):
         return {
@@ -69,12 +70,20 @@ class codeHandler(BaseHandler):
             'co_varnames': obj.co_varnames
         }
 
+class GeneratorHandler(BaseCustomHandler):
+    ### to prevent freeze-up when picking infinite generators, see https://github.com/Almenon/AREPL-backend/issues/96 ###
+    def flatten(self, obj, data):
+        return {
+            'py/object': 'builtins.generator',
+        }
+
 handlers = [
     {'type': datetime.date, 'handler': DatetimeHandler},
     {'type': datetime.time, 'handler': DatetimeHandler},
     {'type': datetime.datetime, 'handler': DatetimeHandler},
-    {'type': type(re.search('', '')), 'handler': regexMatchHandler},
-    {'type': FrameType, 'handler': frameHandler},
-    {'type': CodeType, 'handler': codeHandler},
-    {'type': decimal.Decimal, 'handler': DecimalHandler}
+    {'type': type(re.search('', '')), 'handler': RegexMatchHandler},
+    {'type': FrameType, 'handler': FrameHandler},
+    {'type': CodeType, 'handler': CodeHandler},
+    {'type': decimal.Decimal, 'handler': DecimalHandler},
+    {'type': GeneratorType, 'handler': GeneratorHandler}
 ]
