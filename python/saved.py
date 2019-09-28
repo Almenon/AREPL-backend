@@ -3,6 +3,7 @@ from copy import deepcopy
 import traceback
 from pickler import pickle_user_vars, specialVars
 from user_error import UserError
+from sys import exc_info
 
 #####################################
 """
@@ -40,8 +41,8 @@ def exec_saved(savedLines):
     try:
         exec(savedLines, savedLocals)
     except Exception:
-        errorMsg = traceback.format_exc()
-        raise UserError(errorMsg, savedLocals)
+        _, exc_obj, exc_tb = exc_info()
+        raise UserError(exc_obj, exc_tb, savedLocals)
 
     # deepcopy cant handle imported modules, so remove them
     savedLocals = {k:v for k,v in savedLocals.items() if str(type(v)) != "<class 'module'>"}
@@ -99,8 +100,8 @@ def copy_saved_imports_to_exec(codeToExec, savedLines):
         try:
             savedCodeAST = ast.parse(savedLines)
         except SyntaxError:
-            errorMsg = traceback.format_exc()
-            raise UserError(errorMsg)
+            _, exc_obj, exc_tb = exc_info()
+            raise UserError(exc_obj, exc_tb)
 
         imports = get_imports(savedCodeAST, savedLines)
         codeToExec = imports + '\n' + codeToExec
