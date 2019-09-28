@@ -15,7 +15,7 @@ from saved import get_eval_locals
 from saved import copy_saved_imports_to_exec
 from saved import startingLocals
 from saved import areplStore
-from pickler import specialVars, pickle_user_vars
+from pickler import specialVars, pickle_user_vars, pickle_user_error
 from user_error import UserError
 
 if util.find_spec('howdoi') is not None:
@@ -288,7 +288,7 @@ if __name__ == '__main__':
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:
-            myReturnInfo.userError = e.traceback_exception
+            myReturnInfo.userError = pickle_user_error(e.traceback_exception)
             myReturnInfo.userVariables = e.varsSoFar
             myReturnInfo.execTime = e.execTime
         except Exception as e:

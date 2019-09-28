@@ -71,3 +71,8 @@ def pickle_user_vars(userVars):
         max_depth=100, # any depth above 245 resuls in error and anything above 100 takes too long to process
         fail_safe=lambda x:"AREPL could not pickle this object"
     ) 
+
+def pickle_user_error(error):
+    return jsonpickle.encode(error,
+        fail_safe=lambda x:"AREPL could not pickle this object"
+    )
