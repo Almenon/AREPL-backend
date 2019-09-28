@@ -26,7 +26,7 @@ def test_error_has_traceback():
         raise
     except python_evaluator.UserError as e:
         assert e.traceback_exception.exc_type == NameError
-        assert e.traceback_exception.stack[1].lineno == 1
+        assert e.traceback_exception.stack[0].lineno == 1
 
 def test_dict_unpack_error():
     with pytest.raises(python_evaluator.UserError):

@@ -9,6 +9,8 @@ class UserError(Exception):
     """
 
     def __init__(self, exc_obj, exc_tb, varsSoFar={}, execTime=0):
+        # skip arepl traceback - the user should just see their own error
+        exc_tb = exc_tb.tb_next
         self.traceback_exception = TracebackException(type(exc_obj), exc_obj, exc_tb, limit=100)
         self.varsSoFar = pickle_user_vars(varsSoFar)
         self.execTime = execTime
