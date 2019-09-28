@@ -1,7 +1,17 @@
 import {PythonShell} from 'python-shell' 
 
 export interface PythonResult{
-	userError:{},
+	userError:{
+		_str: string
+		exc_traceback: {}
+		exc_type: {}
+		filename: string
+		lineno: string
+		msg: string
+		offset: number
+		stack: {}
+		text: string
+	},
 	userVariables:object,
 	execTime:number,
 	totalPyTime:number,
@@ -157,7 +167,7 @@ export class python_evaluator{
 	 */
 	handleResult(results:string) {
 		let pyResult:PythonResult = {
-			userError:{},
+			userError:null,
 			userVariables: {},
             execTime:0,
             totalTime:0,
@@ -180,11 +190,13 @@ export class python_evaluator{
 				
 				//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
 				pyResult.userVariables = JSON.parse(pyResult.userVariables)
+				//@ts-ignore pyResult.userError is sent to as string, we convert to object
+				pyResult.userError = pyResult.userError ? JSON.parse(pyResult.userError) : {}
 	
-				if(pyResult.userError != ""){
-					// I need to revamp below
-					//pyResult.userError = this.formatPythonException(pyResult.userError)
-				}
+				// I need to revamp below
+				// if(pyResult.userError != ""){
+				// 	pyResult.userError = this.formatPythonException(pyResult.userError)
+				// }
 	
 				pyResult.totalTime = Date.now()-this.startTime
 				this.onResult(pyResult)
