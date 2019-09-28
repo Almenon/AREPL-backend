@@ -29,6 +29,29 @@ def test_error_has_traceback():
         assert e.traceback_exception.stack[0].lineno == 1
         assert 'name \'x\' is not defined' in e.friendly_message
 
+def test_error_has_multiple_tracebacks():
+
+    error_code = """
+def foo():
+    raise Exception
+    
+try:
+    foo()
+except Exception as e:
+    fah"""
+
+    try:
+        python_evaluator.exec_input(error_code)
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except python_evaluator.UserError as e:
+        assert e.traceback_exception.exc_type == NameError
+        print(e.traceback_exception.stack)
+        assert len(e.traceback_exception.stack) == 3
+        assert e.traceback_exception.stack[0].lineno == 3
+        assert e.traceback_exception.stack[1].lineno == 6
+        assert e.traceback_exception.stack[2].lineno == 8
+
 def test_dict_unpack_error():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
