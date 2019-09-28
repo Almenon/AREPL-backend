@@ -2,9 +2,17 @@ import {PythonShell} from 'python-shell'
 
 export interface PythonResult{
 	userError:{
+		__cause__: {}
+		__context__: {}
+		__suppress_context__: boolean
 		_str: string
 		exc_traceback: {}
 		exc_type: {}
+
+		/* 
+		has 'py/object' and 'py/seq' attributes
+		'py/seq' is an array of FrameSummary's
+		*/
 		stack: {}
 
 		/* following for syntax errors only */
@@ -23,6 +31,14 @@ export interface PythonResult{
 	caller: string,
 	lineno:number,
 	done: boolean
+}
+
+export interface FrameSummary {
+	_line: string
+	filename: string
+	lineno: number
+	locals: {}
+	name: string
 }
 
 export class python_evaluator{
