@@ -289,6 +289,7 @@ if __name__ == '__main__':
             raise
         except UserError as e:
             myReturnInfo.userError = pickle_user_error(e.traceback_exception)
+            myReturnInfo.userErrorMsg = e.friendly_message
             myReturnInfo.userVariables = e.varsSoFar
             myReturnInfo.execTime = e.execTime
         except Exception as e:

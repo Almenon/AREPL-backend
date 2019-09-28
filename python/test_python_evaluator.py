@@ -27,6 +27,7 @@ def test_error_has_traceback():
     except python_evaluator.UserError as e:
         assert e.traceback_exception.exc_type == NameError
         assert e.traceback_exception.stack[0].lineno == 1
+        assert 'name \'x\' is not defined' in e.friendly_message
 
 def test_dict_unpack_error():
     with pytest.raises(python_evaluator.UserError):

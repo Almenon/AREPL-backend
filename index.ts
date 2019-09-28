@@ -5,13 +5,16 @@ export interface PythonResult{
 		_str: string
 		exc_traceback: {}
 		exc_type: {}
-		filename: string
-		lineno: string
-		msg: string
-		offset: number
 		stack: {}
-		text: string
+
+		/* following for syntax errors only */
+		filename?: string
+		lineno?: string
+		msg?: string
+		offset?: number
+		text?: string
 	},
+	userErrorMsg?: string,
 	userVariables:object,
 	execTime:number,
 	totalPyTime:number,
@@ -168,6 +171,7 @@ export class python_evaluator{
 	handleResult(results:string) {
 		let pyResult:PythonResult = {
 			userError:null,
+			userErrorMsg: "",
 			userVariables: {},
             execTime:0,
             totalTime:0,
@@ -192,12 +196,10 @@ export class python_evaluator{
 				pyResult.userVariables = JSON.parse(pyResult.userVariables)
 				//@ts-ignore pyResult.userError is sent to as string, we convert to object
 				pyResult.userError = pyResult.userError ? JSON.parse(pyResult.userError) : {}
-	
-				// I need to revamp below
-				// if(pyResult.userError != ""){
-				// 	pyResult.userError = this.formatPythonException(pyResult.userError)
-				// }
-	
+
+				if(pyResult.userErrorMsg){
+					pyResult.userErrorMsg = this.formatPythonException(pyResult.userErrorMsg)
+				}
 				pyResult.totalTime = Date.now()-this.startTime
 				this.onResult(pyResult)
 
@@ -237,33 +239,13 @@ export class python_evaluator{
 
 	/**
 	 * gets rid of unnecessary exception data, among other things
-	 * @param {string} err
 	 * @example err:
-	 * "Traceback (most recent call last):
-	 *   File "python_evaluator.py", line 26, in <module>
-	 * 	exec(data['evalCode'], evalLocals)
-	 *   line 4, in <module>
-	 * NameError: name 'y' is not defined"
-	 * @returns {string}
+	 * Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nNameError: name \'x\' is not defined\n
 	 */
 	formatPythonException(err:string){
-
 		//replace File "<string>" (pointless)
 		err = err.replace(/File \"<string>\", /g, "")
-
-		// we need to further modify bottom traceback
-		let index = err.lastIndexOf("Traceback (most recent call last):")
-		let bottomTraceback = err.slice(index)
-		let otherTracebacks = err.slice(0,index)
-	
-		let errLines = bottomTraceback.split('\n')
-	
-		// error caught in python_evaluator so it includes that stack frame
-		// user should not see it, so remove first and second lines:
-		errLines = [errLines[0]].concat(errLines.slice(3))		
-		bottomTraceback = errLines.join('\n')
-
-		return otherTracebacks + bottomTraceback
+		return err
 	}
 
 	/**
