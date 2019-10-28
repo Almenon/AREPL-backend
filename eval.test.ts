@@ -6,14 +6,14 @@
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert'
 
-import {python_evaluator} from './index'
+import {PythonEvaluator} from './index'
 
 function isEmpty(obj) {
     return Object.keys(obj).length === 0;
 }
 
 suite("python_evaluator Tests", () => {
-    let pyEvaluator = new python_evaluator()
+    let pyEvaluator = new PythonEvaluator()
     let input = {evalCode:"", savedCode: "", filePath: "", usePreviousVariables: false, showGlobalVars: true}
     const pythonStartupTime = 3500
     // python 3.7 has much faster startup time

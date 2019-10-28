@@ -1,4 +1,4 @@
-import {PythonShell} from 'python-shell' 
+import {PythonShell, Options} from 'python-shell' 
 
 export interface PythonResult{
 	userError:{
@@ -41,9 +41,10 @@ export interface FrameSummary {
 	name: string
 }
 
-export class python_evaluator{
+export class PythonEvaluator{
     
     private static readonly identifier = "6q3co7"
+	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
     /**
      * whether python is busy executing inputted code
@@ -51,13 +52,12 @@ export class python_evaluator{
     evaling = false
 
     /**
-     * whether python backend is on/off
+     * whether python backend process is running / not running
      */
     running = false
 
     restarting = false
     private startTime:number
-    private pythonEvalFolderPath = __dirname + '/python/'
 
     /**
      * an instance of python-shell. See https://github.com/extrabacon/python-shell
@@ -66,17 +66,20 @@ export class python_evaluator{
 
 	/**
 	 * starts python_evaluator.py 
-	 * @param {string} pythonPath the path to run python. If null python-shell will determine this for you.
-	 * @param {[string]} pythonOptions see https://docs.python.org/3/using/cmdline.html#miscellaneous-options.
+	 * @param options Process / Python options. If not specified sensible defaults are inferred. 
 	 */
-	constructor(private pythonPath:string = null, private pythonOptions: string[] = ['-u']){
+	constructor(private options: Options = {}){
 
 		if(process.platform == "darwin"){
 			//needed for Mac to prevent ENOENT
 			process.env.PATH = ["/usr/local/bin", process.env.PATH].join(":")
 		}
 
-		if(!pythonPath) this.pythonPath = PythonShell.defaultPythonPath
+		// we want unbuffered mode by default because it can be frustrating to the user
+		// if they run the program but don't see any print output immediately.
+		if(!options.pythonOptions) this.options.pythonOptions = ['-u']
+		if(!options.pythonPath) this.options.pythonPath = PythonShell.defaultPythonPath
+		if(!options.scriptPath) this.options.scriptPath = PythonEvaluator.areplPythonBackendFolderPath
 	}
 
 	
@@ -146,11 +149,7 @@ export class python_evaluator{
 	 */
 	start(){
 		console.log("Starting Python...")
-		this.pyshell = new PythonShell('python_evaluator.py', {
-			scriptPath: this.pythonEvalFolderPath,
-			pythonOptions: this.pythonOptions,
-			pythonPath: this.pythonPath,
-		})
+		this.pyshell = new PythonShell('python_evaluator.py', this.options)
 		this.pyshell.on('message', message => {
 			this.handleResult(message)
 		})
@@ -199,9 +198,9 @@ export class python_evaluator{
 		}
 
         //result should have identifier, otherwise it is just a printout from users code
-        if(results.startsWith(python_evaluator.identifier)){
+        if(results.startsWith(PythonEvaluator.identifier)){
 			try {
-				results = results.replace(python_evaluator.identifier,"")
+				results = results.replace(PythonEvaluator.identifier,"")
 				pyResult = JSON.parse(results)
 				this.evaling = !pyResult['done']
 				
