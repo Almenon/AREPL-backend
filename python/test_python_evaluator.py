@@ -21,12 +21,18 @@ def test_has_error():
 
 def test_error_has_traceback():
     try:
-        python_evaluator.exec_input("x")
+        python_evaluator.exec_input("""
+def foo():
+    x
+foo()
+        """)
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:
         assert e.traceback_exception.exc_type == NameError
-        assert e.traceback_exception.stack[0].lineno == 1
+        assert len(e.traceback_exception.stack) == 2
+        assert e.traceback_exception.stack[0].lineno == 4
+        assert e.traceback_exception.stack[1].lineno == 3
         assert 'name \'x\' is not defined' in e.friendly_message
 
 def test_dict_unpack_error():
