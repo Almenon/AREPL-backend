@@ -13,6 +13,13 @@
             "justMyCode": false
         },
         {
+            "name": "Debug Tests",
+            "type": "python",
+            "request": "test",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Python: Remote Attach",
             "type": "python",
             "request": "attach",
@@ -23,7 +30,8 @@
                     "localRoot": "${workspaceFolder}",
                     "remoteRoot": "."
                 }
-            ]
+            ],
+            "justMyCode": false
         },
         {
             "name": "Python: Module",
