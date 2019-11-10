@@ -12,12 +12,12 @@ def get_non_user_modules():
         set -- set of module names
     """
     # p[1] is name
-    pip_modules = [p[1] for p in iter_modules()] # pylint: disable=E1133
+    pip_modules = [p[1] for p in iter_modules()]  # pylint: disable=E1133
 
     special_cases = [
-        'jsonpickle', # hardcoded as part of AREPL
-        'stdlib_list', # hardcoded as part of AREPL
-        'python_evaluator', # hardcoded as part of AREPL
+        "jsonpickle",  # hardcoded as part of AREPL
+        "stdlib_list",  # hardcoded as part of AREPL
+        "python_evaluator",  # hardcoded as part of AREPL
     ]
 
     more_builtin_modules = stdlib_list(version[:3], fallback=True)

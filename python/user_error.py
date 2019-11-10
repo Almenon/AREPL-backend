@@ -1,6 +1,7 @@
 from pickler import pickle_user_vars
 from traceback import TracebackException
 
+
 class UserError(Exception):
     """
     user errors should be caught and re-thrown with this
@@ -13,6 +14,6 @@ class UserError(Exception):
         exc_tb = exc_tb.tb_next
 
         self.traceback_exception = TracebackException(type(exc_obj), exc_obj, exc_tb)
-        self.friendly_message = ''.join(self.traceback_exception.format())
+        self.friendly_message = "".join(self.traceback_exception.format())
         self.varsSoFar = pickle_user_vars(varsSoFar)
         self.execTime = execTime

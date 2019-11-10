@@ -27,12 +27,12 @@ for var in specialVars:
     startingLocals[var] = locals()[var]
 
 # users code should execute under main scope
-startingLocals['__name__'] = '__main__'
+startingLocals["__name__"] = "__main__"
 
 
 def get_starting_locals():
     starting_locals_copy = deepcopy(startingLocals)
-    starting_locals_copy['areplStore'] = areplStore
+    starting_locals_copy["areplStore"] = areplStore
     return starting_locals_copy
 
 
@@ -45,7 +45,7 @@ def exec_saved(savedLines):
         raise UserError(exc_obj, exc_tb, savedLocals)
 
     # deepcopy cant handle imported modules, so remove them
-    savedLocals = {k:v for k,v in savedLocals.items() if str(type(v)) != "<class 'module'>"}
+    savedLocals = {k: v for k, v in savedLocals.items() if str(type(v)) != "<class 'module'>"}
 
     return savedLocals
 
@@ -80,13 +80,13 @@ def get_imports(parsedText, text):
     child_nodes = [l for l in ast.iter_child_nodes(parsedText)]
 
     imports = []
-    savedCode = text.split('\n')
+    savedCode = text.split("\n")
     for node in child_nodes:
         if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
             importLine = savedCode[node.lineno - 1]
             imports.append(importLine)
 
-    imports = '\n'.join(imports)
+    imports = "\n".join(imports)
     return imports
 
 
@@ -104,12 +104,11 @@ def copy_saved_imports_to_exec(codeToExec, savedLines):
             raise UserError(exc_obj, exc_tb)
 
         imports = get_imports(savedCodeAST, savedLines)
-        codeToExec = imports + '\n' + codeToExec
+        codeToExec = imports + "\n" + codeToExec
 
         # to make sure line # in errors is right we need to pad codeToExec with newlines
-        numLinesToAdd = len(savedLines.split('\n')) - len(imports.split('\n'))
+        numLinesToAdd = len(savedLines.split("\n")) - len(imports.split("\n"))
         for i in range(numLinesToAdd):
-            codeToExec = '\n' + codeToExec
+            codeToExec = "\n" + codeToExec
 
     return codeToExec
-

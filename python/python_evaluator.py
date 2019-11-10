@@ -18,8 +18,8 @@ from saved import areplStore
 from pickler import specialVars, pickle_user_vars, pickle_user_error
 from user_error import UserError
 
-if util.find_spec('howdoi') is not None:
-    from howdoi import howdoi # pylint: disable=import-error
+if util.find_spec("howdoi") is not None:
+    from howdoi import howdoi  # pylint: disable=import-error
 
 #####################################
 """
@@ -49,6 +49,7 @@ class ReturnInfo:
         self.done = done
         self.count = count
 
+
 if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 4):
     # need at least 3.5 for typing
     exMsg = "Must be using python 3.4 or later. You are using " + str(version_info)
@@ -59,13 +60,16 @@ if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 4):
 class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
-    def __init__(self, saved_code, eval_code, file_path='', use_previous_variables=False, show_global_vars=True, *args, **kwargs):
+    def __init__(
+        self, saved_code, eval_code, file_path="", use_previous_variables=False, show_global_vars=True, *args, **kwargs
+    ):
         self.saved_code = saved_code
         self.eval_code = eval_code
         self.file_path = file_path
         self.use_previous_variables = use_previous_variables
         self.show_global_vars = show_global_vars
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
+
 
 nonUserModules = get_non_user_modules()
 origModules = frozenset(modules)
@@ -86,6 +90,8 @@ But AREPL's help can still give you information on functions / modules / objects
 
 
 areplInputIterator = None
+
+
 def input_overload(prompt=None):
     """AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input()). You can also hardcode standard_input as a generator or list.
     
@@ -111,10 +117,10 @@ def input_overload(prompt=None):
         else:
 
             callingFrame = inspect.currentframe().f_back
-            standard_input = callingFrame.f_globals['standard_input']
+            standard_input = callingFrame.f_globals["standard_input"]
 
             if type(standard_input) is str:
-                areplInputIterator = iter([line for line in standard_input.split('\n')])
+                areplInputIterator = iter([line for line in standard_input.split("\n")])
             elif callable(standard_input):
                 areplInputIterator = standard_input()
             else:
@@ -132,30 +138,28 @@ def howdoi_wrapper(strArg):
         strArg {str} -- search term
     """
 
-    if strArg.lower() == 'use arepl' or strArg.lower() == 'arepl':
-        returnVal = 'using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki'
+    if strArg.lower() == "use arepl" or strArg.lower() == "arepl":
+        returnVal = "using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki"
     else:
         try:
             parser = howdoi.get_parser()
         except NameError as e:
             # alter error to be more readable by user
-            e.args = (['howdoi is not installed'])
+            e.args = (["howdoi is not installed"])
             raise
-            
-        args = vars(parser.parse_args(strArg.split(' ')))
+
+        args = vars(parser.parse_args(strArg.split(" ")))
         returnVal = howdoi.howdoi(args)
 
     print(returnVal)
-    return returnVal # not actually necessary but nice for unit testing
+    return returnVal  # not actually necessary but nice for unit testing
 
 
-startingLocals['help'] = help_overload
-startingLocals['input'] = input_overload
-startingLocals['howdoi'] = howdoi_wrapper
+startingLocals["help"] = help_overload
+startingLocals["input"] = input_overload
+startingLocals["howdoi"] = howdoi_wrapper
 
 evalLocals = deepcopy(startingLocals)
-
-
 
 
 @contextmanager
@@ -189,7 +193,9 @@ def script_path(script_dir):
             except (os.error, ValueError):
                 pass
 
-noGlobalVarsMsg = {'zz status': 'AREPL is configured to not show global vars'}
+
+noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
+
 
 def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=False, show_global_vars=True):
     """
@@ -200,8 +206,8 @@ def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=F
     global areplStore
     global evalLocals
 
-    argv[0] = file_path # see https://docs.python.org/3/library/sys.html#sys.argv
-    startingLocals['__file__'] = file_path
+    argv[0] = file_path  # see https://docs.python.org/3/library/sys.html#sys.argv
+    startingLocals["__file__"] = file_path
 
     if not use_previous_variables:
         evalLocals = get_eval_locals(savedLines)
@@ -227,15 +233,15 @@ def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=F
 
         finally:
 
-            areplStore = evalLocals.get('areplStore', None)
+            areplStore = evalLocals.get("areplStore", None)
 
             try:
                 # arepl_dump library keeps state internally
                 # because python caches imports the state is kept inbetween runs
                 # we do not want that, arepl_dump should reset each run
-                del modules['arepl_dump']
+                del modules["arepl_dump"]
             except KeyError:
-                pass # they have not imported it, whatever
+                pass  # they have not imported it, whatever
 
             importedModules = set(modules) - origModules
             userModules = importedModules - nonUserModules
@@ -247,12 +253,12 @@ def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=F
                     # #70: nonUserModules does not list submodules
                     # so we have to extract base module and use that
                     # to skip any nonUserModules
-                    baseModule = userModule.split('.')[0]
+                    baseModule = userModule.split(".")[0]
                     if len(baseModule) > 1:
                         if baseModule in nonUserModules: continue
                     del modules[userModule]
                 except KeyError:
-                    pass # it's not worth failing AREPL over
+                    pass  # it's not worth failing AREPL over
 
             # clear mock stdin for next run
             areplInputIterator = None
@@ -270,10 +276,10 @@ def print_output(output):
     turns output into JSON and prints it
     """
     # 6q3co7 signifies to frontend that stdout is not due to a print in user's code
-    print('6q3co7' + json.dumps(output, default=lambda x: x.__dict__))
+    print("6q3co7" + json.dumps(output, default=lambda x: x.__dict__))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     while True:
 
@@ -284,7 +290,9 @@ if __name__ == '__main__':
         myReturnInfo = ReturnInfo("", "{}", None, None)
 
         try:
-            myReturnInfo = exec_input(data.eval_code, data.saved_code, data.file_path, data.use_previous_variables, data.show_global_vars)
+            myReturnInfo = exec_input(
+                data.eval_code, data.saved_code, data.file_path, data.use_previous_variables, data.show_global_vars
+            )
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:
