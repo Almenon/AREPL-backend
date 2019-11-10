@@ -5,31 +5,31 @@ from pkgutil import iter_modules
 from stdlib_list import stdlib_list
 
 
-def getNonUserModules():
+def get_non_user_modules():
     """returns a set of all modules not written by the user (aka all builtin and pip modules)
     
     Returns:
         set -- set of module names
     """
     # p[1] is name
-    pipModules = [p[1] for p in iter_modules()] # pylint: disable=E1133
+    pip_modules = [p[1] for p in iter_modules()] # pylint: disable=E1133
 
-    specialCases = [
+    special_cases = [
         'jsonpickle', # hardcoded as part of AREPL
         'stdlib_list', # hardcoded as part of AREPL
         'python_evaluator', # hardcoded as part of AREPL
     ]
 
-    moreBuiltinModules = stdlib_list(version[:3], fallback=True)
-    # moreBuiltinModules contains modules in libs folder, among many others
+    more_builtin_modules = stdlib_list(version[:3], fallback=True)
+    # more_builtin_modules contains modules in libs folder, among many others
 
-    evenMoreBuiltinModules = [k for k in modules]
+    even_more_builtin_modules = [k for k in modules]
     # how many damn modules are there???
 
     return set(
-        pipModules
+        pip_modules
         + list(builtin_module_names)
-        + moreBuiltinModules
-        + evenMoreBuiltinModules
-        + specialCases
+        + more_builtin_modules
+        + even_more_builtin_modules
+        + special_cases
     )

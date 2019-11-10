@@ -48,32 +48,32 @@ x=next(counter)
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 0   
 
 def test_dont_show_global_vars():
-    returnInfo = python_evaluator.exec_input("x = 1", showGlobalVars=False)
+    returnInfo = python_evaluator.exec_input("x = 1", show_global_vars=False)
     assert jsonpickle.decode(returnInfo.userVariables)['zz status'] == 'AREPL is configured to not show global vars'
 
-def test_argv0ShouldBeFilePath():
+def test_argv0_should_be_file_path():
     code = "from sys import argv;args=argv"
     returnInfo = python_evaluator.exec_input(code)
     assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == ''
 
-    returnInfo = python_evaluator.exec_input(code, "", filePath="test path")
+    returnInfo = python_evaluator.exec_input(code, "", file_path="test path")
     assert jsonpickle.decode(returnInfo.userVariables)['args'][0] == 'test path'
 
-def test_startingDundersShouldBeCorrect():
+def test_starting_dunders_should_be_correct():
     code = "file_dunder=__file__"
     returnInfo = python_evaluator.exec_input(code)
     assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == ''
 
-    returnInfo = python_evaluator.exec_input(code, "", filePath="test path")
+    returnInfo = python_evaluator.exec_input(code, "", file_path="test path")
     assert jsonpickle.decode(returnInfo.userVariables)['file_dunder'] == 'test path'
 
     returnInfo = python_evaluator.exec_input("name_dunder=__name__")
     assert jsonpickle.decode(returnInfo.userVariables)['name_dunder'] == '__main__'
 
 def test_relative_import():
-    filePath = path.join(python_ignore_path, "foo2.py")
-    with open(filePath) as f:
-        returnInfo = python_evaluator.exec_input(f.read(),"",filePath)
+    file_path = path.join(python_ignore_path, "foo2.py")
+    with open(file_path) as f:
+        returnInfo = python_evaluator.exec_input(f.read(),"",file_path)
     assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2
 
 def test_jsonpickle_err_doesnt_break_arepl():
@@ -269,63 +269,63 @@ import praw
     assert 'praw' in modules
     assert 'praw.models.user' in modules
 
-def test_userImportDeleted():
+def test_user_import_deleted():
 
-    filePath = path.join(python_ignore_path, "foo.py")
-    filePath2 = path.join(python_ignore_path, "foo2.py")
+    file_path = path.join(python_ignore_path, "foo.py")
+    file_path2 = path.join(python_ignore_path, "foo2.py")
 
-    with open(filePath) as f:
+    with open(file_path) as f:
         origFileText = f.read()
 
     try:
-        with open(filePath2) as f:
-            returnInfo = python_evaluator.exec_input(f.read(),"",filePath2)
+        with open(file_path2) as f:
+            returnInfo = python_evaluator.exec_input(f.read(),"",file_path2)
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 2 # just checking this for later on
         assert 'foo' not in modules # user import should be deleted!
 
         # now that import is uncached i should be able to change code, rerun & get different result
-        with open(filePath,'w') as f:
+        with open(file_path,'w') as f:
             f.write('def foo():\n    return 3')
 
-        with open(filePath2) as f:
-            returnInfo = python_evaluator.exec_input(f.read(),"",filePath2)
+        with open(file_path2) as f:
+            returnInfo = python_evaluator.exec_input(f.read(),"",file_path2)
         assert jsonpickle.decode(returnInfo.userVariables)['x'] == 3
 
     finally:
         # restore file back to original
-        with open(filePath, 'w') as f:
+        with open(file_path, 'w') as f:
             f.write(origFileText)
 
-def test_userVarImportDeleted():
+def test_user_var_import_deleted():
 
     # __pycache__ will muck up our test on every second run
     # this problem only happens during unit tests and not in actual useage (not sure why)
     # so we can safely delete pycache to avoid the problem
     rmtree(path.join(python_ignore_path, "__pycache__"))
 
-    varToImportFilePath = path.join(python_ignore_path, "varToImport.py")
-    importVarFilePath = path.join(python_ignore_path, "importVar.py")
+    varToImportFile_path = path.join(python_ignore_path, "varToImport.py")
+    importVarFile_path = path.join(python_ignore_path, "importVar.py")
 
-    with open(varToImportFilePath) as f:
+    with open(varToImportFile_path) as f:
         origVarToImportFileText = f.read()
 
     try:
-        with open(importVarFilePath) as f:
-            returnInfo = python_evaluator.exec_input(f.read(),"",importVarFilePath)
+        with open(importVarFile_path) as f:
+            returnInfo = python_evaluator.exec_input(f.read(),"",importVarFile_path)
         assert jsonpickle.decode(returnInfo.userVariables)['myVar'] == 5 # just checking this for later on
         assert 'varToImport' not in modules # user import should be deleted!
 
         # now that import is uncached i should be able to change code, rerun & get different result
-        with open(varToImportFilePath,'w') as f:
+        with open(varToImportFile_path,'w') as f:
             f.write('varToImport = 3')
 
-        with open(importVarFilePath) as f:
-            returnInfo = python_evaluator.exec_input(f.read(),"",importVarFilePath)
+        with open(importVarFile_path) as f:
+            returnInfo = python_evaluator.exec_input(f.read(),"",importVarFile_path)
         assert jsonpickle.decode(returnInfo.userVariables)['myVar'] == 3
 
     finally:
         # restore file back to original
-        with open(varToImportFilePath, 'w') as f:
+        with open(varToImportFile_path, 'w') as f:
             f.write(origVarToImportFileText)
 
 def test_howdoiArepl():
@@ -334,11 +334,11 @@ def test_howdoiArepl():
 
 def test_script_path_should_work_regardless_of_user_errors():
     try:
-        python_evaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
+        python_evaluator.exec_input("from sys import path;x", file_path=python_ignore_path)
     except python_evaluator.UserError as e:
         returnInfo = e.varsSoFar
     try:
-        python_evaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
+        python_evaluator.exec_input("from sys import path;x", file_path=python_ignore_path)
     except python_evaluator.UserError as e:
         secondReturnInfo = e.varsSoFar
 
@@ -358,7 +358,7 @@ def test_mock_stdin():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input("standard_input = ['hello'];x=input();y=input()")
 
-def integrationTestHowdoi():
+def integration_test_howdoi():
     # this requires internet access so it is not official test
     returnInfo = python_evaluator.exec_input("x=howdoi('eat a apple')")
     print(jsonpickle.decode(returnInfo.userVariables)['x']) # this should print out howdoi results

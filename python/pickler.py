@@ -9,7 +9,7 @@ This file sets up jsonpickle. Jsonpickle is used in pickle_user_vars for picking
 """
 #####################################
 
-class customPickler(jsonpickle.pickler.Pickler):
+class CustomPickler(jsonpickle.pickler.Pickler):
     """
     encodes float values like inf / nan as strings to follow JSON spec while keeping meaning
     Im doing this in custom class because handlers do not fire for floats
@@ -26,7 +26,7 @@ class customPickler(jsonpickle.pickler.Pickler):
                 return lambda obj: '-Infinity'
             if isnan(obj):
                 return lambda obj: 'NaN'
-        return super(customPickler, self)._get_flattener(obj)
+        return super(CustomPickler, self)._get_flattener(obj)
 
 
 if util.find_spec('numpy') is not None:
@@ -45,7 +45,7 @@ if util.find_spec('pandas') is not None:
         # todo: log ImportError
         pass
 
-jsonpickle.pickler.Pickler = customPickler
+jsonpickle.pickler.Pickler = CustomPickler
 jsonpickle.set_encoder_options('json', ensure_ascii=False)
 jsonpickle.set_encoder_options('json', allow_nan=False) # nan is not deseriazable by javascript
 for handler in handlers:

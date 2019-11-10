@@ -7,7 +7,7 @@ import asyncio
 import os
 from sys import path, modules, argv, version_info, exc_info
 from contextlib import contextmanager
-from module_logic import getNonUserModules
+from module_logic import get_non_user_modules
 import inspect
 
 from saved import get_starting_locals
@@ -30,7 +30,7 @@ Along the way I check if I haved saved the locals from a previous run and use th
 #####################################
 
 
-class returnInfo:
+class ReturnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
     def __init__(self, userError, userVariables, execTime, totalTime, internalError=None, caller='<module>',
@@ -52,22 +52,22 @@ class returnInfo:
 if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 4):
     # need at least 3.5 for typing
     exMsg = "Must be using python 3.4 or later. You are using " + str(version_info)
-    print(returnInfo("", "{}", None, None, exMsg))
+    print(ReturnInfo("", "{}", None, None, exMsg))
     raise Exception(exMsg)
 
 
 class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
-    def __init__(self, savedCode, evalCode, filePath='', usePreviousVariables=False, showGlobalVars=True, *args, **kwargs):
-        self.savedCode = savedCode
-        self.evalCode = evalCode
-        self.filePath = filePath
-        self.usePreviousVariables = usePreviousVariables
-        self.showGlobalVars = showGlobalVars
+    def __init__(self, saved_code, eval_code, file_path='', use_previous_variables=False, show_global_vars=True, *args, **kwargs):
+        self.saved_code = saved_code
+        self.eval_code = eval_code
+        self.file_path = file_path
+        self.use_previous_variables = use_previous_variables
+        self.show_global_vars = show_global_vars
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
 
-nonUserModules = getNonUserModules()
+nonUserModules = get_non_user_modules()
 origModules = frozenset(modules)
 
 # AREPL-vscode does not support stdin yet so help breaks it
@@ -75,7 +75,7 @@ origModules = frozenset(modules)
 # just a temp fix untill AREPL-vscode supports stdin
 
 
-def helpOverload(arg=None):
+def help_overload(arg=None):
     if arg is None: print("""Welcome to python! :)
 If this is your first time using Python, you should definitely check out
 the tutorial on the Internet at https://docs.python.org/3.7/tutorial/.
@@ -86,7 +86,7 @@ But AREPL's help can still give you information on functions / modules / objects
 
 
 areplInputIterator = None
-def inputOverload(prompt=None):
+def input_overload(prompt=None):
     """AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input()). You can also hardcode standard_input as a generator or list.
     
     Keyword Arguments:
@@ -125,7 +125,7 @@ def inputOverload(prompt=None):
         print("AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input())")
 
 
-def howdoiWrapper(strArg):
+def howdoi_wrapper(strArg):
     """howdoi is meant to be called from the command line - this wrapper lets it be called programatically
     
     Arguments:
@@ -149,9 +149,9 @@ def howdoiWrapper(strArg):
     return returnVal # not actually necessary but nice for unit testing
 
 
-startingLocals['help'] = helpOverload
-startingLocals['input'] = inputOverload
-startingLocals['howdoi'] = howdoiWrapper
+startingLocals['help'] = help_overload
+startingLocals['input'] = input_overload
+startingLocals['howdoi'] = howdoi_wrapper
 
 evalLocals = deepcopy(startingLocals)
 
@@ -191,7 +191,7 @@ def script_path(script_dir):
 
 noGlobalVarsMsg = {'zz status': 'AREPL is configured to not show global vars'}
 
-def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False, showGlobalVars=True):
+def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=False, show_global_vars=True):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
@@ -200,10 +200,10 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
     global areplStore
     global evalLocals
 
-    argv[0] = filePath # see https://docs.python.org/3/library/sys.html#sys.argv
-    startingLocals['__file__'] = filePath
+    argv[0] = file_path # see https://docs.python.org/3/library/sys.html#sys.argv
+    startingLocals['__file__'] = file_path
 
-    if not usePreviousVariables:
+    if not use_previous_variables:
         evalLocals = get_eval_locals(savedLines)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
@@ -212,7 +212,7 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-    with script_path(os.path.dirname(filePath)):
+    with script_path(os.path.dirname(file_path)):
         try:
             start = time()
             exec(codeToExec, evalLocals)
@@ -220,7 +220,7 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
         except BaseException:
             execTime = time() - start
             _, exc_obj, exc_tb = exc_info()
-            if not showGlobalVars:
+            if not show_global_vars:
                 raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
                 raise UserError(exc_obj, exc_tb, evalLocals, execTime)
@@ -257,12 +257,12 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             # clear mock stdin for next run
             areplInputIterator = None
 
-    if showGlobalVars:
+    if show_global_vars:
         userVariables = pickle_user_vars(evalLocals)
     else:
         userVariables = pickle_user_vars(noGlobalVarsMsg)
 
-    return returnInfo("", userVariables, execTime, None)
+    return ReturnInfo("", userVariables, execTime, None)
 
 
 def print_output(output):
@@ -281,10 +281,10 @@ if __name__ == '__main__':
         data = ExecArgs(**data)
 
         start = time()
-        myReturnInfo = returnInfo("", "{}", None, None)
+        myReturnInfo = ReturnInfo("", "{}", None, None)
 
         try:
-            myReturnInfo = exec_input(data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables, data.showGlobalVars)
+            myReturnInfo = exec_input(data.eval_code, data.saved_code, data.file_path, data.use_previous_variables, data.show_global_vars)
         except (KeyboardInterrupt, SystemExit):
             raise
         except UserError as e:
