@@ -15,8 +15,8 @@ import inspect
 from saved import get_starting_locals
 from saved import get_eval_locals
 from saved import copy_saved_imports_to_exec
-from saved import startingLocals
-from saved import areplStore
+from saved import starting_locals
+from saved import arepl_store
 from pickler import specialVars, pickle_user_vars, pickle_user_error
 from user_error import UserError
 
@@ -35,6 +35,7 @@ Along the way I check if I haved saved the locals from a previous run and use th
 class ReturnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
+    # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(
         self,
         userError,
@@ -74,14 +75,15 @@ if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 4):
 class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
+    # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(
-        self, saved_code, eval_code, file_path="", use_previous_variables=False, show_global_vars=True, *args, **kwargs
+        self, savedCode, evalCode, filePath="", usePreviousVariables=False, showGlobalVars=True, *args, **kwargs
     ):
-        self.saved_code = saved_code
-        self.eval_code = eval_code
-        self.file_path = file_path
-        self.use_previous_variables = use_previous_variables
-        self.show_global_vars = show_global_vars
+        self.savedCode = savedCode
+        self.evalCode = evalCode
+        self.filePath = filePath
+        self.usePreviousVariables = usePreviousVariables
+        self.showGlobalVars = showGlobalVars
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
 
 
@@ -107,7 +109,7 @@ But AREPL's help can still give you information on functions / modules / objects
         print(arg.__doc__)
 
 
-areplInputIterator = None
+arepl_input_iterator = None
 
 
 def input_overload(prompt=None):
@@ -122,14 +124,14 @@ def input_overload(prompt=None):
     Returns:
         str
     """
-    global areplInputIterator
+    global arepl_input_iterator
 
     if prompt is not None:
         print(prompt)
     try:
-        if areplInputIterator is not None:
+        if arepl_input_iterator is not None:
             try:
-                return next(areplInputIterator)
+                return next(arepl_input_iterator)
             except StopIteration:
                 # give simple user-friendly error, we dont want users worry about error in arepl source code
                 raise StopIteration("There is no more input") from None
@@ -139,13 +141,13 @@ def input_overload(prompt=None):
             standard_input = callingFrame.f_globals["standard_input"]
 
             if type(standard_input) is str:
-                areplInputIterator = iter([line for line in standard_input.split("\n")])
+                arepl_input_iterator = iter([line for line in standard_input.split("\n")])
             elif callable(standard_input):
-                areplInputIterator = standard_input()
+                arepl_input_iterator = standard_input()
             else:
-                areplInputIterator = iter([line for line in standard_input])
+                arepl_input_iterator = iter([line for line in standard_input])
 
-            return next(areplInputIterator)
+            return next(arepl_input_iterator)
     except KeyError:
         print("AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input())")
 
@@ -174,11 +176,11 @@ def howdoi_wrapper(strArg):
     return returnVal  # not actually necessary but nice for unit testing
 
 
-startingLocals["help"] = help_overload
-startingLocals["input"] = input_overload
-startingLocals["howdoi"] = howdoi_wrapper
+starting_locals["help"] = help_overload
+starting_locals["input"] = input_overload
+starting_locals["howdoi"] = howdoi_wrapper
 
-evalLocals = deepcopy(startingLocals)
+eval_locals = deepcopy(starting_locals)
 
 
 @contextmanager
@@ -216,20 +218,20 @@ def script_path(script_dir):
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
 
-def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=False, show_global_vars=True):
+def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False, showGlobalVars=True):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
-    global areplInputIterator
-    global areplStore
-    global evalLocals
+    global arepl_input_iterator
+    global arepl_store
+    global eval_locals
 
-    argv[0] = file_path  # see https://docs.python.org/3/library/sys.html#sys.argv
-    startingLocals["__file__"] = file_path
+    argv[0] = filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
+    starting_locals["__file__"] = filePath
 
-    if not use_previous_variables:
-        evalLocals = get_eval_locals(savedLines)
+    if not usePreviousVariables:
+        eval_locals = get_eval_locals(savedLines)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
     codeToExec = copy_saved_imports_to_exec(codeToExec, savedLines)
@@ -237,22 +239,22 @@ def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=F
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-    with script_path(os.path.dirname(file_path)):
+    with script_path(os.path.dirname(filePath)):
         try:
             start = time()
-            exec(codeToExec, evalLocals)
+            exec(codeToExec, eval_locals)
             execTime = time() - start
         except BaseException:
             execTime = time() - start
             _, exc_obj, exc_tb = exc_info()
-            if not show_global_vars:
+            if not showGlobalVars:
                 raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
-                raise UserError(exc_obj, exc_tb, evalLocals, execTime)
+                raise UserError(exc_obj, exc_tb, eval_locals, execTime)
 
         finally:
 
-            areplStore = evalLocals.get("areplStore", None)
+            arepl_store = eval_locals.get("arepl_store", None)
 
             try:
                 # arepl_dump library keeps state internally
@@ -281,10 +283,10 @@ def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=F
                     pass  # it's not worth failing AREPL over
 
             # clear mock stdin for next run
-            areplInputIterator = None
+            arepl_input_iterator = None
 
-    if show_global_vars:
-        userVariables = pickle_user_vars(evalLocals)
+    if showGlobalVars:
+        userVariables = pickle_user_vars(eval_locals)
     else:
         userVariables = pickle_user_vars(noGlobalVarsMsg)
 
@@ -311,7 +313,7 @@ if __name__ == "__main__":
 
         try:
             myReturnInfo = exec_input(
-                data.eval_code, data.saved_code, data.file_path, data.use_previous_variables, data.show_global_vars
+                data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables, data.showGlobalVars
             )
         except (KeyboardInterrupt, SystemExit):
             raise

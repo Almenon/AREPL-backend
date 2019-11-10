@@ -56,7 +56,7 @@ jsonpickle.set_encoder_options("json", allow_nan=False)  # nan is not deseriazab
 for handler in handlers:
     jsonpickle.handlers.register(handler["type"], handler["handler"])
 
-specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "areplStore"]
+specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "arepl_store"]
 
 
 def pickle_user_vars(userVars):
@@ -70,9 +70,9 @@ def pickle_user_vars(userVars):
         and k not in specialVars + ["__builtins__"]
     }
 
-    # but we do want to show areplStore if it has data
-    if userVars.get("areplStore") is not None:
-        userVariables["areplStore"] = userVars["areplStore"]
+    # but we do want to show arepl_store if it has data
+    if userVars.get("arepl_store") is not None:
+        userVariables["arepl_store"] = userVars["arepl_store"]
 
     # json dumps cant handle any object type, so we need to use jsonpickle
     # still has limitations but can handle much more

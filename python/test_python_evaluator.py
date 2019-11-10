@@ -58,7 +58,7 @@ x=next(counter)
 
 
 def test_dont_show_global_vars():
-    returnInfo = python_evaluator.exec_input("x = 1", show_global_vars=False)
+    returnInfo = python_evaluator.exec_input("x = 1", showGlobalVars=False)
     assert jsonpickle.decode(returnInfo.userVariables)["zz status"] == "AREPL is configured to not show global vars"
 
 
@@ -67,7 +67,7 @@ def test_argv0_should_be_file_path():
     returnInfo = python_evaluator.exec_input(code)
     assert jsonpickle.decode(returnInfo.userVariables)["args"][0] == ""
 
-    returnInfo = python_evaluator.exec_input(code, "", file_path="test path")
+    returnInfo = python_evaluator.exec_input(code, "", filePath="test path")
     assert jsonpickle.decode(returnInfo.userVariables)["args"][0] == "test path"
 
 
@@ -76,7 +76,7 @@ def test_starting_dunders_should_be_correct():
     returnInfo = python_evaluator.exec_input(code)
     assert jsonpickle.decode(returnInfo.userVariables)["file_dunder"] == ""
 
-    returnInfo = python_evaluator.exec_input(code, "", file_path="test path")
+    returnInfo = python_evaluator.exec_input(code, "", filePath="test path")
     assert jsonpickle.decode(returnInfo.userVariables)["file_dunder"] == "test path"
 
     returnInfo = python_evaluator.exec_input("name_dunder=__name__")
@@ -372,11 +372,11 @@ def test_howdoiArepl():
 
 def test_script_path_should_work_regardless_of_user_errors():
     try:
-        python_evaluator.exec_input("from sys import path;x", file_path=python_ignore_path)
+        python_evaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
     except python_evaluator.UserError as e:
         returnInfo = e.varsSoFar
     try:
-        python_evaluator.exec_input("from sys import path;x", file_path=python_ignore_path)
+        python_evaluator.exec_input("from sys import path;x", filePath=python_ignore_path)
     except python_evaluator.UserError as e:
         secondReturnInfo = e.varsSoFar
 
