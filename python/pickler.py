@@ -1,4 +1,6 @@
-from importlib import util #https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
+from importlib import (
+    util,
+)  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 from math import isnan
 import jsonpickle
 from custom_handlers import handlers
@@ -61,7 +63,8 @@ def pickle_user_vars(userVars):
 
     # filter out non-user vars, no point in showing them
     userVariables = {
-        k: v for k, v in userVars.items()
+        k: v
+        for k, v in userVars.items()
         if str(type(v)) != "<class 'module'>"
         and str(type(v)) != "<class 'function'>"
         and k not in specialVars + ["__builtins__"]

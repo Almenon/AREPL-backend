@@ -27,9 +27,5 @@ def get_non_user_modules():
     # how many damn modules are there???
 
     return set(
-        pip_modules
-        + list(builtin_module_names)
-        + more_builtin_modules
-        + even_more_builtin_modules
-        + special_cases
+        pip_modules + list(builtin_module_names) + more_builtin_modules + even_more_builtin_modules + special_cases
     )

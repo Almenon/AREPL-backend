@@ -42,7 +42,8 @@ class RegexMatchHandler(BaseCustomHandler):
 class FrameHandler(BaseCustomHandler):
     ### better represention of frame, see https://github.com/Almenon/AREPL-backend/issues/26 ###
     def flatten(self, obj, data):
-        if obj is None: return None
+        if obj is None:
+            return None
         return {
             "py/object": "types.FrameType",
             "f_back": self.flatten(obj.f_back, data),

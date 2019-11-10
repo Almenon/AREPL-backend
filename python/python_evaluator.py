@@ -1,5 +1,7 @@
 from copy import deepcopy
-from importlib import util #https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
+from importlib import (
+    util,
+)  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 import json
 import traceback
 from time import time
@@ -33,8 +35,20 @@ Along the way I check if I haved saved the locals from a previous run and use th
 class ReturnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
-    def __init__(self, userError, userVariables, execTime, totalTime, internalError=None, caller='<module>',
-                 lineno=-1, done=True, count=-1, *args, **kwargs):
+    def __init__(
+        self,
+        userError,
+        userVariables,
+        execTime,
+        totalTime,
+        internalError=None,
+        caller="<module>",
+        lineno=-1,
+        done=True,
+        count=-1,
+        *args,
+        **kwargs
+    ):
         """
         :param userVariables: JSON string
         :param count: iteration number, used when dumping info at a specific point.
@@ -80,13 +94,17 @@ origModules = frozenset(modules)
 
 
 def help_overload(arg=None):
-    if arg is None: print("""Welcome to python! :)
+    if arg is None:
+        print(
+            """Welcome to python! :)
 If this is your first time using Python, you should definitely check out
 the tutorial on the Internet at https://docs.python.org/3.7/tutorial/.
 
 AREPL uses a custom implementation of help which does not have all the features of the interpreter help. 
-But AREPL's help can still give you information on functions / modules / objects you pass into it.""")
-    else: print(arg.__doc__)
+But AREPL's help can still give you information on functions / modules / objects you pass into it."""
+        )
+    else:
+        print(arg.__doc__)
 
 
 areplInputIterator = None
@@ -106,7 +124,8 @@ def input_overload(prompt=None):
     """
     global areplInputIterator
 
-    if prompt is not None: print(prompt)
+    if prompt is not None:
+        print(prompt)
     try:
         if areplInputIterator is not None:
             try:
@@ -145,7 +164,7 @@ def howdoi_wrapper(strArg):
             parser = howdoi.get_parser()
         except NameError as e:
             # alter error to be more readable by user
-            e.args = (["howdoi is not installed"])
+            e.args = ["howdoi is not installed"]
             raise
 
         args = vars(parser.parse_args(strArg.split(" ")))
@@ -255,7 +274,8 @@ def exec_input(codeToExec, savedLines="", file_path="", use_previous_variables=F
                     # to skip any nonUserModules
                     baseModule = userModule.split(".")[0]
                     if len(baseModule) > 1:
-                        if baseModule in nonUserModules: continue
+                        if baseModule in nonUserModules:
+                            continue
                     del modules[userModule]
                 except KeyError:
                     pass  # it's not worth failing AREPL over
