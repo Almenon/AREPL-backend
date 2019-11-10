@@ -61,6 +61,8 @@ specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "
 
 def pickle_user_vars(userVars):
 
+    custom_filter = userVars.get('arepl_filter', [])
+
     # filter out non-user vars, no point in showing them
     userVariables = {
         k: v
@@ -68,6 +70,7 @@ def pickle_user_vars(userVars):
         if str(type(v)) != "<class 'module'>"
         and str(type(v)) != "<class 'function'>"
         and k not in specialVars + ["__builtins__"]
+        and k not in custom_filter
     }
 
     # but we do want to show arepl_store if it has data
