@@ -56,7 +56,7 @@ if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 4):
     raise Exception(exMsg)
 
 
-class execArgs(object):
+class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     def __init__(self, savedCode, evalCode, filePath='', usePreviousVariables=False, showGlobalVars=True, *args, **kwargs):
@@ -278,7 +278,7 @@ if __name__ == '__main__':
     while True:
 
         data = json.loads(input())
-        data = execArgs(**data)
+        data = ExecArgs(**data)
 
         start = time()
         myReturnInfo = returnInfo("", "{}", None, None)
