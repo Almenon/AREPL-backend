@@ -73,6 +73,20 @@ def pickle_user_vars(userVars):
     ) 
 
 def pickle_user_error(error):
-    return jsonpickle.encode(error,
+
+    # error needs to have context/cause
+    # as a actual attribute so it gets pickled
+    originalError = error
+    while error:
+        if error.__context__:
+            error.context = error.__context__
+            error = error.__context__
+        if error.__cause__:
+            error.cause = error.__cause__
+            error = error.__cause__
+        if error.__cause__ is None and error.__context__ is None:
+            break
+
+    return jsonpickle.encode(originalError,
         fail_safe=lambda x:"AREPL could not pickle this object"
     )

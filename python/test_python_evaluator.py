@@ -19,18 +19,21 @@ def test_has_error():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input("x")
 
-def test_error_has_traceback():
+def test_error_has_multiple_tracebacks():
     try:
         python_evaluator.exec_input("""
 def foo():
     x
-foo()
+try:
+    foo()
+except NameError as e:
+    x=1/0 # ZeroDivisionError
         """)
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:
-        assert e.traceback_exception.exc_type == NameError
-        assert len(e.traceback_exception.stack) == 2
+        assert e.traceback_exception.exc_type == ZeroDivisionError
+        assert len(e.traceback_exception.stack) == 1
         assert e.traceback_exception.stack[0].lineno == 4
         assert e.traceback_exception.stack[1].lineno == 3
         assert 'name \'x\' is not defined' in e.friendly_message
