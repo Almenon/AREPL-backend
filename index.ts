@@ -1,27 +1,34 @@
 import {PythonShell, Options} from 'python-shell' 
 
+export interface FrameSummary {
+	_line: string
+	filename: string
+	lineno: number
+	locals: {}
+	name: string
+}
+
+export interface UserError{
+	// __dunder__ vars don't get populated
+	// The python backend explicitly sets dunder cause and context to non-dunder vars
+	// __cause__: {}
+	// __context__: {}
+	_str: string
+	cause: {}
+	context: {}
+	exc_traceback: {}
+	exc_type: {}
+	stack: FrameSummary[]
+	/* following for syntax errors only */
+	filename?: string
+	lineno?: string
+	msg?: string
+	offset?: number
+	text?: string
+}
+
 export interface PythonResult{
-	userError:{
-		__cause__: {}
-		__context__: {}
-		__suppress_context__: boolean
-		_str: string
-		exc_traceback: {}
-		exc_type: {}
-
-		/* 
-		has 'py/object' and 'py/seq' attributes
-		'py/seq' is an array of FrameSummary's
-		*/
-		stack: {}
-
-		/* following for syntax errors only */
-		filename?: string
-		lineno?: string
-		msg?: string
-		offset?: number
-		text?: string
-	},
+	userError: UserError,
 	userErrorMsg?: string,
 	userVariables:object,
 	execTime:number,
@@ -31,14 +38,6 @@ export interface PythonResult{
 	caller: string,
 	lineno:number,
 	done: boolean
-}
-
-export interface FrameSummary {
-	_line: string
-	filename: string
-	lineno: number
-	locals: {}
-	name: string
 }
 
 export class PythonEvaluator{
