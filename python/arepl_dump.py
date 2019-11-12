@@ -2,7 +2,7 @@ import jsonpickle
 import inspect
 import json
 from time import time
-from python_evaluator import pickle_user_vars, returnInfo, print_output
+from python_evaluator import pickle_user_vars, ReturnInfo, print_output
 
 context = {}
 
@@ -37,12 +37,14 @@ def dump(variable=None, atCount=0):
             variableDict = {"dump output": variable}
 
         variableJson = pickle_user_vars(variableDict)
-        myReturnInfo = returnInfo("", variableJson, None, time()-startTime, None, caller, callerLine, done=False, count=count)
+        my_return_info = ReturnInfo(
+            "", variableJson, None, time() - startTime, None, caller, callerLine, done=False, count=count
+        )
 
-        print_output(myReturnInfo)
+        print_output(my_return_info)
 
         # we don't need to return anything for user, this is just to make testing easier
-        return myReturnInfo
+        return my_return_info
 
 
 # dump(5) for quick testing

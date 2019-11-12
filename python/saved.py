@@ -13,60 +13,60 @@ In practice not sure if this is actually used and its quite buggy :(
 """
 #####################################
 
-savedLocals = {}
-oldSavedLines = []
-startingLocals = {}
+saved_locals = {}
+old_saved_lines = []
+starting_locals = {}
 
 # public cache var for user to store their data between runs
-areplStore = None
+arepl_store = None
 
 # copy all special vars (we want execd code to have similar locals as actual code)
 # not copying builtins cause exec adds it in
 # also when specialVars is deepCopied later on deepcopy cant handle builtins anyways
 for var in specialVars:
-    startingLocals[var] = locals()[var]
+    starting_locals[var] = locals()[var]
 
 # users code should execute under main scope
-startingLocals['__name__'] = '__main__'
+starting_locals["__name__"] = "__main__"
 
 
 def get_starting_locals():
-    starting_locals_copy = deepcopy(startingLocals)
-    starting_locals_copy['areplStore'] = areplStore
+    starting_locals_copy = deepcopy(starting_locals)
+    starting_locals_copy["arepl_store"] = arepl_store
     return starting_locals_copy
 
 
 def exec_saved(savedLines):
-    savedLocals = get_starting_locals()
+    saved_locals = get_starting_locals()
     try:
-        exec(savedLines, savedLocals)
+        exec(savedLines, saved_locals)
     except Exception:
         _, exc_obj, exc_tb = exc_info()
-        raise UserError(exc_obj, exc_tb, savedLocals)
+        raise UserError(exc_obj, exc_tb, saved_locals)
 
     # deepcopy cant handle imported modules, so remove them
-    savedLocals = {k:v for k,v in savedLocals.items() if str(type(v)) != "<class 'module'>"}
+    saved_locals = {k: v for k, v in saved_locals.items() if str(type(v)) != "<class 'module'>"}
 
-    return savedLocals
+    return saved_locals
 
 
 def get_eval_locals(savedLines):
     """
     If savedLines is changed, rexecutes saved lines and returns resulting local variables.
     If savedLines is unchanged, returns the saved locals.
-    If savedLines is empty, simply returns the original startingLocals.
+    If savedLines is empty, simply returns the original starting_locals.
     """
-    global oldSavedLines
-    global savedLocals
+    global old_saved_lines
+    global saved_locals
 
     # "saved" code we only ever run once and save locals, vs. codeToExec which we exec as the user types
     # although if saved code has changed we need to re-run it
-    if savedLines != oldSavedLines:
-        savedLocals = exec_saved(savedLines)
-        oldSavedLines = savedLines
+    if savedLines != old_saved_lines:
+        saved_locals = exec_saved(savedLines)
+        old_saved_lines = savedLines
 
     if savedLines != "":
-        return deepcopy(savedLocals)
+        return deepcopy(saved_locals)
     else:
         return get_starting_locals()
 
@@ -80,13 +80,13 @@ def get_imports(parsedText, text):
     child_nodes = [l for l in ast.iter_child_nodes(parsedText)]
 
     imports = []
-    savedCode = text.split('\n')
+    saved_code = text.split("\n")
     for node in child_nodes:
         if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
-            importLine = savedCode[node.lineno - 1]
+            importLine = saved_code[node.lineno - 1]
             imports.append(importLine)
 
-    imports = '\n'.join(imports)
+    imports = "\n".join(imports)
     return imports
 
 
@@ -98,18 +98,17 @@ def copy_saved_imports_to_exec(codeToExec, savedLines):
     """
     if savedLines.strip() != "":
         try:
-            savedCodeAST = ast.parse(savedLines)
+            saved_code_AST = ast.parse(savedLines)
         except SyntaxError:
             _, exc_obj, exc_tb = exc_info()
             raise UserError(exc_obj, exc_tb)
 
-        imports = get_imports(savedCodeAST, savedLines)
-        codeToExec = imports + '\n' + codeToExec
+        imports = get_imports(saved_code_AST, savedLines)
+        codeToExec = imports + "\n" + codeToExec
 
         # to make sure line # in errors is right we need to pad codeToExec with newlines
-        numLinesToAdd = len(savedLines.split('\n')) - len(imports.split('\n'))
+        numLinesToAdd = len(savedLines.split("\n")) - len(imports.split("\n"))
         for i in range(numLinesToAdd):
-            codeToExec = '\n' + codeToExec
+            codeToExec = "\n" + codeToExec
 
     return codeToExec
-
