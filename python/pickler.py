@@ -101,4 +101,4 @@ def pickle_user_error(error):
         if error.__cause__ is None and error.__context__ is None:
             break
 
-    return jsonpickle.encode(error, fail_safe=lambda x: "AREPL could not pickle this object")
+    return jsonpickle.encode(originalError, fail_safe=lambda x: "AREPL could not pickle this object")
