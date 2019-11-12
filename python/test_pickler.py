@@ -12,7 +12,7 @@ except NameError as e:
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:
-        json = pickle_user_error(e)
+        json = pickle_user_error(e.traceback_exception)
         assert "ZeroDivisionError" in json
         assert "NameError" in json
 
@@ -30,6 +30,6 @@ except Exception as e:
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:
-        json = pickle_user_error(e)
+        json = pickle_user_error(e.traceback_exception)
         assert "NameError" in json
         assert "ZeroDivisionError" in json
