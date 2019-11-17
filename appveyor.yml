@@ -11,7 +11,7 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
-  - set path=%programfiles(x86)%\\Microsoft SDKs\TypeScript\2.6;%path%
+  - set path=%programfiles(x86)%\\Microsoft SDKs\TypeScript\3.0.1;%path%
 
   # Get the latest stable version of Node.js
   - ps: Install-Product node ''
