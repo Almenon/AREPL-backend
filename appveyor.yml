@@ -15,7 +15,7 @@ install:
 
   # Get the latest stable version of Node.js
   - ps: Install-Product node ''
-  - npm ci
+  - npm install
 
   # Install Python (from the official .msi of http://python.org) and pip when
   # not already installed.
