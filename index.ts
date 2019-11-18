@@ -14,11 +14,15 @@ export interface UserError{
 	// __cause__: {}
 	// __context__: {}
 	_str: string
-	cause: {}
-	context: {}
+	cause: UserError
+	context: UserError
 	exc_traceback: {}
-	exc_type: {}
-	stack: FrameSummary[]
+	exc_type: {
+		"py/type": string
+	}
+	stack: {
+		"py/seq": FrameSummary[]
+	}
 	/* following for syntax errors only */
 	filename?: string
 	lineno?: string
