@@ -50,6 +50,7 @@ def test_custom_filter():
     vars = jsonpickle.decode(return_info.userVariables)
     assert vars["cat"] == 2
     assert "dog" not in vars
+    assert "arepl_filter" not in vars
 
 def test_infinite_generator():
     return_info = python_evaluator.exec_input(

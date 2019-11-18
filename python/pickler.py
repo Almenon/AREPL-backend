@@ -73,6 +73,12 @@ def pickle_user_vars(userVars):
         and k not in custom_filter
     }
 
+    try:
+        # This var is just for filtering, no need to show to user
+        del userVariables['arepl_filter']
+    except KeyError:
+        pass
+
     # but we do want to show arepl_store if it has data
     if userVars.get("arepl_store") is not None:
         userVariables["arepl_store"] = userVars["arepl_store"]
