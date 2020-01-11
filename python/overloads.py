@@ -1,4 +1,7 @@
+from collections import Iterable
+import json
 import inspect
+import sys
 
 """
 This file contains overloads of certain python functions for arepl purposes
@@ -64,6 +67,38 @@ def input_overload(prompt=None):
             return next(arepl_input_iterator)
     except KeyError:
         print("AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input())")
+
+class MetaPrint:
+  def __init__(self, line_num, file_name, values):
+    self.line_num = line_num
+    self.file_name = file_name
+    self.message = values
+
+def print_output(output):
+    """
+    turns output into JSON and prints it
+    """
+    # 6q3co6 signifies to frontend that stdout is not due to a print in user's code
+    # (user may opt to turn overload off in which case they can use native print)
+    print("6q3co6" + json.dumps(output, default=lambda x: x.__dict__))
+
+def print_overload(*values, sep=' ', end='\n', file=sys.stdout, flush=False):
+    # if print is writing to file we dont want to record metadata
+    if file != sys.stdout and file != sys.stderr:
+      print(values, sep, end, file, flush)
+      return
+  
+    calling_frame = inspect.currentframe().f_back
+
+    calling_filename = calling_frame.f_code.co_filename
+    calling_lineno = calling_frame.f_lineno
+
+    message = str(values[0] if len(values) > 0 else "")
+    for val in values[1:]:
+        message += sep + str(val)
+  
+    metaPrint = MetaPrint(calling_lineno, calling_filename, message)
+    print_output(metaPrint)
 
 
 def howdoi_wrapper(strArg):

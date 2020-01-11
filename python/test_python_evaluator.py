@@ -406,6 +406,15 @@ def test_mock_stdin():
         python_evaluator.exec_input("standard_input = ['hello'];x=input();y=input()")
 
 
+def test_print_overload():
+    # just make sure there are no exceptions
+    # this is tested again in node anyways
+    return_info = python_evaluator.exec_input("print('hi')")
+    return_info = python_evaluator.exec_input("print('hi', 1)")
+    return_info = python_evaluator.exec_input("print('hi', 1, sep='-')")
+    return_info = python_evaluator.exec_input("print('hi', 1, sep='-', end='fah')")
+
+
 def integration_test_howdoi():
     # this requires internet access so it is not official test
     return_info = python_evaluator.exec_input("x=howdoi('eat a apple')")

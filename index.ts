@@ -44,9 +44,16 @@ export interface PythonResult{
 	done: boolean
 }
 
+export interface printMetaData{
+	line_num: number
+	file_name: string
+	message: string
+}
+
 export class PythonEvaluator{
     
-    private static readonly identifier = "6q3co7"
+	private static readonly identifier = "6q3co7"
+	private static readonly printIdentifier = "6q3co6"
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
     /**
@@ -170,10 +177,15 @@ export class PythonEvaluator{
 
 	/**
 	 * Overwrite this with your own handler.
-	 * Is called when program prints
-	 * @param {string} foo
+	 * Is called when program prints without any metadata attached
 	 */
-	onPrint(foo: string){}
+	onNativePrint(foo: string){}
+
+	/**
+	 * Overwrite this with your own handler.
+	 * Is called when program prints wth metadata
+	 */
+	onPrint(foo: printMetaData){}
 
 	/**
 	 * Overwrite this with your own handler. 
@@ -228,8 +240,12 @@ export class PythonEvaluator{
 				throw err
 			}
 		}
+		else if(results.startsWith(PythonEvaluator.printIdentifier)){
+			results = results.replace(PythonEvaluator.printIdentifier,"")
+			this.onPrint(JSON.parse(results))
+		}
         else{
-            this.onPrint(results)
+            this.onNativePrint(results)
 		}
 	}
 
