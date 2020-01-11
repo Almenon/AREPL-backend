@@ -45,12 +45,14 @@ def test_dict_unpack_error():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
 
+
 def test_custom_filter():
     return_info = python_evaluator.exec_input("arepl_filter = ['dog'];dog=1;cat=2")
     vars = jsonpickle.decode(return_info.userVariables)
     assert vars["cat"] == 2
     assert "dog" not in vars
     assert "arepl_filter" not in vars
+
 
 def test_infinite_generator():
     return_info = python_evaluator.exec_input(

@@ -61,7 +61,7 @@ specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "
 
 def pickle_user_vars(userVars):
 
-    custom_filter = userVars.get('arepl_filter', [])
+    custom_filter = userVars.get("arepl_filter", [])
 
     # filter out non-user vars, no point in showing them
     userVariables = {
@@ -75,7 +75,7 @@ def pickle_user_vars(userVars):
 
     try:
         # This var is just for filtering, no need to show to user
-        del userVariables['arepl_filter']
+        del userVariables["arepl_filter"]
     except KeyError:
         pass
 
