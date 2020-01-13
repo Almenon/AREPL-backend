@@ -21,15 +21,15 @@ class CustomPickler(jsonpickle.pickler.Pickler):
     inf = float("inf")
     negativeInf = float("-inf")
 
-    def _get_flattener(self, obj):
-        if type(obj) == type(float()):
+    def _flatten(self, obj):
+        if type(obj) == float:
             if obj == self.inf:
-                return lambda obj: "Infinity"
+                return "Infinity"
             if obj == self.negativeInf:
-                return lambda obj: "-Infinity"
+                return "-Infinity"
             if isnan(obj):
-                return lambda obj: "NaN"
-        return super(CustomPickler, self)._get_flattener(obj)
+                return "NaN"
+        return super(CustomPickler, self)._flatten(obj)
 
 
 if util.find_spec("numpy") is not None:
