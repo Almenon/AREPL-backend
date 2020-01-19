@@ -21,14 +21,13 @@ see <https://github.com/Almenon/AREPL-vscode> for example useage.
 ## For developers:
 
 Semantic release cheatsheet:
-```
-| Commit message       | Release type |
-|----------------------|--------------|
-| fix: msg             | patch        |
-| feat: msg            | feature      |
-| perf: msg            |              |
-| BREAKING CHANGE: msg | breaking     |
-```
+
+    | Commit message       | Release type |
+    |----------------------|--------------|
+    | fix: msg             | patch        |
+    | feat: msg            | feature      |
+    | perf: msg            |              |
+    | BREAKING CHANGE: msg | breaking     |
 
 ## API
 
@@ -59,8 +58,7 @@ starts python_evaluator.py
 
 **Parameters**
 
--   `pythonPath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** the path to run python. If null python-shell will determine this for you. (optional, default `null`)
--   `pythonOptions` **\[[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)]** see <https://docs.python.org/3/using/cmdline.html#miscellaneous-options>. (optional, default `['-u']`)
+-   `options`  Process / Python options. If not specified sensible defaults are inferred.
 
 ### evaling
 
@@ -68,7 +66,7 @@ whether python is busy executing inputted code
 
 ### running
 
-whether python backend is on/off
+whether python backend process is running / not running
 
 ### debounce
 
@@ -169,17 +167,11 @@ gets rid of unnecessary exception data, among other things
 
 **Parameters**
 
--   `err` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `err`  
 
 **Examples**
 
 ```javascript
 err:
-"Traceback (most recent call last):
-  File "python_evaluator.py", line 26, in <module>
-	exec(data['evalCode'], evalLocals)
-  line 4, in <module>
-NameError: name 'y' is not defined"
+Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nNameError: name \'x\' is not defined\n
 ```
-
-Returns **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
