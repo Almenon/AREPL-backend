@@ -102,7 +102,9 @@ suite("python_evaluator Tests", () => {
     test("can print stdout", function(done){
         let hasPrinted = false
         pyEvaluator.onPrint = (stdout)=>{ 
-            assert.equal(stdout, "hello world")
+            assert.equal(stdout.message, "hello world")
+            assert.equal(stdout.line_num, 1)
+            assert.equal(stdout.file_name, "<string>")
             hasPrinted = true
         }
 
@@ -139,11 +141,11 @@ suite("python_evaluator Tests", () => {
 
         pyEvaluator.onPrint = (stdout)=>{ 
             if(firstPrint){
-                assert.equal(stdout, '2')
+                assert.equal(stdout.message, '2')
                 secondPrint = true
             }
             else{
-                assert.equal(stdout, "1")
+                assert.equal(stdout.message, "1")
                 firstPrint = true
             }
         }
@@ -159,7 +161,7 @@ suite("python_evaluator Tests", () => {
 
     test("returns result after print", function(done){
         pyEvaluator.onPrint = (stdout)=>{ 
-            assert.equal(stdout, "hello world")
+            assert.equal(stdout.message, "hello world")
             assert.equal(pyEvaluator.evaling, true)
         }
 

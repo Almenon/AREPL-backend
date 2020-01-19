@@ -94,6 +94,7 @@ origModules = frozenset(modules)
 
 starting_locals["help"] = overloads.help_overload
 starting_locals["input"] = overloads.input_overload
+starting_locals["print"] = overloads.print_overload
 starting_locals["howdoi"] = overloads.howdoi_wrapper
 
 eval_locals = deepcopy(starting_locals)
