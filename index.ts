@@ -9,10 +9,8 @@ export interface FrameSummary {
 }
 
 export interface UserError{
-	// __dunder__ vars don't get populated
-	// The python backend explicitly sets dunder cause and context to non-dunder vars
-	// __cause__: {}
-	// __context__: {}
+	__cause__: {}
+	__context__: {}
 	_str: string
 	cause: UserError
 	context: UserError
