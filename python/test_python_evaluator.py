@@ -98,18 +98,6 @@ def test_relative_import():
     assert jsonpickle.decode(return_info.userVariables)["x"] == 2
 
 
-def test_jsonpickle_err_doesnt_break_arepl():
-    return_info = python_evaluator.exec_input(
-        """
-class foo:
-    def __getstate__(self):
-        a
-f = foo()
-    """
-    )
-    assert jsonpickle.decode(return_info.userVariables)["f"] == "AREPL could not pickle this object"
-
-
 def test_dump():
     return_info = python_evaluator.exec_input("from arepl_dump import dump;dump('dump worked');x=1")
     assert jsonpickle.decode(return_info.userVariables)["x"] == 1
