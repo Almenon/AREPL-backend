@@ -13,6 +13,24 @@ def test_special_floats():
     assert vars["z"] == "-Infinity"
 
 
+def test_default_type_filter():
+    def foo(): return 3
+    cat = 2
+    vars = jsonpickle.decode(pickle_user_vars(locals()))
+
+    assert vars["cat"] == 2
+    assert "foo" not in vars
+
+
+def test_custom_type_filter():
+    arepl_filter_type = ["<class 'str'>"];dog="";cat=2
+    vars = jsonpickle.decode(pickle_user_vars(locals()))
+
+    assert vars["cat"] == 2
+    assert "dog" not in vars
+    assert "arepl_filter_type" not in vars
+
+
 def test_custom_filter():
     arepl_filter = ['dog'];dog=1;cat=2
     vars = jsonpickle.decode(pickle_user_vars(locals()))
@@ -20,6 +38,7 @@ def test_custom_filter():
     assert vars["cat"] == 2
     assert "dog" not in vars
     assert "arepl_filter" not in vars
+
 
 def test_jsonpickle_err_doesnt_break_arepl():
     class foo:

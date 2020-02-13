@@ -2,6 +2,8 @@ from importlib import (
     util,
 )  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 from math import isnan
+from types import ModuleType, FunctionType
+
 import jsonpickle
 from custom_handlers import handlers
 
@@ -62,22 +64,22 @@ specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "
 def pickle_user_vars(userVars):
 
     custom_filter = userVars.get("arepl_filter", [])
+    custom_filter_type = userVars.get("arepl_filter_type", [])
+
+    type_filters = ["<class 'module'>", "<class 'function'>"] + custom_filter_type
 
     # filter out non-user vars, no point in showing them
     userVariables = {
         k: v
         for k, v in userVars.items()
-        if str(type(v)) != "<class 'module'>"
-        and str(type(v)) != "<class 'function'>"
+        if str(type(v)) not in type_filters
         and k not in specialVars + ["__builtins__"]
         and k not in custom_filter
     }
 
-    try:
-        # This var is just for filtering, no need to show to user
-        del userVariables["arepl_filter"]
-    except KeyError:
-        pass
+    # These vars are just for filtering, no need to show to user
+    userVariables.pop("arepl_filter", None)
+    userVariables.pop("arepl_filter_type", None)
 
     # but we do want to show arepl_store if it has data
     if userVars.get("arepl_store") is not None:
