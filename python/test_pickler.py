@@ -22,6 +22,15 @@ def test_default_type_filter():
     assert "foo" not in vars
 
 
+def test_custom_filter():
+    arepl_filter = ['dog'];dog=1;cat=2
+    vars = jsonpickle.decode(pickle_user_vars(locals()))
+
+    assert vars["cat"] == 2
+    assert "dog" not in vars
+    assert "arepl_filter" not in vars
+
+
 def test_custom_type_filter():
     arepl_filter_type = ["<class 'str'>"];dog="";cat=2
     vars = jsonpickle.decode(pickle_user_vars(locals()))
@@ -31,13 +40,14 @@ def test_custom_type_filter():
     assert "arepl_filter_type" not in vars
 
 
-def test_custom_filter():
-    arepl_filter = ['dog'];dog=1;cat=2
+def test_custom_filter_function():
+    def arepl_filter_function(userVariables):
+        userVariables['a']=3
+        return userVariables
     vars = jsonpickle.decode(pickle_user_vars(locals()))
 
-    assert vars["cat"] == 2
-    assert "dog" not in vars
-    assert "arepl_filter" not in vars
+    assert vars["a"] == 3
+    assert "arepl_filter_function" not in vars
 
 
 def test_jsonpickle_err_doesnt_break_arepl():

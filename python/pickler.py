@@ -65,6 +65,7 @@ def pickle_user_vars(userVars):
 
     custom_filter = userVars.get("arepl_filter", [])
     custom_filter_type = userVars.get("arepl_filter_type", [])
+    custom_filter_function = userVars.get("arepl_filter_function", lambda x:x)
 
     type_filters = ["<class 'module'>", "<class 'function'>"] + custom_filter_type
 
@@ -80,10 +81,13 @@ def pickle_user_vars(userVars):
     # These vars are just for filtering, no need to show to user
     userVariables.pop("arepl_filter", None)
     userVariables.pop("arepl_filter_type", None)
+    userVariables.pop("arepl_filter_function", None)
 
     # but we do want to show arepl_store if it has data
     if userVars.get("arepl_store") is not None:
         userVariables["arepl_store"] = userVars["arepl_store"]
+
+    userVariables = custom_filter_function(userVariables)
 
     # json dumps cant handle any object type, so we need to use jsonpickle
     # still has limitations but can handle much more
