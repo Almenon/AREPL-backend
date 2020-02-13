@@ -70,14 +70,6 @@ def test_main_returns_var_even_when_error():
     assert jsonpickle.decode(return_info.userVariables)["y"] == 1
 
 
-def test_custom_filter():
-    return_info = python_evaluator.exec_input("arepl_filter = ['dog'];dog=1;cat=2")
-    vars = jsonpickle.decode(return_info.userVariables)
-    assert vars["cat"] == 2
-    assert "dog" not in vars
-    assert "arepl_filter" not in vars
-
-
 def test_infinite_generator():
     return_info = python_evaluator.exec_input(
         """
@@ -140,19 +132,6 @@ def test_dump_when_exception():
         assert "dumpOut" in jsonpickle.decode(e.varsSoFar) and jsonpickle.decode(e.varsSoFar)["dumpOut"] is not None
 
 
-def test_special_floats():
-    return_info = python_evaluator.exec_input(
-        """
-x = float('infinity')
-y = float('nan')
-z = float('-infinity')
-    """
-    )
-    assert jsonpickle.decode(return_info.userVariables)["x"] == "Infinity"
-    assert jsonpickle.decode(return_info.userVariables)["y"] == "NaN"
-    assert jsonpickle.decode(return_info.userVariables)["z"] == "-Infinity"
-
-
 def test_import_does_not_show():
     # we only show local vars to user, no point in showing modules
     return_info = python_evaluator.exec_input("import json")
@@ -201,42 +180,6 @@ n = False
     assert vars["l"] != None
     assert vars["m"] != None
     assert vars["n"] == False
-
-
-def test_frame_handler():
-    # I have a custom handler for frame (see https://github.com/Almenon/AREPL-backend/issues/26)
-    # otherwise frame returns as simply "py/object": "__builtin__.frame"
-    frame_code = """
-import bdb
-
-f = {}
-
-class areplDebug(bdb.Bdb):
-    # override
-    def user_line(self,frame):
-        global f
-        f = frame
-
-b = areplDebug()
-b.run('x=1+5',{},{})
-    """
-    return_info = python_evaluator.exec_input(frame_code)
-    vars = jsonpickle.decode(return_info.userVariables)
-    assert vars["f"]["f_lineno"] == 1
-
-
-def test_generator_handler():
-    generator_code = """
-def count(start=0):
-    while True:
-        yield start
-        start += 1
-
-counter = count()
-    """
-    return_info = python_evaluator.exec_input(generator_code)
-    vars = jsonpickle.decode(return_info.userVariables)
-    assert vars["counter"]["py/object"] == "builtins.generator"
 
 
 def test_file_IO():

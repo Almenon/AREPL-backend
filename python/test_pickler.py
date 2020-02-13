@@ -3,6 +3,24 @@ import python_evaluator
 import jsonpickle
 
 
+def test_special_floats():
+    x = float('infinity')
+    y = float('nan')
+    z = float('-infinity')
+    vars = jsonpickle.decode(pickle_user_vars(locals()))
+    assert vars["x"] == "Infinity"
+    assert vars["y"] == "NaN"
+    assert vars["z"] == "-Infinity"
+
+
+def test_custom_filter():
+    arepl_filter = ['dog'];dog=1;cat=2
+    vars = jsonpickle.decode(pickle_user_vars(locals()))
+
+    assert vars["cat"] == 2
+    assert "dog" not in vars
+    assert "arepl_filter" not in vars
+
 def test_jsonpickle_err_doesnt_break_arepl():
     class foo:
         def __getstate__(self):
