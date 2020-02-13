@@ -46,6 +46,30 @@ def test_dict_unpack_error():
         python_evaluator.exec_input("[(k,v) for (k,v) in {'a': 1}]")
 
 
+def test_main_returns_var():
+    mock_stdin = """{
+        "savedCode": "",
+        "evalCode": "x=1",
+        "filePath": "",
+        "usePreviousVariables": false,
+        "showGlobalVars": true
+    }"""
+    return_info = python_evaluator.main(mock_stdin)
+    assert jsonpickle.decode(return_info.userVariables)["x"] == 1
+
+
+def test_main_returns_var_even_when_error():
+    mock_stdin = """{
+        "savedCode": "",
+        "evalCode": "y=1;x",
+        "filePath": "",
+        "usePreviousVariables": false,
+        "showGlobalVars": true
+    }"""
+    return_info = python_evaluator.main(mock_stdin)
+    assert jsonpickle.decode(return_info.userVariables)["y"] == 1
+
+
 def test_custom_filter():
     return_info = python_evaluator.exec_input("arepl_filter = ['dog'];dog=1;cat=2")
     vars = jsonpickle.decode(return_info.userVariables)

@@ -216,30 +216,33 @@ def print_output(output):
     print("6q3co7" + json.dumps(output, default=lambda x: x.__dict__))
 
 
+def main(json_input):
+    data = json.loads(json_input)
+    data = ExecArgs(**data)
+
+    start = time()
+    return_info = ReturnInfo("", "{}", None, None)
+
+    try:
+        return_info = exec_input(
+            data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables, data.showGlobalVars
+        )
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except UserError as e:
+        return_info.userError = pickle_user_error(e.traceback_exception)
+        return_info.userErrorMsg = e.friendly_message
+        return_info.userVariables = e.varsSoFar
+        return_info.execTime = e.execTime
+    except Exception as e:
+        return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + str(e)
+
+    return_info.totalPyTime = time() - start
+
+    print_output(return_info)
+    return return_info
+
+
 if __name__ == "__main__":
-
     while True:
-
-        data = json.loads(input())
-        data = ExecArgs(**data)
-
-        start = time()
-        myReturnInfo = ReturnInfo("", "{}", None, None)
-
-        try:
-            myReturnInfo = exec_input(
-                data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables, data.showGlobalVars
-            )
-        except (KeyboardInterrupt, SystemExit):
-            raise
-        except UserError as e:
-            myReturnInfo.userError = pickle_user_error(e.traceback_exception)
-            myReturnInfo.userErrorMsg = e.friendly_message
-            myReturnInfo.userVariables = e.varsSoFar
-            myReturnInfo.execTime = e.execTime
-        except Exception as e:
-            myReturnInfo.internalError = "Sorry, AREPL has ran into an error\n\n" + str(e)
-
-        myReturnInfo.totalPyTime = time() - start
-
-        print_output(myReturnInfo)
+        main(input())
