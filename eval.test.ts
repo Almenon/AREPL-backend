@@ -39,6 +39,27 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("arepl_store works", function(done){
+        pyEvaluator.onPrint = (result)=>{
+            assert.strictEqual(result, "3")
+            done()
+        }
+
+        input.evalCode = "arepl_store=3"
+        pyEvaluator.onResult = ()=>{}
+        pyEvaluator.execCode(input)
+
+        pyEvaluator.onResult = (result)=>{
+            if(result.userErrorMsg){
+                done(result.userErrorMsg)
+            }
+            else{
+                input.evalCode = "print(arepl_store)"
+                pyEvaluator.execCode(input)
+            }
+        }
+    })
+
     // todo: FIX THIS!
     // test("no encoding errors with utf16", function(done){
     //     pyEvaluator.onResult = (result)=>{
