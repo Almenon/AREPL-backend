@@ -254,7 +254,7 @@ export class PythonEvaluator{
 	}
 
 	/**
-	 * gets rid of unnecessary exception data, among other things
+	 * gets rid of unnecessary File "<string>" message in exception
 	 * @example err:
 	 * Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nNameError: name \'x\' is not defined\n
 	 */
