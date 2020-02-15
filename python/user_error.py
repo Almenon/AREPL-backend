@@ -1,5 +1,5 @@
 from pickler import pickle_user_vars
-from traceback import TracebackException
+from traceback import TracebackException,FrameSummary
 
 
 class UserError(Exception):
@@ -17,3 +17,13 @@ class UserError(Exception):
         self.friendly_message = "".join(self.traceback_exception.format())
         self.varsSoFar = pickle_user_vars(varsSoFar)
         self.execTime = execTime
+
+        # stack is empty in event of a syntax error
+        # This is problematic because frontend has to handle syntax/regular error differently
+        # to make it easier populate stack so frontend can handle them the same way
+        if(self.traceback_exception.exc_type is SyntaxError):
+            self.traceback_exception.stack.append(FrameSummary(
+                self.traceback_exception.filename,
+                int(self.traceback_exception.lineno),
+                ""
+            ))
