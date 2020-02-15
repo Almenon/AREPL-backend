@@ -9,8 +9,8 @@ export interface FrameSummary {
 }
 
 export interface UserError{
-	__cause__: {}
-	__context__: {}
+	__cause__: UserError
+	__context__: UserError
 	_str: string
 	cause: UserError
 	context: UserError
