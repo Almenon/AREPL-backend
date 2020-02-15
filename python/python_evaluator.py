@@ -235,7 +235,7 @@ def main(json_input):
         return_info.userVariables = e.varsSoFar
         return_info.execTime = e.execTime
     except Exception as e:
-        return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + str(e)
+        return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
 
     return_info.totalPyTime = time() - start
 
