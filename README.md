@@ -36,7 +36,7 @@ Semantic release cheatsheet:
 #### Table of Contents
 
 -   [constructor](#constructor)
--   [evaling](#evaling)
+-   [executing](#executing)
 -   [running](#running)
 -   [debounce](#debounce)
 -   [execCode](#execcode)
@@ -60,7 +60,7 @@ starts python_evaluator.py
 
 -   `options`  Process / Python options. If not specified sensible defaults are inferred.
 
-### evaling
+### executing
 
 whether python is busy executing inputted code
 
@@ -76,7 +76,7 @@ thanks to <https://stackoverflow.com/a/1909508/6629672>
 
 ### execCode
 
-does not do anything if program is currently evaling code
+does not do anything if program is currently executing code
 
 **Parameters**
 

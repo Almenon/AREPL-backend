@@ -160,11 +160,11 @@ suite("python_evaluator Tests", () => {
     test("returns result after print", function(done){
         pyEvaluator.onPrint = (stdout)=>{ 
             assert.equal(stdout, "hello world")
-            assert.equal(pyEvaluator.evaling, true)
+            assert.equal(pyEvaluator.executing, true)
         }
 
         pyEvaluator.onResult = () => {
-            assert.equal(pyEvaluator.evaling, false)
+            assert.equal(pyEvaluator.executing, false)
             done()
         }
 
@@ -178,11 +178,11 @@ suite("python_evaluator Tests", () => {
 
         assert.equal(pyEvaluator.running, true)
         assert.equal(pyEvaluator.restarting, false)
-        assert.equal(pyEvaluator.evaling, false)
+        assert.equal(pyEvaluator.executing, false)
 
         pyEvaluator.restart(()=>{
             assert.equal(pyEvaluator.running, true)
-            assert.equal(pyEvaluator.evaling, false)
+            assert.equal(pyEvaluator.executing, false)
 
             setTimeout(()=>{
                 // by now python should be restarted and accepting input

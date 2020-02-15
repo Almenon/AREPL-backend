@@ -50,7 +50,7 @@ export class PythonEvaluator{
     /**
      * whether python is busy executing inputted code
      */
-    evaling = false
+    executing = false
 
     /**
      * whether python backend process is running / not running
@@ -85,11 +85,11 @@ export class PythonEvaluator{
 
 	
 	/**
-	 * does not do anything if program is currently evaling code 
+	 * does not do anything if program is currently executing code 
 	 */
 	execCode(code:{evalCode:string, savedCode:string, filePath:string, usePreviousVariables?:boolean, showGlobalVars?:boolean}){
-		if(this.evaling) return
-		this.evaling = true
+		if(this.executing) return
+		this.executing = true
 		this.startTime = Date.now()
 		this.pyshell.send(JSON.stringify(code))
 	}
@@ -114,7 +114,7 @@ export class PythonEvaluator{
 		// (pyshell callback only happens when process exits voluntarily)
 		this.pyshell.childProcess.on('exit',()=>{
 			this.restarting = true
-			this.evaling = false
+			this.executing = false
 			this.start()
 			callback()
 		})
@@ -131,7 +131,7 @@ export class PythonEvaluator{
 		this.pyshell.childProcess.kill()
 		this.running = !this.pyshell.childProcess.killed
 		if(this.running) console.info("pyshell refused to die")
-		else this.evaling = false
+		else this.executing = false
 
 		setTimeout(()=>{
 			if(this.running && !this.restarting){
@@ -140,7 +140,7 @@ export class PythonEvaluator{
 				if(this.pyshell.childProcess.killed){
 					console.error("the python process simply cannot be killed!")
 				}
-				else this.evaling = false
+				else this.executing = false
 			}
 		}, 50)
 	}
@@ -203,7 +203,7 @@ export class PythonEvaluator{
 			try {
 				results = results.replace(PythonEvaluator.identifier,"")
 				pyResult = JSON.parse(results)
-				this.evaling = !pyResult['done']
+				this.executing = !pyResult['done']
 				
 				pyResult.execTime = pyResult.execTime*1000 // convert into ms
 				pyResult.totalPyTime = pyResult.totalPyTime*1000
