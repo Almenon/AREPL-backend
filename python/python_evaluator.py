@@ -75,13 +75,23 @@ class ExecArgs(object):
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(
-        self, savedCode, evalCode, filePath="", usePreviousVariables=False, showGlobalVars=True, *args, **kwargs
+        self,
+        evalCode,
+        savedCode="",
+        filePath="",
+        usePreviousVariables=False,
+        showGlobalVars=True,
+        default_filter_vars=[],
+        default_filter_types=[],
+        *args,**kwargs
     ):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
         self.usePreviousVariables = usePreviousVariables
         self.showGlobalVars = showGlobalVars
+        self.default_filter_vars = default_filter_vars
+        self.default_filter_types = default_filter_types
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
 
 
@@ -130,34 +140,34 @@ def script_path(script_dir):
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
 
-def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False, showGlobalVars=True):
+def exec_input(data: ExecArgs):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
     global eval_locals
 
-    argv[0] = filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
-    saved.starting_locals["__file__"] = filePath
+    argv[0] = data.filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
+    saved.starting_locals["__file__"] = data.filePath
 
-    if not usePreviousVariables:
-        eval_locals = saved.get_eval_locals(savedLines)
+    if not data.usePreviousVariables:
+        eval_locals = saved.get_eval_locals(data.savedLines)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
-    codeToExec = saved.copy_saved_imports_to_exec(codeToExec, savedLines)
+    data.codeToExec = saved.copy_saved_imports_to_exec(data.codeToExec, data.savedLines)
 
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-    with script_path(os.path.dirname(filePath)):
+    with script_path(os.path.dirname(data.filePath)):
         try:
             start = time()
-            exec(codeToExec, eval_locals)
+            exec(data.codeToExec, eval_locals)
             execTime = time() - start
         except BaseException:
             execTime = time() - start
             _, exc_obj, exc_tb = exc_info()
-            if not showGlobalVars:
+            if not data.showGlobalVars:
                 raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
                 raise UserError(exc_obj, exc_tb, eval_locals, execTime)
@@ -195,10 +205,10 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             # clear mock stdin for next run
             overloads.arepl_input_iterator = None
 
-    if showGlobalVars:
-        userVariables = pickle_user_vars(eval_locals)
+    if data.showGlobalVars:
+        userVariables = pickle_user_vars(eval_locals, default_filter_vars=data.default_filter_vars, default_filter_types=data.default_filter_types)
     else:
-        userVariables = pickle_user_vars(noGlobalVarsMsg)
+        userVariables = pickle_user_vars(noGlobalVarsMsg, default_filter_vars=data.default_filter_vars, default_filter_types=data.default_filter_types)
 
     return ReturnInfo("", userVariables, execTime, None)
 
@@ -219,9 +229,7 @@ def main(json_input):
     return_info = ReturnInfo("", "{}", None, None)
 
     try:
-        return_info = exec_input(
-            data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables, data.showGlobalVars
-        )
+        return_info = exec_input(data)
     except (KeyboardInterrupt, SystemExit):
         raise
     except UserError as e:
