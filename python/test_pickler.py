@@ -4,9 +4,9 @@ import jsonpickle
 
 
 def test_special_floats():
-    x = float('infinity')
-    y = float('nan')
-    z = float('-infinity')
+    x = float("infinity")
+    y = float("nan")
+    z = float("-infinity")
     vars = jsonpickle.decode(pickle_user_vars(locals()))
     assert vars["x"] == "Infinity"
     assert vars["y"] == "NaN"
@@ -14,7 +14,9 @@ def test_special_floats():
 
 
 def test_default_type_filter():
-    def foo(): return 3
+    def foo():
+        return 3
+
     cat = 2
     vars = jsonpickle.decode(pickle_user_vars(locals()))
 
@@ -23,7 +25,9 @@ def test_default_type_filter():
 
 
 def test_custom_filter():
-    arepl_filter = ['dog'];dog=1;cat=2
+    arepl_filter = ["dog"]
+    dog = 1
+    cat = 2
     vars = jsonpickle.decode(pickle_user_vars(locals()))
 
     assert vars["cat"] == 2
@@ -32,7 +36,9 @@ def test_custom_filter():
 
 
 def test_custom_type_filter():
-    arepl_filter_type = ["<class 'str'>"];dog="";cat=2
+    arepl_filter_type = ["<class 'str'>"]
+    dog = ""
+    cat = 2
     vars = jsonpickle.decode(pickle_user_vars(locals()))
 
     assert vars["cat"] == 2
@@ -42,8 +48,9 @@ def test_custom_type_filter():
 
 def test_custom_filter_function():
     def arepl_filter_function(userVariables):
-        userVariables['a']=3
+        userVariables["a"] = 3
         return userVariables
+
     vars = jsonpickle.decode(pickle_user_vars(locals()))
 
     assert vars["a"] == 3
@@ -54,9 +61,11 @@ def test_jsonpickle_err_doesnt_break_arepl():
     class foo:
         def __getstate__(self):
             a
+
     f = foo()
 
     assert jsonpickle.decode(pickle_user_vars(locals()))["f"] == "AREPL could not pickle this object"
+
 
 # I don't want to require pandas to run tests
 # So leaving this commented, devs can uncomment to run test if they want to

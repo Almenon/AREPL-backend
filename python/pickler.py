@@ -65,7 +65,7 @@ def pickle_user_vars(userVars):
 
     custom_filter = userVars.get("arepl_filter", [])
     custom_filter_type = userVars.get("arepl_filter_type", [])
-    custom_filter_function = userVars.get("arepl_filter_function", lambda x:x)
+    custom_filter_function = userVars.get("arepl_filter_function", lambda x: x)
 
     type_filters = ["<class 'module'>", "<class 'function'>"] + custom_filter_type
 
