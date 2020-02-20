@@ -325,6 +325,12 @@ def test_user_var_import_deleted():
             f.write(origVarToImportFileText)
 
 
+def test_arepl_store():
+    python_evaluator.exec_input("arepl_store=5")
+    return_info = python_evaluator.exec_input("x=arepl_store")
+    assert jsonpickle.decode(return_info.userVariables)["x"] == 5
+
+
 def test_howdoiArepl():
     return_info = python_evaluator.exec_input("x=howdoi('use arepl')")
     assert (

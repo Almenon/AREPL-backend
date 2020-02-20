@@ -15,11 +15,7 @@ from module_logic import get_non_user_modules
 # it will recreate arepl_input_iterator and we need the original
 import overloads
 from pickler import specialVars, pickle_user_vars, pickle_user_error
-from saved import get_starting_locals
-from saved import get_eval_locals
-from saved import copy_saved_imports_to_exec
-from saved import starting_locals
-from saved import arepl_store
+import saved
 from user_error import UserError
 
 if util.find_spec("howdoi") is not None:
@@ -92,11 +88,11 @@ class ExecArgs(object):
 nonUserModules = get_non_user_modules()
 origModules = frozenset(modules)
 
-starting_locals["help"] = overloads.help_overload
-starting_locals["input"] = overloads.input_overload
-starting_locals["howdoi"] = overloads.howdoi_wrapper
+saved.starting_locals["help"] = overloads.help_overload
+saved.starting_locals["input"] = overloads.input_overload
+saved.starting_locals["howdoi"] = overloads.howdoi_wrapper
 
-eval_locals = deepcopy(starting_locals)
+eval_locals = deepcopy(saved.starting_locals)
 
 
 @contextmanager
@@ -139,17 +135,16 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
-    global arepl_store
     global eval_locals
 
     argv[0] = filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
-    starting_locals["__file__"] = filePath
+    saved.starting_locals["__file__"] = filePath
 
     if not usePreviousVariables:
-        eval_locals = get_eval_locals(savedLines)
+        eval_locals = saved.get_eval_locals(savedLines)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
-    codeToExec = copy_saved_imports_to_exec(codeToExec, savedLines)
+    codeToExec = saved.copy_saved_imports_to_exec(codeToExec, savedLines)
 
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
@@ -169,7 +164,7 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
 
         finally:
 
-            arepl_store = eval_locals.get("arepl_store", None)
+            saved.arepl_store = eval_locals.get("arepl_store")
 
             try:
                 # arepl_dump library keeps state internally
