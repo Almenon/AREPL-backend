@@ -6,6 +6,7 @@ import pytest
 import jsonpickle
 
 import python_evaluator
+from settings import get_settings, update_settings
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 
@@ -82,7 +83,8 @@ x=next(counter)
 
 
 def test_dont_show_global_vars():
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x = 1", showGlobalVars=False))
+    update_settings({'showGlobalVars': False})
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x = 1"))
     assert jsonpickle.decode(return_info.userVariables)["zz status"] == "AREPL is configured to not show global vars"
 
 

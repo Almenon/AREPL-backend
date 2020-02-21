@@ -1,6 +1,6 @@
 from pickler import pickle_user_vars
 from traceback import TracebackException, FrameSummary
-
+from settings import get_settings
 
 class UserError(Exception):
     """
@@ -15,7 +15,7 @@ class UserError(Exception):
 
         self.traceback_exception = TracebackException(type(exc_obj), exc_obj, exc_tb)
         self.friendly_message = "".join(self.traceback_exception.format())
-        self.varsSoFar = pickle_user_vars(varsSoFar)
+        self.varsSoFar = pickle_user_vars(varsSoFar, get_settings().default_filter_vars, get_settings().default_filter_types)
         self.execTime = execTime
 
         # stack is empty in event of a syntax error
