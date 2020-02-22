@@ -9,10 +9,16 @@ import python_evaluator
 from settings import get_settings, update_settings
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
+# The frontend will pass in below settings as default    
+default_settings = {
+    'showGlobalVars': True,
+    'default_filter_vars': [],
+    'default_filter_types': ["<class 'module'>", "<class 'function'>"],
+}
 
-# The frontend will pass in below settings as default
-default_settings = {'default_filter_types': ["<class 'module'>", "<class 'function'>"]}
-update_settings(default_settings)
+
+def setup_function():
+    update_settings(default_settings)
 
 
 def test_simple_code():
@@ -85,12 +91,9 @@ x=next(counter)
 
 
 def test_dont_show_global_vars():
-    default_settings['showGlobalVars'] = False
-    update_settings(default_settings)
+    update_settings({'showGlobalVars': False})
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x = 1"))
     assert jsonpickle.decode(return_info.userVariables)["zz status"] == "AREPL is configured to not show global vars"
-    default_settings['showGlobalVars'] = True
-    update_settings(default_settings)
 
 
 def test_argv0_should_be_file_path():
