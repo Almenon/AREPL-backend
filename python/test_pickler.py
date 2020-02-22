@@ -81,14 +81,14 @@ def test_jsonpickle_err_doesnt_break_arepl():
 
 def test_error_has_extended_traceback_1():
     try:
-        python_evaluator.exec_input(
+        python_evaluator.exec_input(python_evaluator.ExecArgs(
             """
 try:
     x
 except NameError as e:
     x=1/0
 """
-        )
+        ))
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:
@@ -99,7 +99,7 @@ except NameError as e:
 
 def test_error_has_extended_traceback_2():
     try:
-        python_evaluator.exec_input(
+        python_evaluator.exec_input(python_evaluator.ExecArgs(
             """
 def foo():
     raise ZeroDivisionError()
@@ -109,7 +109,7 @@ try:
 except Exception as e:
     fah
 """
-        )
+        ))
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:

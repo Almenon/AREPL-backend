@@ -62,10 +62,10 @@ for handler in handlers:
 specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "arepl_store"]
 
 
-def pickle_user_vars(userVars: dict, default_filter_vars: List[str], default_filter_types: List[str]):
+def pickle_user_vars(userVars: dict, default_filter_vars: List[str]=[], default_filter_types: List[str]=["<class 'module'>", "<class 'function'>"]):
 
-    default_filter_vars.append(userVars.get("arepl_filter", []))
-    default_filter_types.append(userVars.get("arepl_filter_type", []))
+    default_filter_vars += userVars.get("arepl_filter", [])
+    default_filter_types += userVars.get("arepl_filter_type", [])
     custom_filter_function = userVars.get("arepl_filter_function", lambda x: x)
 
     # filter out non-user vars, no point in showing them

@@ -25,4 +25,5 @@ def update_settings(new_settings) -> None:
     """
     Updates all settings
     """
+    global settings
     settings = Settings(**new_settings)
