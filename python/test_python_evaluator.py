@@ -6,7 +6,7 @@ import pytest
 import jsonpickle
 
 import python_evaluator
-from settings import get_settings, update_settings
+from settings import update_settings
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 # The frontend will pass in below settings as default
