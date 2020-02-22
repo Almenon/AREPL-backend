@@ -37,6 +37,7 @@
   "devDependencies": {
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.5.2",
+    "documentation": "^12.1.4",
     "mocha": "^5.2.0",
     "mocha-appveyor-reporter": "^0.4.0",
     "semantic-release": "^15.13.30",
