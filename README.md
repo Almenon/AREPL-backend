@@ -36,29 +36,41 @@ Semantic release cheatsheet:
 #### Table of Contents
 
 -   [constructor](#constructor)
+    -   [Parameters](#parameters)
 -   [executing](#executing)
 -   [running](#running)
 -   [debounce](#debounce)
 -   [execCode](#execcode)
+    -   [Parameters](#parameters-1)
 -   [sendStdin](#sendstdin)
+    -   [Parameters](#parameters-2)
 -   [restart](#restart)
+    -   [Parameters](#parameters-3)
 -   [stop](#stop)
 -   [start](#start)
 -   [onResult](#onresult)
+    -   [Parameters](#parameters-4)
 -   [onPrint](#onprint)
+    -   [Parameters](#parameters-5)
 -   [onStderr](#onstderr)
+    -   [Parameters](#parameters-6)
 -   [handleResult](#handleresult)
+    -   [Parameters](#parameters-7)
 -   [checkSyntax](#checksyntax)
+    -   [Parameters](#parameters-8)
 -   [checkSyntaxFile](#checksyntaxfile)
+    -   [Parameters](#parameters-9)
 -   [formatPythonException](#formatpythonexception)
+    -   [Parameters](#parameters-10)
+    -   [Examples](#examples)
 
 ### constructor
 
 starts python_evaluator.py
 
-**Parameters**
+#### Parameters
 
--   `options`  Process / Python options. If not specified sensible defaults are inferred.
+-   `options`  Process / Python options. If not specified sensible defaults are inferred. (optional, default `{}`)
 
 ### executing
 
@@ -78,13 +90,13 @@ thanks to <https://stackoverflow.com/a/1909508/6629672>
 
 does not do anything if program is currently executing code
 
-**Parameters**
+#### Parameters
 
 -   `code`  
 
 ### sendStdin
 
-**Parameters**
+#### Parameters
 
 -   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
@@ -93,7 +105,7 @@ does not do anything if program is currently executing code
 kills python process and restarts.  Force-kills if necessary after 50ms.
 After process restarts the callback passed in is invoked
 
-**Parameters**
+#### Parameters
 
 -   `callback`   (optional, default `()=>{}`)
 
@@ -111,7 +123,7 @@ starts python_evaluator.py. Will NOT WORK with python 2
 Overwrite this with your own handler.
 is called when program fails or completes
 
-**Parameters**
+#### Parameters
 
 -   `foo`  
 
@@ -120,7 +132,7 @@ is called when program fails or completes
 Overwrite this with your own handler.
 Is called when program prints
 
-**Parameters**
+#### Parameters
 
 -   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
@@ -129,7 +141,7 @@ Is called when program prints
 Overwrite this with your own handler.
 Is called when program logs stderr
 
-**Parameters**
+#### Parameters
 
 -   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
@@ -137,7 +149,7 @@ Is called when program logs stderr
 
 handles pyshell results and calls onResult / onPrint
 
-**Parameters**
+#### Parameters
 
 -   `results` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
@@ -145,7 +157,7 @@ handles pyshell results and calls onResult / onPrint
 
 checks syntax without executing code
 
-**Parameters**
+#### Parameters
 
 -   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
@@ -155,7 +167,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 checks syntax without executing code
 
-**Parameters**
+#### Parameters
 
 -   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
@@ -163,13 +175,13 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 ### formatPythonException
 
-gets rid of unnecessary exception data, among other things
+gets rid of unnecessary File "<string>" message in exception
 
-**Parameters**
+#### Parameters
 
 -   `err`  
 
-**Examples**
+#### Examples
 
 ```javascript
 err:
