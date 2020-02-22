@@ -29,6 +29,16 @@ export interface UserError{
 	text?: string
 }
 
+export interface ExecArgs{
+	evalCode:string,
+	savedCode:string,
+	filePath:string,
+	usePreviousVariables?:boolean,
+	showGlobalVars?:boolean,
+	default_filter_vars:string[],
+	default_filter_types:string[]
+}
+
 export interface PythonResult{
 	userError: UserError,
 	userErrorMsg?: string,
@@ -87,7 +97,7 @@ export class PythonEvaluator{
 	/**
 	 * does not do anything if program is currently executing code 
 	 */
-	execCode(code:{evalCode:string, savedCode:string, filePath:string, usePreviousVariables?:boolean, showGlobalVars?:boolean}){
+	execCode(code:ExecArgs){
 		if(this.executing) return
 		this.executing = true
 		this.startTime = Date.now()

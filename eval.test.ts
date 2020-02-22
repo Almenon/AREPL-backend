@@ -14,7 +14,15 @@ function isEmpty(obj) {
 
 suite("python_evaluator Tests", () => {
     let pyEvaluator = new PythonEvaluator()
-    let input = {evalCode:"", savedCode: "", filePath: "", usePreviousVariables: false, showGlobalVars: true}
+    let input = {
+      evalCode:"",
+      savedCode: "",
+      filePath: "",
+      usePreviousVariables: false,
+      showGlobalVars: true,
+      default_filter_vars: [],
+      default_filter_types: ["<class 'module'>", "<class 'function'>"]
+    }
     const pythonStartupTime = 3500
     // python 3.7 has much faster startup time
     // when we drop support for 3.6 we can decrease this
@@ -42,20 +50,24 @@ suite("python_evaluator Tests", () => {
     test("arepl_store works", function(done){
         pyEvaluator.onPrint = (result)=>{
             assert.strictEqual(result, "3")
-            done()
         }
 
         input.evalCode = "arepl_store=3"
         pyEvaluator.onResult = ()=>{}
         pyEvaluator.execCode(input)
 
+        let onSecondRun = false
         pyEvaluator.onResult = (result)=>{
             if(result.userErrorMsg){
                 done(result.userErrorMsg)
             }
-            else{
+            else if(!onSecondRun){
                 input.evalCode = "print(arepl_store)"
                 pyEvaluator.execCode(input)
+                onSecondRun = true
+            }
+            else{
+                done()
             }
         }
     })

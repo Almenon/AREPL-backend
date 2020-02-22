@@ -16,6 +16,7 @@ from module_logic import get_non_user_modules
 import overloads
 from pickler import specialVars, pickle_user_vars, pickle_user_error
 import saved
+from settings import get_settings, update_settings
 from user_error import UserError
 
 if util.find_spec("howdoi") is not None:
@@ -74,14 +75,11 @@ class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
-    def __init__(
-        self, savedCode, evalCode, filePath="", usePreviousVariables=False, showGlobalVars=True, *args, **kwargs
-    ):
+    def __init__(self, evalCode, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
         self.usePreviousVariables = usePreviousVariables
-        self.showGlobalVars = showGlobalVars
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
 
 
@@ -130,34 +128,34 @@ def script_path(script_dir):
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
 
-def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=False, showGlobalVars=True):
+def exec_input(exec_args: ExecArgs):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
     global eval_locals
 
-    argv[0] = filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
-    saved.starting_locals["__file__"] = filePath
+    argv[0] = exec_args.filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
+    saved.starting_locals["__file__"] = exec_args.filePath
 
-    if not usePreviousVariables:
-        eval_locals = saved.get_eval_locals(savedLines)
+    if not exec_args.usePreviousVariables:
+        eval_locals = saved.get_eval_locals(exec_args.savedCode)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
-    codeToExec = saved.copy_saved_imports_to_exec(codeToExec, savedLines)
+    exec_args.evalCode = saved.copy_saved_imports_to_exec(exec_args.evalCode, exec_args.savedCode)
 
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-    with script_path(os.path.dirname(filePath)):
+    with script_path(os.path.dirname(exec_args.filePath)):
         try:
             start = time()
-            exec(codeToExec, eval_locals)
+            exec(exec_args.evalCode, eval_locals)
             execTime = time() - start
         except BaseException:
             execTime = time() - start
             _, exc_obj, exc_tb = exc_info()
-            if not showGlobalVars:
+            if not get_settings().showGlobalVars:
                 raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
                 raise UserError(exc_obj, exc_tb, eval_locals, execTime)
@@ -195,10 +193,14 @@ def exec_input(codeToExec, savedLines="", filePath="", usePreviousVariables=Fals
             # clear mock stdin for next run
             overloads.arepl_input_iterator = None
 
-    if showGlobalVars:
-        userVariables = pickle_user_vars(eval_locals)
+    if get_settings().showGlobalVars:
+        userVariables = pickle_user_vars(
+            eval_locals, get_settings().default_filter_vars, get_settings().default_filter_types
+        )
     else:
-        userVariables = pickle_user_vars(noGlobalVarsMsg)
+        userVariables = pickle_user_vars(
+            noGlobalVarsMsg, get_settings().default_filter_vars, get_settings().default_filter_types
+        )
 
     return ReturnInfo("", userVariables, execTime, None)
 
@@ -213,15 +215,14 @@ def print_output(output):
 
 def main(json_input):
     data = json.loads(json_input)
-    data = ExecArgs(**data)
+    execArgs = ExecArgs(**data)
+    update_settings(data)
 
     start = time()
     return_info = ReturnInfo("", "{}", None, None)
 
     try:
-        return_info = exec_input(
-            data.evalCode, data.savedCode, data.filePath, data.usePreviousVariables, data.showGlobalVars
-        )
+        return_info = exec_input(execArgs)
     except (KeyboardInterrupt, SystemExit):
         raise
     except UserError as e:

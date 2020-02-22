@@ -20,7 +20,7 @@ class areplDebug(bdb.Bdb):
 b = areplDebug()
 b.run('x=1+5',{},{})
     """
-    return_info = python_evaluator.exec_input(frame_code)
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(frame_code))
     vars = jsonpickle.decode(return_info.userVariables)
     assert vars["f"]["f_lineno"] == 1
 
@@ -34,6 +34,6 @@ def count(start=0):
 
 counter = count()
     """
-    return_info = python_evaluator.exec_input(generator_code)
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(generator_code))
     vars = jsonpickle.decode(return_info.userVariables)
     assert vars["counter"]["py/object"] == "builtins.generator"

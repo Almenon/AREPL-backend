@@ -3,6 +3,7 @@ from importlib import (
 )  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 from math import isnan
 from types import ModuleType, FunctionType
+from typing import List
 
 import jsonpickle
 from custom_handlers import handlers
@@ -61,21 +62,23 @@ for handler in handlers:
 specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "arepl_store"]
 
 
-def pickle_user_vars(userVars):
+def pickle_user_vars(
+    userVars: dict,
+    default_filter_vars: List[str] = [],
+    default_filter_types: List[str] = ["<class 'module'>", "<class 'function'>"],
+):
 
-    custom_filter = userVars.get("arepl_filter", [])
-    custom_filter_type = userVars.get("arepl_filter_type", [])
+    default_filter_vars += userVars.get("arepl_filter", [])
+    default_filter_types += userVars.get("arepl_filter_type", [])
     custom_filter_function = userVars.get("arepl_filter_function", lambda x: x)
-
-    type_filters = ["<class 'module'>", "<class 'function'>"] + custom_filter_type
 
     # filter out non-user vars, no point in showing them
     userVariables = {
         k: v
         for k, v in userVars.items()
-        if str(type(v)) not in type_filters
+        if str(type(v)) not in default_filter_types
         and k not in specialVars + ["__builtins__"]
-        and k not in custom_filter
+        and k not in default_filter_vars
     }
 
     # These vars are just for filtering, no need to show to user

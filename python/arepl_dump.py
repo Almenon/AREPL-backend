@@ -3,6 +3,7 @@ import inspect
 import json
 from time import time
 from python_evaluator import pickle_user_vars, ReturnInfo, print_output
+from settings import get_settings
 
 context = {}
 
@@ -36,7 +37,9 @@ def dump(variable=None, atCount=0):
         else:
             variableDict = {"dump output": variable}
 
-        variableJson = pickle_user_vars(variableDict)
+        variableJson = pickle_user_vars(
+            variableDict, get_settings().default_filter_vars, get_settings().default_filter_types
+        )
         my_return_info = ReturnInfo(
             "", variableJson, None, time() - startTime, None, caller, callerLine, done=False, count=count
         )
