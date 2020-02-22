@@ -75,14 +75,7 @@ class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
-    def __init__(
-        self,
-        evalCode,
-        savedCode="",
-        filePath="",
-        usePreviousVariables=False,
-        *args,**kwargs
-    ):
+    def __init__(self, evalCode, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
@@ -201,9 +194,13 @@ def exec_input(exec_args: ExecArgs):
             overloads.arepl_input_iterator = None
 
     if get_settings().showGlobalVars:
-        userVariables = pickle_user_vars(eval_locals, get_settings().default_filter_vars, get_settings().default_filter_types)
+        userVariables = pickle_user_vars(
+            eval_locals, get_settings().default_filter_vars, get_settings().default_filter_types
+        )
     else:
-        userVariables = pickle_user_vars(noGlobalVarsMsg, get_settings().default_filter_vars, get_settings().default_filter_types)
+        userVariables = pickle_user_vars(
+            noGlobalVarsMsg, get_settings().default_filter_vars, get_settings().default_filter_types
+        )
 
     return ReturnInfo("", userVariables, execTime, None)
 

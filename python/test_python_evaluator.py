@@ -9,11 +9,11 @@ import python_evaluator
 from settings import get_settings, update_settings
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
-# The frontend will pass in below settings as default    
+# The frontend will pass in below settings as default
 default_settings = {
-    'showGlobalVars': True,
-    'default_filter_vars': [],
-    'default_filter_types': ["<class 'module'>", "<class 'function'>"],
+    "showGlobalVars": True,
+    "default_filter_vars": [],
+    "default_filter_types": ["<class 'module'>", "<class 'function'>"],
 }
 
 
@@ -33,13 +33,15 @@ def test_has_error():
 
 def test_error_has_traceback():
     try:
-        python_evaluator.exec_input(python_evaluator.ExecArgs(
-            """
+        python_evaluator.exec_input(
+            python_evaluator.ExecArgs(
+                """
 def foo():
     x
 foo()
         """
-        ))
+            )
+        )
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:
@@ -80,18 +82,20 @@ def test_main_returns_var_even_when_error():
 
 
 def test_infinite_generator():
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(
-        """
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs(
+            """
 import itertools
 counter = (x for x in itertools.count())
 x=next(counter)
     """
-    ))
+        )
+    )
     assert jsonpickle.decode(return_info.userVariables)["x"] == 0
 
 
 def test_dont_show_global_vars():
-    update_settings({'showGlobalVars': False})
+    update_settings({"showGlobalVars": False})
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x = 1"))
     assert jsonpickle.decode(return_info.userVariables)["zz status"] == "AREPL is configured to not show global vars"
 
@@ -125,7 +129,9 @@ def test_relative_import():
 
 
 def test_dump():
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("from arepl_dump import dump;dump('dump worked');x=1"))
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs("from arepl_dump import dump;dump('dump worked');x=1")
+    )
     assert jsonpickle.decode(return_info.userVariables)["x"] == 1
 
 
@@ -133,11 +139,15 @@ def test_dump_when_exception():
     # this test prevents rather specific error case where i forget to uncache dump during exception handling
     # and it causes dump to not work properly second time around (see https://github.com/Almenon/AREPL-vscode/issues/91)
     try:
-        python_evaluator.exec_input(python_evaluator.ExecArgs("from arepl_dump import dump;dumpOut = dump('dump worked');x=1;raise Exception()"))
+        python_evaluator.exec_input(
+            python_evaluator.ExecArgs("from arepl_dump import dump;dumpOut = dump('dump worked');x=1;raise Exception()")
+        )
     except Exception as e:
         assert "dumpOut" in jsonpickle.decode(e.varsSoFar)
     try:
-        python_evaluator.exec_input(python_evaluator.ExecArgs("from arepl_dump import dump;dumpOut = dump('dump worked');raise Exception()"))
+        python_evaluator.exec_input(
+            python_evaluator.ExecArgs("from arepl_dump import dump;dumpOut = dump('dump worked');raise Exception()")
+        )
     except Exception as e:
         assert "dumpOut" in jsonpickle.decode(e.varsSoFar) and jsonpickle.decode(e.varsSoFar)["dumpOut"] is not None
 
@@ -149,9 +159,13 @@ def test_import_does_not_show():
 
 
 def test_save():
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("", "from random import random\nx=random()#$save"))
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs("", "from random import random\nx=random()#$save")
+    )
     randomVal = jsonpickle.decode(return_info.userVariables)["x"]
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("z=3", "from random import random\nx=random()#$save"))
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs("z=3", "from random import random\nx=random()#$save")
+    )
     assert jsonpickle.decode(return_info.userVariables)["x"] == randomVal
 
 
@@ -365,11 +379,15 @@ def test_script_path_should_work_regardless_of_user_errors():
 
 
 def test_mock_stdin():
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("standard_input = 'hello\\nworld';x=input();y=input()"))
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs("standard_input = 'hello\\nworld';x=input();y=input()")
+    )
     assert jsonpickle.decode(return_info.userVariables)["x"] == "hello"
     assert jsonpickle.decode(return_info.userVariables)["y"] == "world"
 
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("standard_input = ['hello', 'world'];x=input();y=input()"))
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs("standard_input = ['hello', 'world'];x=input();y=input()")
+    )
     assert jsonpickle.decode(return_info.userVariables)["x"] == "hello"
     assert jsonpickle.decode(return_info.userVariables)["y"] == "world"
 
