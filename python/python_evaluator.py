@@ -8,6 +8,7 @@ from time import time
 import asyncio
 import os
 from sys import path, modules, argv, version_info, exc_info
+from typing import Any, Dict, FrozenSet, Set
 from contextlib import contextmanager
 from module_logic import get_non_user_modules
 
@@ -37,15 +38,15 @@ class ReturnInfo:
     # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(
         self,
-        userError,
-        userVariables,
-        execTime,
-        totalTime,
-        internalError=None,
-        caller="<module>",
-        lineno=-1,
-        done=True,
-        count=-1,
+        userError: str,
+        userVariables: dict,
+        execTime: float,
+        totalPyTime: float,
+        internalError: str = None,
+        caller = "<module>",
+        lineno = -1,
+        done = True,
+        count = -1,
         *args,
         **kwargs
     ):
@@ -56,7 +57,7 @@ class ReturnInfo:
         self.userError = userError
         self.userVariables = userVariables
         self.execTime = execTime
-        self.totalTime = totalTime
+        self.totalPyTime = totalPyTime
         self.internalError = internalError
         self.caller = caller
         self.lineno = lineno
@@ -64,9 +65,9 @@ class ReturnInfo:
         self.count = count
 
 
-if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 4):
+if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 5):
     # need at least 3.5 for typing
-    exMsg = "Must be using python 3.4 or later. You are using " + str(version_info)
+    exMsg = "Must be using python 3.5 or later. You are using " + str(version_info)
     print(ReturnInfo("", "{}", None, None, exMsg))
     raise Exception(exMsg)
 
@@ -75,7 +76,7 @@ class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
-    def __init__(self, evalCode, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
+    def __init__(self, evalCode: str, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
@@ -94,7 +95,7 @@ eval_locals = deepcopy(saved.starting_locals)
 
 
 @contextmanager
-def script_path(script_dir):
+def script_path(script_dir: str):
     """
         Context manager for adding a dir to the sys path
         and restoring it afterwards. This trick allows
@@ -205,7 +206,7 @@ def exec_input(exec_args: ExecArgs):
     return ReturnInfo("", userVariables, execTime, None)
 
 
-def print_output(output):
+def print_output(output: object):
     """
     turns output into JSON and prints it
     """
@@ -213,7 +214,7 @@ def print_output(output):
     print("6q3co7" + json.dumps(output, default=lambda x: x.__dict__))
 
 
-def main(json_input):
+def main(json_input: str):
     data = json.loads(json_input)
     execArgs = ExecArgs(**data)
     update_settings(data)

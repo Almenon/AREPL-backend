@@ -4,6 +4,7 @@ import traceback
 from pickler import pickle_user_vars, specialVars
 from user_error import UserError
 from sys import exc_info
+from typing import Any, Dict, List
 
 #####################################
 """
@@ -14,7 +15,7 @@ In practice not sure if this is actually used and its quite buggy :(
 #####################################
 
 saved_locals = {}
-old_saved_lines = []
+old_saved_lines = ""
 starting_locals = {}
 
 # public cache var for user to store their data between runs
@@ -30,13 +31,13 @@ for var in specialVars:
 starting_locals["__name__"] = "__main__"
 
 
-def get_starting_locals():
+def get_starting_locals() -> Dict[str, Any]:
     starting_locals_copy = deepcopy(starting_locals)
     starting_locals_copy["arepl_store"] = arepl_store
     return starting_locals_copy
 
 
-def exec_saved(savedLines):
+def exec_saved(savedLines: str) -> Dict[str, Any]:
     saved_locals = get_starting_locals()
     try:
         exec(savedLines, saved_locals)
@@ -50,7 +51,7 @@ def exec_saved(savedLines):
     return saved_locals
 
 
-def get_eval_locals(savedLines):
+def get_eval_locals(savedLines: str) -> Dict[str, Any]:
     """
     If savedLines is changed, rexecutes saved lines and returns resulting local variables.
     If savedLines is unchanged, returns the saved locals.
@@ -71,7 +72,7 @@ def get_eval_locals(savedLines):
         return get_starting_locals()
 
 
-def get_imports(parsedText, text):
+def get_imports(parsedText: ast.AST, text: str) -> str:
     """
     :param parsedText: the result of ast.parse(text)
     :returns: empty string if no imports, otherwise string containing all imports
@@ -90,7 +91,7 @@ def get_imports(parsedText, text):
     return imports
 
 
-def copy_saved_imports_to_exec(codeToExec, savedLines):
+def copy_saved_imports_to_exec(codeToExec: str, savedLines: str) -> str:
     """
     copies imports in savedLines to the top of codeToExec.
     If savedLines is empty this function does nothing.

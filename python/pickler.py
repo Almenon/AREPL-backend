@@ -3,7 +3,7 @@ from importlib import (
 )  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 from math import isnan
 from types import ModuleType, FunctionType
-from typing import List
+from typing import Any, Dict, List
 
 import jsonpickle
 from custom_handlers import handlers
@@ -63,7 +63,7 @@ specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "
 
 
 def pickle_user_vars(
-    userVars: dict,
+    userVars: Dict[str, Any],
     default_filter_vars: List[str] = [],
     default_filter_types: List[str] = ["<class 'module'>", "<class 'function'>"],
 ):

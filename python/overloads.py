@@ -1,4 +1,5 @@
 import inspect
+from typing import Any
 
 """
 This file contains overloads of certain python functions for arepl purposes
@@ -8,7 +9,7 @@ For example, arepl doesn't support stdin so we overload input and help
 # AREPL-vscode does not support stdin yet so help breaks it
 # by overridding help with a non-stdin version we can prevent AREPL-vscode from freezing up
 # just a temp fix untill AREPL-vscode supports stdin
-def help_overload(arg=None):
+def help_overload(arg: Any = None):
     if arg is None:
         print(
             """Welcome to python! :)
@@ -26,7 +27,7 @@ arepl_input_iterator = None
 
 # AREPL doesn't support input so we overload input
 # This allows users to hardcode input by specifying a standard_input var
-def input_overload(prompt=None):
+def input_overload(prompt: str = None) -> str:
     """AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input()). You can also hardcode standard_input as a generator or list.
     
     Keyword Arguments:
@@ -34,9 +35,6 @@ def input_overload(prompt=None):
     
     Raises:
         StopIteration -- if there is no more input
-    
-    Returns:
-        str
     """
     global arepl_input_iterator
 
@@ -64,26 +62,27 @@ def input_overload(prompt=None):
             return next(arepl_input_iterator)
     except KeyError:
         print("AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input())")
+        return ""
 
 
-def howdoi_wrapper(strArg):
+def howdoi_wrapper(query: str) -> str:
     """howdoi is meant to be called from the command line - this wrapper lets it be called programatically
     
     Arguments:
-        strArg {str} -- search term
+        query {str} -- search term
     """
 
-    if strArg.lower() == "use arepl" or strArg.lower() == "arepl":
+    if query.lower() == "use arepl" or query.lower() == "arepl":
         returnVal = "using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki"
     else:
         try:
             parser = howdoi.get_parser()
         except NameError as e:
             # alter error to be more readable by user
-            e.args = ["howdoi is not installed"]
+            e.args = ("howdoi is not installed",)
             raise
 
-        args = vars(parser.parse_args(strArg.split(" ")))
+        args = vars(parser.parse_args(query.split(" ")))
         returnVal = howdoi.howdoi(args)
 
     print(returnVal)

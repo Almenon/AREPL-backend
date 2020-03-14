@@ -3,9 +3,9 @@ from sys import builtin_module_names
 from sys import modules
 from pkgutil import iter_modules
 from stdlib_list import stdlib_list
+from typing import List,Set
 
-
-def get_non_user_modules():
+def get_non_user_modules() -> Set[str]:
     """returns a set of all modules not written by the user (aka all builtin and pip modules)
     
     Returns:
