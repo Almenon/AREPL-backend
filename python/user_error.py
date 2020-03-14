@@ -1,5 +1,6 @@
 from pickler import pickle_user_vars
 from traceback import TracebackException, FrameSummary
+from types import TracebackType
 from settings import get_settings
 
 
@@ -10,7 +11,7 @@ class UserError(Exception):
     :raises: ValueError (varsSoFar gets pickled into JSON, which may result in any number of errors depending on what types are inside)
     """
 
-    def __init__(self, exc_obj, exc_tb, varsSoFar={}, execTime=0):
+    def __init__(self, exc_obj: BaseException, exc_tb: TracebackType, varsSoFar={}, execTime=0):
         # skip arepl traceback - the user should just see their own error
         exc_tb = exc_tb.tb_next
 

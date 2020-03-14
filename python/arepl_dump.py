@@ -2,13 +2,14 @@ import jsonpickle
 import inspect
 import json
 from time import time
+from typing import Any
 from python_evaluator import pickle_user_vars, ReturnInfo, print_output
 from settings import get_settings
 
 context = {}
 
 
-def dump(variable=None, atCount=0):
+def dump(variable: Any = None, atCount: int = 0):
     """
     dumps specified var to arepl viewer or all vars of calling scope if unspecified
     :param atCount: when to dump. ex: dump(,3) to dump vars at fourth iteration of loop. You can pass in a list of numbers to do multiple dumps.
