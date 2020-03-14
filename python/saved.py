@@ -14,9 +14,9 @@ In practice not sure if this is actually used and its quite buggy :(
 """
 #####################################
 
-saved_locals: Dict[str, Any] = {}
+saved_locals = {}
 old_saved_lines = ""
-starting_locals: Dict[str, Any] = {}
+starting_locals = {}
 
 # public cache var for user to store their data between runs
 arepl_store = None
@@ -80,8 +80,8 @@ def get_imports(parsedText: ast.AST, text: str) -> str:
 
     child_nodes = [l for l in ast.iter_child_nodes(parsedText)]
 
-    imports: List[str] = []
-    saved_code: List[str] = text.split("\n")
+    imports = []
+    saved_code = text.split("\n")
     for node in child_nodes:
         if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
             importLine = saved_code[node.lineno - 1]

@@ -12,9 +12,9 @@ def get_non_user_modules() -> Set[str]:
         set -- set of module names
     """
     # p[1] is name
-    pip_modules: List[str] = [p[1] for p in iter_modules()]  # pylint: disable=E1133
+    pip_modules = [p[1] for p in iter_modules()]  # pylint: disable=E1133
 
-    special_cases: List[str] = [
+    special_cases = [
         "jsonpickle",  # hardcoded as part of AREPL
         "stdlib_list",  # hardcoded as part of AREPL
         "python_evaluator",  # hardcoded as part of AREPL
@@ -23,7 +23,7 @@ def get_non_user_modules() -> Set[str]:
     more_builtin_modules = stdlib_list(version[:3], fallback=True)
     # more_builtin_modules contains modules in libs folder, among many others
 
-    even_more_builtin_modules: List[str] = [k for k in modules]
+    even_more_builtin_modules = [k for k in modules]
     # how many damn modules are there???
 
     return set(

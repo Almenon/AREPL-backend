@@ -85,7 +85,7 @@ class ExecArgs(object):
 
 
 nonUserModules = get_non_user_modules()
-origModules: FrozenSet[str] = frozenset(modules)
+origModules = frozenset(modules)
 
 saved.starting_locals["help"] = overloads.help_overload
 saved.starting_locals["input"] = overloads.input_overload
@@ -173,8 +173,8 @@ def exec_input(exec_args: ExecArgs):
             except KeyError:
                 pass  # they have not imported it, whatever
 
-            importedModules: Set[str] = set(modules) - origModules
-            userModules: Set[str] = importedModules - nonUserModules
+            importedModules = set(modules) - origModules
+            userModules = importedModules - nonUserModules
 
             # user might have changed user module inbetween arepl runs
             # so we clear them to reload import each time
