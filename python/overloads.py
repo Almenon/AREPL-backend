@@ -65,14 +65,14 @@ def input_overload(prompt: str = None) -> str:
         return ""
 
 
-def howdoi_wrapper(strArg: str) -> str:
+def howdoi_wrapper(query: str) -> str:
     """howdoi is meant to be called from the command line - this wrapper lets it be called programatically
     
     Arguments:
-        strArg {str} -- search term
+        query {str} -- search term
     """
 
-    if strArg.lower() == "use arepl" or strArg.lower() == "arepl":
+    if query.lower() == "use arepl" or query.lower() == "arepl":
         returnVal = "using AREPL is simple - just start coding and arepl will show you the final state of your variables. For more help see https://github.com/Almenon/AREPL-vscode/wiki"
     else:
         try:
@@ -82,7 +82,7 @@ def howdoi_wrapper(strArg: str) -> str:
             e.args = ("howdoi is not installed",)
             raise
 
-        args = vars(parser.parse_args(strArg.split(" ")))
+        args = vars(parser.parse_args(query.split(" ")))
         returnVal = howdoi.howdoi(args)
 
     print(returnVal)
