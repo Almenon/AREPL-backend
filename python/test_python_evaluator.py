@@ -59,9 +59,9 @@ def test_dict_unpack_error():
 
 def test_arepl_does_not_override_user_import():
     executor_folder_path = path.dirname(python_evaluator.__file__)
-    for f in listdir(executor_folder_path):
-        if path.isfile(path.join(executor_folder_path, f)) and f not in executor_folder_path:
-            some_other_file = f
+    for f_path in listdir(executor_folder_path):
+        if path.isfile(path.join(executor_folder_path, f_path)) and f_path not in executor_folder_path:
+            some_other_file = f_path
             break
 
     import tempfile
