@@ -29,6 +29,10 @@ for var in specialVars:
 
 # users code should execute under main scope
 starting_locals["__name__"] = "__main__"
+starting_locals["__loader__"].name = "__main__"
+
+# spec should not exist when executing file directly
+del starting_locals["__spec__"]
 
 
 def get_starting_locals() -> Dict[str, Any]:
