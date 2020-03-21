@@ -1,10 +1,10 @@
-import jsonpickle
+import AHH_jsonpickle
 import inspect
 import json
 from time import time
 from typing import Any, List, Union
-from python_evaluator import pickle_user_vars, ReturnInfo, print_output
-from settings import get_settings
+from AHH_python_evaluator import pickle_user_vars, ReturnInfo, print_output
+from AHH_settings import get_settings
 
 context = {}
 

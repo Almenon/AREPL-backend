@@ -30,7 +30,7 @@ Create an object::
 
 Use jsonpickle to transform the object into a JSON string::
 
-    import jsonpickle
+    import AHH_jsonpickle
     frozen = jsonpickle.encode(obj)
 
 Use jsonpickle to recreate a Python object from a JSON string::
@@ -70,7 +70,7 @@ from .unpickler import Unpickler  # noqa: F401
 __all__ = ('encode', 'decode')
 
 # register built-in handlers
-__import__('jsonpickle.handlers', level=0)
+__import__('AHH_jsonpickle.handlers', level=0)
 
 # Export specific JSONPluginMgr methods into the jsonpickle namespace
 set_preferred_backend = json.set_preferred_backend

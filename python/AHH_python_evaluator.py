@@ -10,15 +10,15 @@ import os
 from sys import path, modules, argv, version_info, exc_info
 from typing import Any, Dict, FrozenSet, Set
 from contextlib import contextmanager
-from module_logic import get_non_user_modules
+from AHH_module_logic import get_non_user_modules
 
-# do NOT use from overloads import arepl_input_iterator
+# do NOT use from AHH_overloads import arepl_input_iterator
 # it will recreate arepl_input_iterator and we need the original
-import overloads
-from pickler import specialVars, pickle_user_vars, pickle_user_error
-import saved
-from settings import get_settings, update_settings
-from user_error import UserError
+import AHH_overloads
+from AHH_pickler import specialVars, pickle_user_vars, pickle_user_error
+import AHH_saved as saved
+from AHH_settings import get_settings, update_settings
+from AHH_user_error import UserError
 
 if util.find_spec("howdoi") is not None:
     from howdoi import howdoi  # pylint: disable=import-error
@@ -87,9 +87,9 @@ class ExecArgs(object):
 nonUserModules = get_non_user_modules()
 origModules = frozenset(modules)
 
-saved.starting_locals["help"] = overloads.help_overload
-saved.starting_locals["input"] = overloads.input_overload
-saved.starting_locals["howdoi"] = overloads.howdoi_wrapper
+saved.starting_locals["help"] = AHH_overloads.help_overload
+saved.starting_locals["input"] = AHH_overloads.input_overload
+saved.starting_locals["howdoi"] = AHH_overloads.howdoi_wrapper
 
 eval_locals = deepcopy(saved.starting_locals)
 
@@ -198,7 +198,7 @@ def exec_input(exec_args: ExecArgs):
                     pass  # it's not worth failing AREPL over
 
             # clear mock stdin for next run
-            overloads.arepl_input_iterator = None
+            AHH_overloads.arepl_input_iterator = None
 
     if get_settings().showGlobalVars:
         userVariables = pickle_user_vars(

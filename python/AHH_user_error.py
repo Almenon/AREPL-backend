@@ -1,7 +1,7 @@
-from pickler import pickle_user_vars
+from AHH_pickler import pickle_user_vars
 from traceback import TracebackException, FrameSummary
 from types import TracebackType
-from settings import get_settings
+from AHH_settings import get_settings
 
 
 class UserError(Exception):

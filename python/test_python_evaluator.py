@@ -4,10 +4,10 @@ from shutil import rmtree
 import tempfile
 
 import pytest
-import jsonpickle
+import AHH_jsonpickle as jsonpickle
 
-import python_evaluator
-from settings import update_settings
+import AHH_python_evaluator as python_evaluator
+from AHH_settings import update_settings
 
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 # The frontend will pass in below settings as default

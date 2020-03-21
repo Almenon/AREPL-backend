@@ -1,7 +1,7 @@
 import re
 import datetime
 import decimal
-from jsonpickle.handlers import BaseHandler
+from AHH_jsonpickle.handlers import BaseHandler
 from types import CodeType, FrameType, GeneratorType
 
 NOT_SERIALIZABLE_MESSAGE = "not serializable by arepl"

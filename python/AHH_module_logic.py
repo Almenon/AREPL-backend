@@ -2,7 +2,7 @@ from sys import version
 from sys import builtin_module_names
 from sys import modules
 from pkgutil import iter_modules
-from stdlib_list import stdlib_list
+from AHH_stdlib_list import stdlib_list
 from typing import List,Set
 
 def get_non_user_modules() -> Set[str]:
