@@ -107,10 +107,12 @@ def script_path(script_dir: str):
     if script_dir is None or script_dir == "":
         yield
     else:
+        arepl_dir = path[0]
+        path[0] = script_dir
+        path.append(arepl_dir)
         try:
             original_cwd = os.getcwd()
             os.chdir(script_dir)
-            path.insert(1, script_dir)
         except os.error:
             # no idea why this would happen but a user got this error once
             # this func is not critical to arepl so we dont want error to bubble up
@@ -119,10 +121,12 @@ def script_path(script_dir: str):
         try:
             yield
         finally:
+            if(path[-1] == arepl_dir):
+                path.pop()
+            path[0] = arepl_dir
             try:
                 os.chdir(original_cwd)
-                path.remove(script_dir)
-            except (os.error, ValueError):
+            except os.error:
                 pass
 
 
@@ -138,6 +142,8 @@ def exec_input(exec_args: ExecArgs):
 
     argv[0] = exec_args.filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
     saved.starting_locals["__file__"] = exec_args.filePath
+    if(exec_args.filePath):
+        saved.starting_locals["__loader__"].path = os.path.basename(exec_args.filePath)
 
     if not exec_args.usePreviousVariables:
         eval_locals = saved.get_eval_locals(exec_args.savedCode)
