@@ -110,6 +110,14 @@ def test_argv0_should_be_file_path():
     assert jsonpickle.decode(return_info.userVariables)["args"][0] == "test path"
 
 
+def test_syspath0_should_be_file_path():
+    code = "from sys import path;first_path=path[0]"
+    temp_dir = tempfile.gettempdir()
+    fake_temp_file = path.join(temp_dir, "foo.py")
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(code, "", filePath=fake_temp_file))
+    assert jsonpickle.decode(return_info.userVariables)["first_path"] == temp_dir
+
+
 def test_starting_dunders_should_be_correct():
     code = "file_dunder=__file__"
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(code))
