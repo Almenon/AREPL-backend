@@ -1,6 +1,6 @@
-import AHH_jsonpickle as jsonpickle
+import arepl_jsonpickle as jsonpickle
 
-import AHH_python_evaluator as python_evaluator
+import arepl_python_evaluator as python_evaluator
 
 
 def test_frame_handler():

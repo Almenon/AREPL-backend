@@ -1,6 +1,6 @@
-from AHH_pickler import specialVars, pickle_user_vars, pickle_user_error
-import AHH_python_evaluator as python_evaluator
-import AHH_jsonpickle as jsonpickle
+from arepl_pickler import specialVars, pickle_user_vars, pickle_user_error
+import arepl_python_evaluator as python_evaluator
+import arepl_jsonpickle as jsonpickle
 
 
 def test_special_floats():

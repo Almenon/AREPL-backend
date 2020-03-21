@@ -5,8 +5,8 @@ from math import isnan
 from types import ModuleType, FunctionType
 from typing import Any, Dict, List
 
-import AHH_jsonpickle as jsonpickle
-from AHH_custom_handlers import handlers
+import arepl_jsonpickle as jsonpickle
+from arepl_custom_handlers import handlers
 
 #####################################
 """
@@ -37,7 +37,7 @@ class CustomPickler(jsonpickle.pickler.Pickler):
 
 if util.find_spec("numpy") is not None:
     try:
-        import AHH_jsonpickle.ext.numpy as jsonpickle_numpy
+        import arepl_jsonpickle.ext.numpy as jsonpickle_numpy
 
         jsonpickle_numpy.register_handlers()
     except ImportError:
@@ -46,7 +46,7 @@ if util.find_spec("numpy") is not None:
 
 if util.find_spec("pandas") is not None:
     try:
-        import AHH_jsonpickle.ext.pandas as jsonpickle_pandas
+        import arepl_jsonpickle.ext.pandas as jsonpickle_pandas
 
         jsonpickle_pandas.register_handlers()
     except ImportError:
