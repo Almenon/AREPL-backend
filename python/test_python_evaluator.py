@@ -1,6 +1,7 @@
-from os import getcwd, chdir, listdir, path, pardir, remove
+from os import chdir, getcwd, listdir, path, pardir, remove
 from sys import version_info, modules
 from shutil import rmtree
+import tempfile
 
 import pytest
 import jsonpickle
@@ -64,12 +65,11 @@ def test_arepl_does_not_override_user_import():
             some_other_file = f_path
             break
 
-    import tempfile
     temp_dir = tempfile.gettempdir()
     user_file_with_same_name_as_internal_arepl_file = path.join(temp_dir, some_other_file)
     with open(user_file_with_same_name_as_internal_arepl_file, 'w') as f:
         f.write('x=5')
-    importable_name = user_file_with_same_name_as_internal_arepl_file[:-3] # get rid of .py
+    importable_name = path.basename(user_file_with_same_name_as_internal_arepl_file)[:-3] # get rid of .py
     user_arepl_file = path.join(temp_dir, "testing.py")
 
     return_info = python_evaluator.exec_input(
