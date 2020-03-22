@@ -1,5 +1,5 @@
 import unittest
-from . import arepl_stdlib_list as stdlib_list
+from . import stdlib_list
 
 
 class TestStdlibList(unittest.TestCase):
