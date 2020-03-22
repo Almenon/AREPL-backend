@@ -10,6 +10,9 @@ matrix:
         - python: 3.7
           dist: bionic
           sudo: true
+        - python: 3.8
+          dist: bionic
+          sudo: true
           
 script:
  - pip install -r python/requirements.txt
