@@ -160,7 +160,7 @@ export class PythonEvaluator{
 	 */
 	start(){
 		console.log("Starting Python...")
-		this.pyshell = new PythonShell('python_evaluator.py', this.options)
+		this.pyshell = new PythonShell('arepl_python_evaluator.py', this.options)
 		this.pyshell.on('message', message => {
 			this.handleResult(message)
 		})
