@@ -98,6 +98,7 @@ def pickle_user_vars(
         userVariables,
         max_depth=100,  # any depth above 245 resuls in error and anything above 100 takes too long to process
         fail_safe=lambda x: "AREPL could not pickle this object",
+        make_refs=False,  # We set this to False for more human readable output - see #115
     )
 
 
