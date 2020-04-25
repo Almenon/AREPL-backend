@@ -43,6 +43,12 @@ suite("python_evaluator Tests", () => {
             assert.notEqual(result, null)
             done()
         }
+        pyEvaluator.onStderr = (err:string) => {
+            done(err)
+        }
+        pyEvaluator.onPrint = (msg:string) => {
+            done(msg)
+        }
         input.evalCode = "x"
         pyEvaluator.execCode(input)
     })
@@ -145,6 +151,22 @@ suite("python_evaluator Tests", () => {
         }
 
         input.evalCode = "print('hello world')"
+        pyEvaluator.execCode(input)
+    })
+
+    test("can print stdout if no newline", function(done){
+        let hasPrinted = false
+        pyEvaluator.onPrint = (stdout)=>{ 
+            assert.equal(stdout, "hello world")
+            hasPrinted = true
+        }
+
+        pyEvaluator.onResult = () => {
+            if(!hasPrinted) assert.fail("program has returned result", "program should still be printing")
+            else done()
+        }
+
+        input.evalCode = "print('hello world', end='')"
         pyEvaluator.execCode(input)
     })
 
