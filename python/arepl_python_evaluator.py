@@ -6,7 +6,9 @@ import json
 import traceback
 from time import time
 import asyncio
+from io import TextIOWrapper
 import os
+import sys
 from sys import path, modules, argv, version_info, exc_info
 from typing import Any, Dict, FrozenSet, Set
 from contextlib import contextmanager
@@ -247,5 +249,9 @@ def main(json_input: str):
 
 
 if __name__ == "__main__":
+    # arepl is ran via node so python thinks stdout is not a tty device and uses full buffering
+    # We want users to see output in real time so we change to line buffering
+    # todo: once python3.7 is supported use .reconfigure() instead
+    sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), 'wb'), line_buffering=True)
     while True:
         main(input())

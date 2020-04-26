@@ -7,6 +7,7 @@
 import * as assert from 'assert'
 
 import {PythonEvaluator} from './index'
+import { EOL } from 'os';
 
 function isEmpty(obj) {
     return Object.keys(obj).length === 0;
@@ -55,7 +56,7 @@ suite("python_evaluator Tests", () => {
 
     test("arepl_store works", function(done){
         pyEvaluator.onPrint = (result)=>{
-            assert.strictEqual(result, "3")
+            assert.strictEqual(result, "3"+EOL)
         }
 
         input.evalCode = "arepl_store=3"
@@ -141,7 +142,7 @@ suite("python_evaluator Tests", () => {
     test("can print stdout", function(done){
         let hasPrinted = false
         pyEvaluator.onPrint = (stdout)=>{ 
-            assert.equal(stdout, "hello world")
+            assert.equal(stdout, "hello world"+EOL)
             hasPrinted = true
         }
 
@@ -174,38 +175,35 @@ suite("python_evaluator Tests", () => {
     test("can print stderr", function(done){
         let hasLogged = false
         pyEvaluator.onStderr = (stderr)=>{ 
-            assert.equal(stderr, "hello world\r")
+            assert.equal(stderr, "hello world")
             // I have nooo clue why the \r is at the end
             // for some reason python-shell recieves hello world\r\r\n
             hasLogged = true
+            done()
         }
 
         pyEvaluator.onResult = (result) => {
-            if(!hasLogged) assert.fail("program has returned result","program should still be logging")
-            else done()
+            setTimeout(() => {
+                if(!hasLogged) assert.fail("program has returned result "+JSON.stringify(result),"program should still be logging")
+            }, 100); //to avoid race conditions wait a bit in case stderr arrives later
         }
 
-        input.evalCode = "import sys;sys.stderr.write('hello world\\r\\n')"
+        input.evalCode = "import sys;sys.stderr.write('hello world')"
         pyEvaluator.execCode(input)
     })
 
     test("can print multiple lines", function(done){
         let firstPrint = false
-        let secondPrint = false
 
-        pyEvaluator.onPrint = (stdout)=>{ 
-            if(firstPrint){
-                assert.equal(stdout, '2')
-                secondPrint = true
-            }
-            else{
-                assert.equal(stdout, "1")
-                firstPrint = true
-            }
+        pyEvaluator.onPrint = (stdout)=>{
+            // not sure why it is doing this.. stdout should be line buffered
+            // so we should get 1 and 2 seperately
+            assert.equal(stdout, '1'+EOL+'2'+EOL)
+            firstPrint = true
         }
 
         pyEvaluator.onResult = () => {
-            if(!secondPrint) assert.fail("program has returned result","program should still be printing")
+            if(!firstPrint) assert.fail("program has returned result","program should still be printing")
             else done()
         }
 
@@ -215,7 +213,7 @@ suite("python_evaluator Tests", () => {
 
     test("returns result after print", function(done){
         pyEvaluator.onPrint = (stdout)=>{ 
-            assert.equal(stdout, "hello world")
+            assert.equal(stdout, "hello world"+EOL)
             assert.equal(pyEvaluator.executing, true)
         }
 

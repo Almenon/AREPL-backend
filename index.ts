@@ -1,4 +1,5 @@
 import {PythonShell, Options} from 'python-shell' 
+import { EOL } from 'os'
 
 export interface FrameSummary {
 	_line: string
@@ -53,8 +54,8 @@ export interface PythonResult{
 }
 
 export class PythonEvaluator{
-    
-    private static readonly identifier = "6q3co7"
+	
+	private static readonly identifier = "6q3co7"
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
     /**
@@ -86,9 +87,10 @@ export class PythonEvaluator{
 			process.env.PATH = ["/usr/local/bin", process.env.PATH].join(":")
 		}
 
-		// we want unbuffered mode by default because it can be frustrating to the user
-		// if they run the program but don't see any print output immediately.
-		if(!options.pythonOptions) this.options.pythonOptions = ['-u']
+		// python-shell buffers untill newline is reached in text mode
+		// so we use binary instead to skip python-shell buffering
+		// this lets user flush without newline
+		this.options.mode = 'binary'
 		if(!options.pythonPath) this.options.pythonPath = PythonShell.defaultPythonPath
 		if(!options.scriptPath) this.options.scriptPath = PythonEvaluator.areplPythonBackendFolderPath
 	}
@@ -101,7 +103,7 @@ export class PythonEvaluator{
 		if(this.executing) return
 		this.executing = true
 		this.startTime = Date.now()
-		this.pyshell.send(JSON.stringify(code))
+		this.pyshell.send(JSON.stringify(code)+EOL)
 	}
 
 	/**
@@ -161,11 +163,11 @@ export class PythonEvaluator{
 	start(){
 		console.log("Starting Python...")
 		this.pyshell = new PythonShell('arepl_python_evaluator.py', this.options)
-		this.pyshell.on('message', message => {
+		this.pyshell.stdout.on('data', message => {
 			this.handleResult(message)
 		})
-		this.pyshell.on('stderr', (log)=>{
-			this.onStderr(log)
+		this.pyshell.stderr.on('data', (log: Buffer)=>{
+			this.onStderr(log.toString())
 		})
 		this.running = true
 	}
@@ -194,7 +196,8 @@ export class PythonEvaluator{
 	 * handles pyshell results and calls onResult / onPrint
 	 * @param {string} results 
 	 */
-	handleResult(results:string) {
+	handleResult(resultsBuffer: Buffer) {
+		let results = resultsBuffer.toString()
 		let pyResult:PythonResult = {
 			userError:null,
 			userErrorMsg: "",
@@ -236,8 +239,8 @@ export class PythonEvaluator{
 				throw err
 			}
 		}
-        else{
-            this.onPrint(results)
+		else{
+			this.onPrint(results)
 		}
 	}
 
