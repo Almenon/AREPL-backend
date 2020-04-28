@@ -56,7 +56,7 @@ foo()
 def test_dict_unpack_error():
     with pytest.raises(python_evaluator.UserError):
         python_evaluator.exec_input(python_evaluator.ExecArgs("[(k,v) for (k,v) in {'a': 1}]"))
-        
+
 
 def test_main_returns_var():
     mock_stdin = """{
@@ -129,10 +129,14 @@ def test_starting_dunders_should_be_correct():
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("name_dunder=__name__"))
     assert jsonpickle.decode(return_info.userVariables)["name_dunder"] == "__main__"
 
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("loader_dunder=__loader__", filePath="test path"))
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs("loader_dunder=__loader__", filePath="test path")
+    )
     assert jsonpickle.decode(return_info.userVariables)["loader_dunder"].name == "__main__"
 
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("loader_dunder=__loader__", filePath="test path"))
+    return_info = python_evaluator.exec_input(
+        python_evaluator.ExecArgs("loader_dunder=__loader__", filePath="test path")
+    )
     assert jsonpickle.decode(return_info.userVariables)["loader_dunder"].path == "test path"
 
 
