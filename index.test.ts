@@ -155,22 +155,21 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    // this test causes arepl to fail so commenting out for now
-    // test("can print stdout if no newline", function(done){
-    //     let hasPrinted = false
-    //     pyEvaluator.onPrint = (stdout)=>{ 
-    //         assert.equal(stdout, "hello world")
-    //         hasPrinted = true
-    //     }
+    test("can print stdout if no newline", function(done){
+        let hasPrinted = false
+        pyEvaluator.onPrint = (stdout)=>{ 
+            assert.equal(stdout, "hello world")
+            hasPrinted = true
+        }
 
-    //     pyEvaluator.onResult = () => {
-    //         if(!hasPrinted) assert.fail("program has returned result", "program should still be printing")
-    //         else done()
-    //     }
+        pyEvaluator.onResult = () => {
+            if(!hasPrinted) assert.fail("program has returned result", "program should still be printing")
+            else done()
+        }
 
-    //     input.evalCode = "print('hello world', end='')"
-    //     pyEvaluator.execCode(input)
-    // })
+        input.evalCode = "print('hello world', end='')"
+        pyEvaluator.execCode(input)
+    })
 
     test("can print stderr", function(done){
         let hasLogged = false
