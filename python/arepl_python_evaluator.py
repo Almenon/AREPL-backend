@@ -182,6 +182,11 @@ def exec_input(exec_args: ExecArgs):
 
         finally:
 
+            if sys.stdout.flush and callable(sys.stdout.flush):
+                # a normal program will flush at the end of the run
+                # arepl never stops so we have to do it manually
+                sys.stdout.flush()
+
             saved.arepl_store = eval_locals.get("arepl_store")
 
             try:
@@ -228,13 +233,17 @@ def exec_input(exec_args: ExecArgs):
 
     return ReturnInfo("", userVariables, execTime, None)
 
+# assigned only if file is ran directly to avoid unit test errors
+result_stream = None
 
 def print_output(output: object):
     """
-    turns output into JSON and prints it
+    turns output into JSON and sends it to result stream
     """
-    # 6q3co7 signifies to frontend that stdout is not due to a print in user's code
-    print("6q3co7" + json.dumps(output, default=lambda x: x.__dict__))
+    # We use result stream because user might use stdout and we don't want to conflict
+    print(
+        json.dumps(output, default=lambda x: x.__dict__), file=result_stream, flush=True
+    )
 
 
 def main(json_input: str):
@@ -270,5 +279,8 @@ if __name__ == "__main__":
     # We want users to see output in real time so we change to line buffering
     # todo: once python3.7 is supported use .reconfigure() instead
     sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), "wb"), line_buffering=True)
+    # Arepl node code will spawn process with a extra pipe for results
+    # This is to avoid results conflicting with user writes to stdout
+    result_stream = open(3, "w")
     while True:
         main(input())

@@ -175,8 +175,6 @@ suite("python_evaluator Tests", () => {
         let hasLogged = false
         pyEvaluator.onStderr = (stderr)=>{ 
             assert.equal(stderr, "hello world")
-            // I have nooo clue why the \r is at the end
-            // for some reason python-shell recieves hello world\r\r\n
             hasLogged = true
             done()
         }

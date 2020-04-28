@@ -1,5 +1,6 @@
 import {PythonShell, Options} from 'python-shell' 
 import { EOL } from 'os'
+import { Readable } from 'stream'
 
 export interface FrameSummary {
 	_line: string
@@ -54,8 +55,6 @@ export interface PythonResult{
 }
 
 export class PythonEvaluator{
-	
-	private static readonly identifier = "6q3co7"
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
     /**
@@ -91,6 +90,7 @@ export class PythonEvaluator{
 		// so we use binary instead to skip python-shell buffering
 		// this lets user flush without newline
 		this.options.mode = 'binary'
+		this.options.stdio = ['pipe','pipe','pipe','pipe']
 		if(!options.pythonPath) this.options.pythonPath = PythonShell.defaultPythonPath
 		if(!options.scriptPath) this.options.scriptPath = PythonEvaluator.areplPythonBackendFolderPath
 	}
@@ -163,8 +163,15 @@ export class PythonEvaluator{
 	start(){
 		console.log("Starting Python...")
 		this.pyshell = new PythonShell('arepl_python_evaluator.py', this.options)
-		this.pyshell.stdout.on('data', message => {
-			this.handleResult(message)
+
+		// @ts-ignore node is badly typed, stdio can have more than 3 pipes
+		const resultPipe: Readable = this.pyshell.childProcess.stdio[3]
+		resultPipe.on('data', this.handleResult.bind(this))
+
+		// not sure why exactly I have to wrap onPrint/onStderr w/ lambda
+		// but tests fail if I don't
+		this.pyshell.stdout.on('data', (message: Buffer) => {
+			this.onPrint(message.toString())
 		})
 		this.pyshell.stderr.on('data', (log: Buffer)=>{
 			this.onStderr(log.toString())
@@ -196,8 +203,7 @@ export class PythonEvaluator{
 	 * handles pyshell results and calls onResult / onPrint
 	 * @param {string} results 
 	 */
-	handleResult(resultsBuffer: Buffer) {
-		let results = resultsBuffer.toString()
+	handleResult(results: string) {
 		let pyResult:PythonResult = {
 			userError:null,
 			userErrorMsg: "",
@@ -211,36 +217,29 @@ export class PythonEvaluator{
 			done:true
 		}
 
-        //result should have identifier, otherwise it is just a printout from users code
-        if(results.startsWith(PythonEvaluator.identifier)){
-			try {
-				results = results.replace(PythonEvaluator.identifier,"")
-				pyResult = JSON.parse(results)
-				this.executing = !pyResult['done']
-				
-				pyResult.execTime = pyResult.execTime*1000 // convert into ms
-				pyResult.totalPyTime = pyResult.totalPyTime*1000
-				
-				//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
-				pyResult.userVariables = JSON.parse(pyResult.userVariables)
-				//@ts-ignore pyResult.userError is sent to as string, we convert to object
-				pyResult.userError = pyResult.userError ? JSON.parse(pyResult.userError) : {}
+		try {
+			pyResult = JSON.parse(results)
+			this.executing = !pyResult['done']
+			
+			pyResult.execTime = pyResult.execTime*1000 // convert into ms
+			pyResult.totalPyTime = pyResult.totalPyTime*1000
+			
+			//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
+			pyResult.userVariables = JSON.parse(pyResult.userVariables)
+			//@ts-ignore pyResult.userError is sent to as string, we convert to object
+			pyResult.userError = pyResult.userError ? JSON.parse(pyResult.userError) : {}
 
-				if(pyResult.userErrorMsg){
-					pyResult.userErrorMsg = this.formatPythonException(pyResult.userErrorMsg)
-				}
-				pyResult.totalTime = Date.now()-this.startTime
-				this.onResult(pyResult)
-
-			} catch (err) {
-				if (err instanceof Error){
-					err.message = err.message+"\nresults: "+results
-				}
-				throw err
+			if(pyResult.userErrorMsg){
+				pyResult.userErrorMsg = this.formatPythonException(pyResult.userErrorMsg)
 			}
-		}
-		else{
-			this.onPrint(results)
+			pyResult.totalTime = Date.now()-this.startTime
+			this.onResult(pyResult)
+
+		} catch (err) {
+			if (err instanceof Error){
+				err.message = err.message+"\nresults: "+results
+			}
+			throw err
 		}
 	}
 
