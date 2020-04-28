@@ -45,10 +45,10 @@ class ReturnInfo:
         execTime: float,
         totalPyTime: float,
         internalError: str = None,
-        caller = "<module>",
-        lineno = -1,
-        done = True,
-        count = -1,
+        caller="<module>",
+        lineno=-1,
+        done=True,
+        count=-1,
         *args,
         **kwargs
     ):
@@ -78,7 +78,15 @@ class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
-    def __init__(self, evalCode: str, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
+    def __init__(
+        self,
+        evalCode: str,
+        savedCode="",
+        filePath="",
+        usePreviousVariables=False,
+        *args,
+        **kwargs
+    ):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
@@ -123,7 +131,7 @@ def script_path(script_dir: str):
         try:
             yield
         finally:
-            if(path[-1] == arepl_dir):
+            if path[-1] == arepl_dir:
                 path.pop()
             path[0] = arepl_dir
             try:
@@ -142,16 +150,19 @@ def exec_input(exec_args: ExecArgs):
     """
     global eval_locals
 
-    argv[0] = exec_args.filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
+    argv[0] = exec_args.filePath
+    # see https://docs.python.org/3/library/sys.html#sys.argv
     saved.starting_locals["__file__"] = exec_args.filePath
-    if(exec_args.filePath):
+    if exec_args.filePath:
         saved.starting_locals["__loader__"].path = os.path.basename(exec_args.filePath)
 
     if not exec_args.usePreviousVariables:
         eval_locals = saved.get_eval_locals(exec_args.savedCode)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
-    exec_args.evalCode = saved.copy_saved_imports_to_exec(exec_args.evalCode, exec_args.savedCode)
+    exec_args.evalCode = saved.copy_saved_imports_to_exec(
+        exec_args.evalCode, exec_args.savedCode
+    )
 
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
@@ -204,11 +215,15 @@ def exec_input(exec_args: ExecArgs):
 
     if get_settings().showGlobalVars:
         userVariables = pickle_user_vars(
-            eval_locals, get_settings().default_filter_vars, get_settings().default_filter_types
+            eval_locals,
+            get_settings().default_filter_vars,
+            get_settings().default_filter_types,
         )
     else:
         userVariables = pickle_user_vars(
-            noGlobalVarsMsg, get_settings().default_filter_vars, get_settings().default_filter_types
+            noGlobalVarsMsg,
+            get_settings().default_filter_vars,
+            get_settings().default_filter_types,
         )
 
     return ReturnInfo("", userVariables, execTime, None)
@@ -240,7 +255,9 @@ def main(json_input: str):
         return_info.userVariables = e.varsSoFar
         return_info.execTime = e.execTime
     except Exception as e:
-        return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
+        return_info.internalError = (
+            "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
+        )
 
     return_info.totalPyTime = time() - start
 
@@ -252,6 +269,6 @@ if __name__ == "__main__":
     # arepl is ran via node so python thinks stdout is not a tty device and uses full buffering
     # We want users to see output in real time so we change to line buffering
     # todo: once python3.7 is supported use .reconfigure() instead
-    sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), 'wb'), line_buffering=True)
+    sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), "wb"), line_buffering=True)
     while True:
         main(input())
