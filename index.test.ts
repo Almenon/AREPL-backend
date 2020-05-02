@@ -35,6 +35,12 @@ suite("python_evaluator Tests", () => {
         setTimeout(()=>done(), pythonStartupTime)
     })
 
+    setup(function(){
+        pyEvaluator.onPrint = ()=>{}
+        pyEvaluator.onStderr = ()=>{}
+        pyEvaluator.onResult = ()=>{}
+    })
+
     test("sanity check: 1+1=2", () => {
         assert.equal(1+1,2)
     })
