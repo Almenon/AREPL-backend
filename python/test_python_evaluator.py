@@ -12,7 +12,7 @@ from arepl_settings import update_settings
 python_ignore_path = path.join(path.dirname(path.abspath(__file__)), "testDataFiles")
 # The frontend will pass in below settings as default
 default_settings = {
-    "showGlobalVars": True,
+    "show_global_vars": True,
     "default_filter_vars": [],
     "default_filter_types": ["<class 'module'>", "<class 'function'>"],
 }
@@ -66,7 +66,7 @@ def test_main_returns_var():
         "evalCode": "x=1",
         "filePath": "",
         "usePreviousVariables": false,
-        "showGlobalVars": true
+        "show_global_vars": true
     }"""
     return_info = python_evaluator.main(mock_stdin)
     assert jsonpickle.decode(return_info.userVariables)["x"] == 1
@@ -78,7 +78,7 @@ def test_main_returns_var_even_when_error():
         "evalCode": "y=1;x",
         "filePath": "",
         "usePreviousVariables": false,
-        "showGlobalVars": true
+        "show_global_vars": true
     }"""
     return_info = python_evaluator.main(mock_stdin)
     assert jsonpickle.decode(return_info.userVariables)["y"] == 1
@@ -98,7 +98,7 @@ x=next(counter)
 
 
 def test_dont_show_global_vars():
-    update_settings({"showGlobalVars": False})
+    update_settings({"show_global_vars": False})
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x = 1"))
     assert (
         jsonpickle.decode(return_info.userVariables)["zz status"]

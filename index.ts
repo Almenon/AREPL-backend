@@ -36,7 +36,7 @@ export interface ExecArgs {
 	savedCode: string,
 	filePath: string,
 	usePreviousVariables?: boolean,
-	showGlobalVars?: boolean,
+	show_global_vars?: boolean,
 	default_filter_vars: string[],
 	default_filter_types: string[]
 }

@@ -20,7 +20,7 @@ suite("python_evaluator Tests", () => {
         savedCode: "",
         filePath: "",
         usePreviousVariables: false,
-        showGlobalVars: true,
+        show_global_vars: true,
         default_filter_vars: [],
         default_filter_types: ["<class 'module'>", "<class 'function'>"]
     }

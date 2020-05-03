@@ -167,7 +167,7 @@ def exec_input(exec_args: ExecArgs):
         except BaseException:
             execTime = time() - start
             _, exc_obj, exc_tb = exc_info()
-            if not get_settings().showGlobalVars:
+            if not get_settings().show_global_vars:
                 raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
                 raise UserError(exc_obj, exc_tb, eval_locals, execTime)
@@ -210,7 +210,7 @@ def exec_input(exec_args: ExecArgs):
             # clear mock stdin for next run
             arepl_overloads.arepl_input_iterator = None
 
-    if get_settings().showGlobalVars:
+    if get_settings().show_global_vars:
         userVariables = pickle_user_vars(
             eval_locals,
             get_settings().default_filter_vars,
