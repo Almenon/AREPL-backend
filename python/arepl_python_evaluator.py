@@ -87,16 +87,6 @@ class ExecArgs(object):
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
 
 
-nonUserModules = get_non_user_modules()
-origModules = frozenset(modules)
-
-saved.starting_locals["help"] = arepl_overloads.help_overload
-saved.starting_locals["input"] = arepl_overloads.input_overload
-saved.starting_locals["howdoi"] = arepl_overloads.howdoi_wrapper
-
-eval_locals = deepcopy(saved.starting_locals)
-
-
 @contextmanager
 def script_path(script_dir: str):
     """
@@ -132,6 +122,15 @@ def script_path(script_dir: str):
             except os.error:
                 pass
 
+
+nonUserModules = get_non_user_modules()
+origModules = frozenset(modules)
+
+saved.starting_locals["help"] = arepl_overloads.help_overload
+saved.starting_locals["input"] = arepl_overloads.input_overload
+saved.starting_locals["howdoi"] = arepl_overloads.howdoi_wrapper
+
+eval_locals = deepcopy(saved.starting_locals)
 
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
