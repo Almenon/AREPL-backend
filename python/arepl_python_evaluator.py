@@ -34,6 +34,13 @@ Along the way I check if I haved saved the locals from a previous run and use th
 #####################################
 
 
+if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 5):
+    # need at least 3.5 for typing
+    exMsg = "Must be using python 3.5 or later. You are using " + str(version_info)
+    print(ReturnInfo("", "{}", None, None, exMsg))
+    raise Exception(exMsg)
+
+
 class ReturnInfo:
 
     # HALT! do NOT change this without changing corresponding type in the frontend!
@@ -65,13 +72,6 @@ class ReturnInfo:
         self.lineno = lineno
         self.done = done
         self.count = count
-
-
-if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 5):
-    # need at least 3.5 for typing
-    exMsg = "Must be using python 3.5 or later. You are using " + str(version_info)
-    print(ReturnInfo("", "{}", None, None, exMsg))
-    raise Exception(exMsg)
 
 
 class ExecArgs(object):
@@ -233,8 +233,10 @@ def exec_input(exec_args: ExecArgs):
 
     return ReturnInfo("", userVariables, execTime, None)
 
+
 # assigned only if file is ran directly to avoid unit test errors
 result_stream = None
+
 
 def print_output(output: object):
     """
