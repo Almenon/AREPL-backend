@@ -21,6 +21,7 @@ from arepl_pickler import specialVars, pickle_user_vars, pickle_user_error
 import arepl_saved as saved
 from arepl_settings import get_settings, update_settings
 from arepl_user_error import UserError
+import arepl_result_stream
 
 if util.find_spec("howdoi") is not None:
     from howdoi import howdoi  # pylint: disable=import-error
@@ -226,17 +227,13 @@ def exec_input(exec_args: ExecArgs):
     return ReturnInfo("", userVariables, execTime, None)
 
 
-# assigned only if file is ran directly to avoid unit test errors
-result_stream = None
-
-
 def print_output(output: object):
     """
     turns output into JSON and sends it to result stream
     """
     # We use result stream because user might use stdout and we don't want to conflict
     print(
-        json.dumps(output, default=lambda x: x.__dict__), file=result_stream, flush=True
+        json.dumps(output, default=lambda x: x.__dict__), file=arepl_result_stream.get_result_stream(), flush=True
     )
 
 
@@ -275,6 +272,6 @@ if __name__ == "__main__":
     sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), "wb"), line_buffering=True)
     # Arepl node code will spawn process with a extra pipe for results
     # This is to avoid results conflicting with user writes to stdout
-    result_stream = open(3, "w")
+    arepl_result_stream.open_result_stream()
     while True:
         main(input())
