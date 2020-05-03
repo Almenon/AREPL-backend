@@ -6,7 +6,9 @@ import json
 import traceback
 from time import time
 import asyncio
+from io import TextIOWrapper
 import os
+import sys
 from sys import path, modules, argv, version_info, exc_info
 from typing import Any, Dict, FrozenSet, Set
 from contextlib import contextmanager
@@ -19,6 +21,7 @@ from arepl_pickler import specialVars, pickle_user_vars, pickle_user_error
 import arepl_saved as saved
 from arepl_settings import get_settings, update_settings
 from arepl_user_error import UserError
+import arepl_result_stream
 
 if util.find_spec("howdoi") is not None:
     from howdoi import howdoi  # pylint: disable=import-error
@@ -43,10 +46,10 @@ class ReturnInfo:
         execTime: float,
         totalPyTime: float,
         internalError: str = None,
-        caller = "<module>",
-        lineno = -1,
-        done = True,
-        count = -1,
+        caller="<module>",
+        lineno=-1,
+        done=True,
+        count=-1,
         *args,
         **kwargs
     ):
@@ -65,33 +68,24 @@ class ReturnInfo:
         self.count = count
 
 
-if version_info[0] < 3 or (version_info[0] == 3 and version_info[1] < 5):
-    # need at least 3.5 for typing
-    exMsg = "Must be using python 3.5 or later. You are using " + str(version_info)
-    print(ReturnInfo("", "{}", None, None, exMsg))
-    raise Exception(exMsg)
-
-
 class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
-    def __init__(self, evalCode: str, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
+    def __init__(
+        self,
+        evalCode: str,
+        savedCode="",
+        filePath="",
+        usePreviousVariables=False,
+        *args,
+        **kwargs
+    ):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
         self.usePreviousVariables = usePreviousVariables
         # HALT! do NOT change this without changing corresponding type in the frontend! <----
-
-
-nonUserModules = get_non_user_modules()
-origModules = frozenset(modules)
-
-saved.starting_locals["help"] = arepl_overloads.help_overload
-saved.starting_locals["input"] = arepl_overloads.input_overload
-saved.starting_locals["howdoi"] = arepl_overloads.howdoi_wrapper
-
-eval_locals = deepcopy(saved.starting_locals)
 
 
 @contextmanager
@@ -121,7 +115,7 @@ def script_path(script_dir: str):
         try:
             yield
         finally:
-            if(path[-1] == arepl_dir):
+            if path[-1] == arepl_dir:
                 path.pop()
             path[0] = arepl_dir
             try:
@@ -129,6 +123,15 @@ def script_path(script_dir: str):
             except os.error:
                 pass
 
+
+nonUserModules = get_non_user_modules()
+origModules = frozenset(modules)
+
+saved.starting_locals["help"] = arepl_overloads.help_overload
+saved.starting_locals["input"] = arepl_overloads.input_overload
+saved.starting_locals["howdoi"] = arepl_overloads.howdoi_wrapper
+
+eval_locals = deepcopy(saved.starting_locals)
 
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
@@ -140,16 +143,19 @@ def exec_input(exec_args: ExecArgs):
     """
     global eval_locals
 
-    argv[0] = exec_args.filePath  # see https://docs.python.org/3/library/sys.html#sys.argv
+    argv[0] = exec_args.filePath
+    # see https://docs.python.org/3/library/sys.html#sys.argv
     saved.starting_locals["__file__"] = exec_args.filePath
-    if(exec_args.filePath):
+    if exec_args.filePath:
         saved.starting_locals["__loader__"].path = os.path.basename(exec_args.filePath)
 
     if not exec_args.usePreviousVariables:
         eval_locals = saved.get_eval_locals(exec_args.savedCode)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
-    exec_args.evalCode = saved.copy_saved_imports_to_exec(exec_args.evalCode, exec_args.savedCode)
+    exec_args.evalCode = saved.copy_saved_imports_to_exec(
+        exec_args.evalCode, exec_args.savedCode
+    )
 
     # repoen revent loop in case user closed it in last run
     asyncio.set_event_loop(asyncio.new_event_loop())
@@ -162,12 +168,17 @@ def exec_input(exec_args: ExecArgs):
         except BaseException:
             execTime = time() - start
             _, exc_obj, exc_tb = exc_info()
-            if not get_settings().showGlobalVars:
+            if not get_settings().show_global_vars:
                 raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
                 raise UserError(exc_obj, exc_tb, eval_locals, execTime)
 
         finally:
+
+            if sys.stdout.flush and callable(sys.stdout.flush):
+                # a normal program will flush at the end of the run
+                # arepl never stops so we have to do it manually
+                sys.stdout.flush()
 
             saved.arepl_store = eval_locals.get("arepl_store")
 
@@ -200,13 +211,17 @@ def exec_input(exec_args: ExecArgs):
             # clear mock stdin for next run
             arepl_overloads.arepl_input_iterator = None
 
-    if get_settings().showGlobalVars:
+    if get_settings().show_global_vars:
         userVariables = pickle_user_vars(
-            eval_locals, get_settings().default_filter_vars, get_settings().default_filter_types
+            eval_locals,
+            get_settings().default_filter_vars,
+            get_settings().default_filter_types,
         )
     else:
         userVariables = pickle_user_vars(
-            noGlobalVarsMsg, get_settings().default_filter_vars, get_settings().default_filter_types
+            noGlobalVarsMsg,
+            get_settings().default_filter_vars,
+            get_settings().default_filter_types,
         )
 
     return ReturnInfo("", userVariables, execTime, None)
@@ -214,10 +229,12 @@ def exec_input(exec_args: ExecArgs):
 
 def print_output(output: object):
     """
-    turns output into JSON and prints it
+    turns output into JSON and sends it to result stream
     """
-    # 6q3co7 signifies to frontend that stdout is not due to a print in user's code
-    print("6q3co7" + json.dumps(output, default=lambda x: x.__dict__))
+    # We use result stream because user might use stdout and we don't want to conflict
+    print(
+        json.dumps(output, default=lambda x: x.__dict__), file=arepl_result_stream.get_result_stream(), flush=True
+    )
 
 
 def main(json_input: str):
@@ -238,7 +255,9 @@ def main(json_input: str):
         return_info.userVariables = e.varsSoFar
         return_info.execTime = e.execTime
     except Exception as e:
-        return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
+        return_info.internalError = (
+            "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
+        )
 
     return_info.totalPyTime = time() - start
 
@@ -247,5 +266,12 @@ def main(json_input: str):
 
 
 if __name__ == "__main__":
+    # arepl is ran via node so python thinks stdout is not a tty device and uses full buffering
+    # We want users to see output in real time so we change to line buffering
+    # todo: once python3.7 is supported use .reconfigure() instead
+    sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), "wb"), line_buffering=True)
+    # Arepl node code will spawn process with a extra pipe for results
+    # This is to avoid results conflicting with user writes to stdout
+    arepl_result_stream.open_result_stream()
     while True:
         main(input())

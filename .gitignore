@@ -19,7 +19,7 @@ pyShellType.js.map
 *.d.ts
 .pytest_cache
 .vscode/settings.json
-
+python/.vscode/settings.json
 
 ##################################################
 # Default python ignore

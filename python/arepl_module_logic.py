@@ -3,7 +3,8 @@ from sys import builtin_module_names
 from sys import modules
 from pkgutil import iter_modules
 from arepl_stdlib_list import stdlib_list
-from typing import List,Set
+from typing import List, Set
+
 
 def get_non_user_modules() -> Set[str]:
     """returns a set of all modules not written by the user (aka all builtin and pip modules)
@@ -20,6 +21,4 @@ def get_non_user_modules() -> Set[str]:
     even_more_builtin_modules = [k for k in modules]
     # how many damn modules are there???
 
-    return set(
-        pip_modules + list(builtin_module_names) + more_builtin_modules + even_more_builtin_modules
-    )
+    return set(pip_modules + list(builtin_module_names) + more_builtin_modules + even_more_builtin_modules)

@@ -7,7 +7,7 @@
     "compile": "tsc -watch -p ./",
     "compileOnce": "tsc",
     "declaration": "tsc --target es6 --declaration index.ts",
-    "test": "npm run compileOnce && mocha --ui tdd *.test.js --exit",
+    "test": "mocha -r ts-node/register --ui tdd *.test.ts --exit",
     "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js --exit",
     "document": "documentation readme index.js --section=API",
     "prePublish": "npm run compileOnce && npm run test && npm run document",
@@ -36,7 +36,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/mocha": "^5.2.5",
-    "@types/node": "^10.5.2",
+    "@types/node": "^12.11.7",
     "documentation": "^12.1.4",
     "mocha": "^5.2.0",
     "mocha-appveyor-reporter": "^0.4.0",
@@ -46,6 +46,6 @@
     "typescript": "^3.6.3"
   },
   "dependencies": {
-    "python-shell": "^1.0.8"
+    "python-shell": "^2.0.0"
   }
 }
