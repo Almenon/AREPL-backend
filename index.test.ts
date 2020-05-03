@@ -113,6 +113,23 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("nothing funky happens if dump called again", function (done) {
+        let gotDump = false
+        pyEvaluator.onResult = (result) => {
+            if (gotDump) return
+            assert.notEqual(result, null)
+            assert.equal(isEmpty(result.userError), true)
+            assert.equal(result.internalError, null)
+            assert.equal(result.userVariables['dump output'], 4)
+            assert.equal(result.caller, '<module>')
+            assert.equal(result.lineno, 1)
+            gotDump = true
+            done()
+        }
+        input.evalCode = "from arepl_dump import dump;dump(4)"
+        pyEvaluator.execCode(input)
+    })
+
     test("returns syntax error when incorrect syntax", function (done) {
         pyEvaluator.onResult = (result) => {
             assert.notEqual(result.userError, null)
