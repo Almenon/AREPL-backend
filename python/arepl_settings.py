@@ -4,7 +4,6 @@ from typing import List
 class Settings(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
-    # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(
         self,
         show_global_vars=True,
