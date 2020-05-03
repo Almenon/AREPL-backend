@@ -1,5 +1,5 @@
 """
-file for storing result stream so it can be accessed by dump
+File for storing result stream so it can be accessed by dump.
 Once you close a stream you can't reopen, hence why this file just has a open method
 """
 
