@@ -85,16 +85,15 @@ suite("python_evaluator Tests", () => {
         }
     })
 
-    // todo: FIX THIS!
-    // test("no encoding errors with utf16", function(done){
-    //     pyEvaluator.onResult = (result)=>{
-    //         assert.equal(result.userError, '')
-    //         assert.equal(result.internalError, null)
-    //         done()
-    //     }
-    //     input.evalCode = "#㍦"
-    //     pyEvaluator.execCode(input)
-    // })
+    test("no encoding errors with utf16", function (done) {
+        pyEvaluator.onResult = (result) => {
+            assert.equal(result.userErrorMsg, undefined)
+            assert.equal(result.internalError, null)
+            done()
+        }
+        input.evalCode = "#㍦"
+        pyEvaluator.execCode(input)
+    })
 
     test("dump returns result", function (done) {
         let gotDump = false

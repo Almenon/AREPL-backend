@@ -81,9 +81,15 @@ export class PythonEvaluator {
 	 */
 	constructor(private options: Options = {}) {
 
+		if (!options.env) options.env = {}
 		if (process.platform == "darwin") {
-			//needed for Mac to prevent ENOENT
-			process.env.PATH = ["/usr/local/bin", process.env.PATH].join(":")
+			// needed for Mac to prevent ENOENT
+			options.env.PATH = ["/usr/local/bin", process.env.PATH].join(":")
+		}
+		else if (process.platform == "win32") {
+			// needed for windows for encoding to match what it would be in terminal
+			// https://docs.python.org/3/library/sys.html#sys.stdin
+			options.env.PYTHONIOENCODING = "utf8"
 		}
 
 		// python-shell buffers untill newline is reached in text mode
