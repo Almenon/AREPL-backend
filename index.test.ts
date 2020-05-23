@@ -60,91 +60,6 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("arepl_store works", function (done) {
-        pyEvaluator.onPrint = (result) => {
-            assert.strictEqual(result, "3" + EOL)
-        }
-
-        input.evalCode = "arepl_store=3"
-        pyEvaluator.onResult = () => { }
-        pyEvaluator.execCode(input)
-
-        let onSecondRun = false
-        pyEvaluator.onResult = (result) => {
-            if (result.userErrorMsg) {
-                done(result.userErrorMsg)
-            }
-            else if (!onSecondRun) {
-                input.evalCode = "print(arepl_store)"
-                pyEvaluator.execCode(input)
-                onSecondRun = true
-            }
-            else {
-                done()
-            }
-        }
-    })
-
-    test("no encoding errors with utf16", function (done) {
-        pyEvaluator.onResult = (result) => {
-            assert.equal(result.userErrorMsg, undefined)
-            assert.equal(result.internalError, null)
-            done()
-        }
-        input.evalCode = "#㍦"
-        pyEvaluator.execCode(input)
-    })
-
-    test("dump returns result", function (done) {
-        let gotDump = false
-        pyEvaluator.onResult = (result) => {
-            if (gotDump) return
-            assert.notEqual(result, null)
-            assert.equal(isEmpty(result.userError), true)
-            assert.equal(result.internalError, null)
-            assert.equal(result.userVariables['dump output'], 5)
-            assert.equal(result.caller, '<module>')
-            assert.equal(result.lineno, 1)
-            gotDump = true
-            done()
-        }
-        input.evalCode = "from arepl_dump import dump;dump(5)"
-        pyEvaluator.execCode(input)
-    })
-
-    test("dump works properly when called repeatedly", function (done) {
-        let numResults = 0;
-        pyEvaluator.onResult = (result) => {
-            numResults += 1
-            if (numResults == 3) {
-                assert.equal(result.done, true)
-                done()
-                return
-            }
-            assert.notEqual(result, null)
-            assert.equal(isEmpty(result.userError), true)
-            assert.equal(result.internalError, null)
-            assert.equal(result.userVariables['dump output'], numResults)
-            assert.equal(result.caller, '<module>')
-            assert.equal(result.lineno, numResults)
-        }
-        input.evalCode = `from arepl_dump import dump;dump(1)
-dump(2)`
-        pyEvaluator.execCode(input)
-    })
-
-    test("returns syntax error when incorrect syntax", function (done) {
-        pyEvaluator.onResult = (result) => {
-            assert.notEqual(result.userError, null)
-            assert.equal(result.userError.filename, '<string>')
-            assert.equal(result.userError.lineno, '1')
-            assert.equal(result.userError.msg, 'invalid syntax')
-            done()
-        }
-        input.evalCode = "x="
-        pyEvaluator.execCode(input)
-    })
-
     test("returns user variables", function (done) {
         pyEvaluator.onResult = (result) => {
             assert.equal(result.userVariables['x'], 1)
@@ -152,17 +67,6 @@ dump(2)`
         }
         input.evalCode = "x=1"
         pyEvaluator.execCode(input)
-    })
-
-    test("uses previousRun variables asked", function (done) {
-        pyEvaluator.onResult = (result) => {
-            assert.equal(result.userVariables['y'], 1)
-            done()
-        }
-        input.evalCode = "y=x"
-        input.usePreviousVariables = true
-        pyEvaluator.execCode(input)
-        input.usePreviousVariables = false
     })
 
     suite("stdout/stderr tests", () => {
@@ -262,6 +166,107 @@ dump(2)`
             input.evalCode = "print('hello world')"
             pyEvaluator.execCode(input)
         })
+    })
+
+    test("arepl_store works", function (done) {
+        pyEvaluator.onPrint = (result) => {
+            assert.strictEqual(result, "3" + EOL)
+        }
+
+        input.evalCode = "arepl_store=3"
+        pyEvaluator.onResult = () => { }
+        pyEvaluator.execCode(input)
+
+        let onSecondRun = false
+        pyEvaluator.onResult = (result) => {
+            if (result.userErrorMsg) {
+                done(result.userErrorMsg)
+            }
+            else if (!onSecondRun) {
+                input.evalCode = "print(arepl_store)"
+                pyEvaluator.execCode(input)
+                onSecondRun = true
+            }
+            else {
+                done()
+            }
+        }
+    })
+
+    test("no encoding errors with utf16", function (done) {
+        pyEvaluator.onResult = (result) => {
+            assert.equal(result.userErrorMsg, undefined)
+            assert.equal(result.internalError, null)
+            done()
+        }
+        input.evalCode = "#㍦"
+        pyEvaluator.execCode(input)
+    })
+
+    test("dump returns result", function (done) {
+        let gotDump = false
+        pyEvaluator.onResult = (result) => {
+            if (gotDump) return
+            assert.notEqual(result, null)
+            assert.equal(isEmpty(result.userError), true)
+            assert.equal(result.internalError, null)
+            assert.equal(result.userVariables['dump output'], 5)
+            assert.equal(result.caller, '<module>')
+            assert.equal(result.lineno, 1)
+            gotDump = true
+            done()
+        }
+        input.evalCode = "from arepl_dump import dump;dump(5)"
+        pyEvaluator.execCode(input)
+    })
+
+    test("dump works properly when called repeatedly", function (done) {
+        let numResults = 0;
+        pyEvaluator.onResult = (result) => {
+            numResults += 1
+            if (numResults == 3) {
+                assert.equal(result.done, true)
+                done()
+                return
+            }
+            assert.notEqual(result, null)
+            assert.equal(isEmpty(result.userError), true)
+            assert.equal(result.internalError, null)
+            assert.equal(result.userVariables['dump output'], numResults)
+            assert.equal(result.caller, '<module>')
+            assert.equal(result.lineno, numResults)
+        }
+        input.evalCode = `from arepl_dump import dump;dump(1)
+dump(2)`
+        pyEvaluator.execCode(input)
+    })
+
+    test("returns syntax error when incorrect syntax", function (done) {
+        pyEvaluator.onResult = (result) => {
+            assert.notEqual(result.userError, null)
+            assert.equal(result.userError.filename, '<string>')
+            assert.equal(result.userError.lineno, '1')
+            assert.equal(result.userError.msg, 'invalid syntax')
+            done()
+        }
+        input.evalCode = "x="
+        pyEvaluator.execCode(input)
+    })
+
+    test("uses previousRun variables asked", function (done) {
+        function onSecondResult(result) {
+            assert.equal(result.userVariables['y'], 1)
+            done()
+        }
+        pyEvaluator.onResult = (result) => {
+            pyEvaluator.onResult = onSecondResult
+            input.usePreviousVariables = true
+            pyEvaluator.execCode(input)
+            input.usePreviousVariables = false
+        }
+        input.evalCode = "x=1"
+        pyEvaluator.execCode(input)
+        input.evalCode = "y=x"
     })
 
     test("can restart", function (done) {
