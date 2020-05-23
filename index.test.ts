@@ -165,88 +165,103 @@ dump(2)`
         input.usePreviousVariables = false
     })
 
-    test("can print stdout", function (done) {
-        let hasPrinted = false
-        pyEvaluator.onPrint = (stdout) => {
-            assert.equal(stdout, "hello world" + EOL)
-            hasPrinted = true
-        }
+    suite("stdout/stderr tests", () => {
 
-        pyEvaluator.onResult = () => {
-            if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
-            else done()
-        }
+        test("can print stdout", function (done) {
+            let hasPrinted = false
+            pyEvaluator.onPrint = (stdout) => {
+                assert.equal(stdout, "hello world" + EOL)
+                hasPrinted = true
+            }
 
-        input.evalCode = "print('hello world')"
-        pyEvaluator.execCode(input)
-    })
+            pyEvaluator.onResult = () => {
+                if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
+                else done()
+            }
 
-    test("can print stdout if no newline", function (done) {
-        let hasPrinted = false
-        pyEvaluator.onPrint = (stdout) => {
-            assert.equal(stdout, "hello world")
-            hasPrinted = true
-        }
+            input.evalCode = "print('hello world')"
+            pyEvaluator.execCode(input)
+        })
 
-        pyEvaluator.onResult = () => {
-            if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
-            else done()
-        }
+        test("can print stdout if no newline", function (done) {
+            let hasPrinted = false
+            pyEvaluator.onPrint = (stdout) => {
+                assert.equal(stdout, "hello world")
+                hasPrinted = true
+            }
 
-        input.evalCode = "print('hello world', end='')"
-        pyEvaluator.execCode(input)
-    })
+            pyEvaluator.onResult = () => {
+                if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
+                else done()
+            }
 
-    test("can print stderr", function (done) {
-        let hasLogged = false
-        pyEvaluator.onStderr = (stderr) => {
-            assert.equal(stderr, "hello world")
-            hasLogged = true
-            done()
-        }
+            input.evalCode = "print('hello world', end='')"
+            pyEvaluator.execCode(input)
+        })
 
-        pyEvaluator.onResult = (result) => {
-            setTimeout(() => {
-                if (!hasLogged) assert.fail("program has returned result " + JSON.stringify(result), "program should still be logging")
-            }, 100); //to avoid race conditions wait a bit in case stderr arrives later
-        }
+        test("can print stderr", function (done) {
+            let hasLogged = false
+            pyEvaluator.onStderr = (stderr) => {
+                assert.equal(stderr, "hello world")
+                hasLogged = true
+                done()
+            }
 
-        input.evalCode = "import sys;sys.stderr.write('hello world')"
-        pyEvaluator.execCode(input)
-    })
+            pyEvaluator.onResult = (result) => {
+                setTimeout(() => {
+                    if (!hasLogged) assert.fail("program has returned result " + JSON.stringify(result), "program should still be logging")
+                }, 100); //to avoid race conditions wait a bit in case stderr arrives later
+            }
 
-    test("can print multiple lines", function (done) {
-        let firstPrint = false
+            input.evalCode = "import sys;sys.stderr.write('hello world')"
+            pyEvaluator.execCode(input)
+        })
 
-        pyEvaluator.onPrint = (stdout) => {
-            // not sure why it is doing this.. stdout should be line buffered
-            // so we should get 1 and 2 seperately
-            assert.equal(stdout, '1' + EOL + '2' + EOL)
-            firstPrint = true
-        }
+        test("can print multiple lines", function (done) {
+            let firstPrint = false
 
-        pyEvaluator.onResult = () => {
-            if (!firstPrint) assert.fail("program has returned result", "program should still be printing")
-            else done()
-        }
+            pyEvaluator.onPrint = (stdout) => {
+                // not sure why it is doing this.. stdout should be line buffered
+                // so we should get 1 and 2 seperately
+                assert.equal(stdout, '1' + EOL + '2' + EOL)
+                firstPrint = true
+            }
 
-        input.evalCode = "[print(x) for x in [1,2]]"
-        pyEvaluator.execCode(input)
-    })
+            pyEvaluator.onResult = () => {
+                if (!firstPrint) assert.fail("program has returned result", "program should still be printing")
+                else done()
+            }
 
-    test("returns result after print", function (done) {
-        pyEvaluator.onPrint = (stdout) => {
-            assert.equal(stdout, "hello world" + EOL)
-            assert.equal(pyEvaluator.executing, true)
-        }
+            input.evalCode = "[print(x) for x in [1,2]]"
+            pyEvaluator.execCode(input)
+        })
 
-        pyEvaluator.onResult = () => {
-            assert.equal(pyEvaluator.executing, false)
-            done()
-        }
+        test("prints in real-time", function (done) {
+            let printed = false
 
-        input.evalCode = "print('hello world')"
-        pyEvaluator.execCode(input)
+            pyEvaluator.onPrint = (stdout) => { printed = true }
+            pyEvaluator.onResult = () => { done() }
+
+            setTimeout(() => { if (!printed) assert.fail("") }, 25)
+
+            input.evalCode = "from time import sleep\nprint('a')\nsleep(.05)\nprint(b)"
+            pyEvaluator.execCode(input)
+        })
+
+        test("returns result after print", function (done) {
+            pyEvaluator.onPrint = (stdout) => {
+                assert.equal(stdout, "hello world" + EOL)
+                assert.equal(pyEvaluator.executing, true)
+            }
+
+            pyEvaluator.onResult = () => {
+                assert.equal(pyEvaluator.executing, false)
+                done()
+            }
+
+            input.evalCode = "print('hello world')"
+            pyEvaluator.execCode(input)
+        })
     })
 
     test("can restart", function (done) {
@@ -319,18 +334,6 @@ try:
 except Exception as e:
     fah`
 
-        pyEvaluator.execCode(input)
-    })
-
-    test("prints in real-time", function (done) {
-        let printed = false
-
-        pyEvaluator.onPrint = (stdout) => { printed = true }
-        pyEvaluator.onResult = () => { done() }
-
-        setTimeout(() => { if (!printed) assert.fail("") }, 25)
-
-        input.evalCode = "from time import sleep\nprint('a')\nsleep(.05)\nprint(b)"
         pyEvaluator.execCode(input)
     })
 
