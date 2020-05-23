@@ -166,7 +166,9 @@ export class PythonEvaluator {
 
 		// @ts-ignore node is badly typed, stdio can have more than 3 pipes
 		const resultPipe: Readable = this.pyshell.childProcess.stdio[3]
-		resultPipe.on('data', this.handleResult.bind(this))
+		resultPipe.on('data', (result: Buffer) => {
+			result.toString().trimRight().split(EOL).forEach(this.handleResult.bind(this))
+		})
 
 		// not sure why exactly I have to wrap onPrint/onStderr w/ lambda
 		// but tests fail if I don't

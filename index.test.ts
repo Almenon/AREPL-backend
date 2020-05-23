@@ -113,20 +113,24 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("nothing funky happens if dump called again", function (done) {
-        let gotDump = false
+    test("dump works properly when called repeatedly", function (done) {
+        let numResults = 0;
         pyEvaluator.onResult = (result) => {
-            if (gotDump) return
+            numResults += 1
+            if (numResults == 3) {
+                assert.equal(result.done, true)
+                done()
+                return
+            }
             assert.notEqual(result, null)
             assert.equal(isEmpty(result.userError), true)
             assert.equal(result.internalError, null)
-            assert.equal(result.userVariables['dump output'], 4)
+            assert.equal(result.userVariables['dump output'], numResults)
             assert.equal(result.caller, '<module>')
-            assert.equal(result.lineno, 1)
-            gotDump = true
-            done()
+            assert.equal(result.lineno, numResults)
         }
-        input.evalCode = "from arepl_dump import dump;dump(4)"
+        input.evalCode = `from arepl_dump import dump;dump(1)
+dump(2)`
         pyEvaluator.execCode(input)
     })
 
