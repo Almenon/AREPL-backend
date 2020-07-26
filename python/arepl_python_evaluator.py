@@ -1,3 +1,4 @@
+import decimal
 from copy import deepcopy
 from importlib import (
     util,
@@ -157,8 +158,10 @@ def exec_input(exec_args: ExecArgs):
         exec_args.evalCode, exec_args.savedCode
     )
 
-    # repoen revent loop in case user closed it in last run
+    # reset settings that persist between runs
+    # todo: figure out some generic way to always start fresh
     asyncio.set_event_loop(asyncio.new_event_loop())
+    decimal.setcontext(decimal.DefaultContext)
 
     with script_path(os.path.dirname(exec_args.filePath)):
         try:
