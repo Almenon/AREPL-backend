@@ -1,1 +1,1 @@
-black -l 120 python --exclude="/(testDataFiles|stdlib_list|jsonpickle)/"
+black -l 120 python --exclude="/(testDataFiles|jsonpickle)/"

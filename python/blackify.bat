@@ -1,1 +1,1 @@
-black -l 120 . --exclude="/(testDataFiles|stdlib_list|jsonpickle)/"
+black -l 120 . --exclude="/(testDataFiles|jsonpickle)/"
