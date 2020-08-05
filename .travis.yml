@@ -19,7 +19,7 @@ script:
  - pip install -r requirements.txt
  - pytest
  - python -m arepl_stdlib_list.stdlibTest
-before_script: cd ../
+after_script: cd ../
 
 cache:
   directories:
