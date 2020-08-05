@@ -14,10 +14,11 @@ modules_to_keep.update(
         "arepl_result_stream",
     )
 )
-# when arepl is ran via unit test/debugging arepl_dump might be in modules to keep
+# when arepl is ran via unit test/debugging some extra libraries might be in modules_to_keep
 # in normal run it is not in there so we remove it
 modules_to_keep.discard("arepl_dump")
 modules_to_keep.discard("decimal")
+modules_to_keep.discard("asyncio")
 
 from copy import deepcopy
 from importlib import (
