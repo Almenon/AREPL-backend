@@ -173,9 +173,12 @@ def test_dump():
     )
     assert jsonpickle.decode(return_info.userVariables)["x"] == 1
 
+
 def test_arepl_dump_not_in_modules():
     python_evaluator.exec_input(
-        python_evaluator.ExecArgs("from sys import modules;assert 'arepl_dump' not in modules")
+        python_evaluator.ExecArgs(
+            "from sys import modules;assert 'arepl_dump' not in modules"
+        )
     )
 
 

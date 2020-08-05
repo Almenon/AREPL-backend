@@ -1,13 +1,23 @@
 from sys import modules
+
 # MUST be done first thing to avoid other modules getting into cache
 modules_to_keep = set([module_name for module_name in modules])
 # below line needed so test_jsonpickle_err_doesnt_break_arepl test passes
 # we want to keep arepl imports in the cache
-modules_to_keep.update(('arepl_overloads', 'arepl_pickler', 'arepl_saved','arepl_settings','arepl_user_error','arepl_result_stream',))
+modules_to_keep.update(
+    (
+        "arepl_overloads",
+        "arepl_pickler",
+        "arepl_saved",
+        "arepl_settings",
+        "arepl_user_error",
+        "arepl_result_stream",
+    )
+)
 # when arepl is ran via unit test/debugging arepl_dump might be in modules to keep
 # in normal run it is not in there so we remove it
-modules_to_keep.remove('arepl_dump')
-modules_to_keep.remove('decimal')
+modules_to_keep.remove("arepl_dump")
+modules_to_keep.remove("decimal")
 
 from copy import deepcopy
 from importlib import (
