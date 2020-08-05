@@ -16,8 +16,8 @@ modules_to_keep.update(
 )
 # when arepl is ran via unit test/debugging arepl_dump might be in modules to keep
 # in normal run it is not in there so we remove it
-modules_to_keep.remove("arepl_dump")
-modules_to_keep.remove("decimal")
+modules_to_keep.discard("arepl_dump")
+modules_to_keep.discard("decimal")
 
 from copy import deepcopy
 from importlib import (
