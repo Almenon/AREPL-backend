@@ -16,10 +16,42 @@ modules_to_keep.update(
 )
 # when arepl is ran via unit test/debugging some extra libraries might be in modules_to_keep
 # in normal run it is not in there so we remove it
-modules_to_keep.discard("arepl_dump")
-modules_to_keep.discard("decimal")
-modules_to_keep.discard("asyncio")
+modules_to_keep.difference_update(
+    {
+        "arepl_dump",
+        "decimal",
+        "asyncio.constants",
+        "asyncio.format_helpers",
+        "asyncio.base_futures",
+        "asyncio.log",
+        "asyncio.coroutines",
+        "asyncio.exceptions",
+        "asyncio.base_tasks",
+        "_asyncio",
+        "asyncio.events",
+        "asyncio.futures",
+        "asyncio.protocols",
+        "asyncio.transports",
+        "asyncio.sslproto",
+        "asyncio.locks",
+        "asyncio.tasks",
+        "asyncio.staggered",
+        "asyncio.trsock",
+        "asyncio.base_events",
+        "asyncio.runners",
+        "asyncio.queues",
+        "asyncio.streams",
+        "asyncio.subprocess",
+        "asyncio.base_subprocess",
+        "asyncio.proactor_events",
+        "asyncio.selector_events",
+        "asyncio.windows_utils",
+        "asyncio.windows_events",
+        "asyncio",
+    }
+)
 
+import asyncio
 from copy import deepcopy
 from importlib import (
     util,
@@ -181,6 +213,10 @@ def exec_input(exec_args: ExecArgs):
     new_modules = current_module_names - modules_to_keep
     for module_name in new_modules:
         del modules[module_name]
+
+    # not sure why i need to do this when module was deleted
+    # but if I don't next run will say event loop closed
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
     with script_path(os.path.dirname(exec_args.filePath)):
         try:
