@@ -31,7 +31,7 @@ import asyncio
 from io import TextIOWrapper
 import os
 import sys
-from sys import path, argv, version_info, exc_info
+from sys import path, argv, exc_info
 from typing import Any, Dict, FrozenSet, Set
 from contextlib import contextmanager
 
