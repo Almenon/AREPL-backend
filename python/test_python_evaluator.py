@@ -1,5 +1,5 @@
 from os import chdir, getcwd, listdir, path, pardir, remove
-from sys import version_info, modules
+from sys import modules
 from shutil import rmtree
 import tempfile
 
@@ -273,24 +273,6 @@ tasks = compile_async_tasks()
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(asyncio.gather(*tasks))
-loop.close()
-x=1
-    """
-
-    # the async def async_run would result
-    # in syntax error in python versions < 3.5
-    # so we use different test in that case
-    if version_info < (3, 5):
-        event_loop_code = """
-import asyncio
-
-@asyncio.coroutine
-def hello_world():
-    print("Hello World!")
-
-loop = asyncio.get_event_loop()
-# Blocking call which returns when the hello_world() coroutine is done
-loop.run_until_complete(hello_world())
 loop.close()
 x=1
     """
