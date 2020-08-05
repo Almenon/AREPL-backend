@@ -52,3 +52,19 @@ def test_dump_at_list():
             assert loads(output.userVariables)["dump output"] == 3
         else:
             assert output is None
+
+
+# This test fails but not sure how to fix it
+# I don't know of any easy way to make dump work with single line
+# def test_dump_same_line():
+#     # fmt: off
+#     dumpInfo = dump(1);dumpInfo2 = dump(2)
+#     # fmt: on
+
+#     assert loads(dumpInfo.userVariables)["dump output"] == 1
+#     assert dumpInfo.caller == "test_dump_same_line"
+#     assert dumpInfo.done == False
+
+#     assert loads(dumpInfo2.userVariables)["dump output"] == 2
+#     assert dumpInfo2.caller == "test_dump_same_line"
+#     assert dumpInfo2.done == False

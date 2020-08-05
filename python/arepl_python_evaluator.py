@@ -1,3 +1,4 @@
+import decimal
 from copy import deepcopy
 from importlib import (
     util,
@@ -157,8 +158,10 @@ def exec_input(exec_args: ExecArgs):
         exec_args.evalCode, exec_args.savedCode
     )
 
-    # repoen revent loop in case user closed it in last run
+    # reset settings that persist between runs
+    # todo: figure out some generic way to always start fresh
     asyncio.set_event_loop(asyncio.new_event_loop())
+    decimal.setcontext(decimal.DefaultContext)
 
     with script_path(os.path.dirname(exec_args.filePath)):
         try:
@@ -233,7 +236,9 @@ def print_output(output: object):
     """
     # We use result stream because user might use stdout and we don't want to conflict
     print(
-        json.dumps(output, default=lambda x: x.__dict__), file=arepl_result_stream.get_result_stream(), flush=True
+        json.dumps(output, default=lambda x: x.__dict__),
+        file=arepl_result_stream.get_result_stream(),
+        flush=True,
     )
 
 
@@ -266,10 +271,19 @@ def main(json_input: str):
 
 
 if __name__ == "__main__":
+    encoding = None
+    # arepl should treat stdout as tty device
+    # windows uses utf8 as encoding for tty device
+    # so we need to manually specify it in that case
+    # https://docs.python.org/3/library/sys.html#sys.stdout
+    if sys.platform == "win32":
+        encoding = "utf8"
     # arepl is ran via node so python thinks stdout is not a tty device and uses full buffering
     # We want users to see output in real time so we change to line buffering
     # todo: once python3.7 is supported use .reconfigure() instead
-    sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), "wb"), line_buffering=True)
+    sys.stdout = TextIOWrapper(
+        open(sys.stdout.fileno(), "wb"), line_buffering=True, encoding=encoding
+    )
     # Arepl node code will spawn process with a extra pipe for results
     # This is to avoid results conflicting with user writes to stdout
     arepl_result_stream.open_result_stream()

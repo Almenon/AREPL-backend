@@ -60,6 +60,114 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("returns user variables", function (done) {
+        pyEvaluator.onResult = (result) => {
+            assert.equal(result.userVariables['x'], 1)
+            done()
+        }
+        input.evalCode = "x=1"
+        pyEvaluator.execCode(input)
+    })
+
+    suite("stdout/stderr tests", () => {
+
+        test("can print stdout", function (done) {
+            let hasPrinted = false
+            pyEvaluator.onPrint = (stdout) => {
+                assert.equal(stdout, "hello world" + EOL)
+                hasPrinted = true
+            }
+
+            pyEvaluator.onResult = () => {
+                if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
+                else done()
+            }
+
+            input.evalCode = "print('hello world')"
+            pyEvaluator.execCode(input)
+        })
+
+        test("can print stdout if no newline", function (done) {
+            let hasPrinted = false
+            pyEvaluator.onPrint = (stdout) => {
+                assert.equal(stdout, "hello world")
+                hasPrinted = true
+            }
+
+            pyEvaluator.onResult = () => {
+                if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
+                else done()
+            }
+
+            input.evalCode = "print('hello world', end='')"
+            pyEvaluator.execCode(input)
+        })
+
+        test("can print stderr", function (done) {
+            let hasLogged = false
+            pyEvaluator.onStderr = (stderr) => {
+                assert.equal(stderr, "hello world")
+                hasLogged = true
+                done()
+            }
+
+            pyEvaluator.onResult = (result) => {
+                setTimeout(() => {
+                    if (!hasLogged) assert.fail("program has returned result " + JSON.stringify(result), "program should still be logging")
+                }, 100); //to avoid race conditions wait a bit in case stderr arrives later
+            }
+
+            input.evalCode = "import sys;sys.stderr.write('hello world')"
+            pyEvaluator.execCode(input)
+        })
+
+        test("can print multiple lines", function (done) {
+            let firstPrint = false
+
+            pyEvaluator.onPrint = (stdout) => {
+                // not sure why it is doing this.. stdout should be line buffered
+                // so we should get 1 and 2 seperately
+                assert.equal(stdout, '1' + EOL + '2' + EOL)
+                firstPrint = true
+            }
+
+            pyEvaluator.onResult = () => {
+                if (!firstPrint) assert.fail("program has returned result", "program should still be printing")
+                else done()
+            }
+
+            input.evalCode = "[print(x) for x in [1,2]]"
+            pyEvaluator.execCode(input)
+        })
+
+        test("prints in real-time", function (done) {
+            let printed = false
+
+            pyEvaluator.onPrint = (stdout) => { printed = true }
+            pyEvaluator.onResult = () => { done() }
+
+            setTimeout(() => { if (!printed) assert.fail("") }, 25)
+
+            input.evalCode = "from time import sleep\nprint('a')\nsleep(.05)\nprint(b)"
+            pyEvaluator.execCode(input)
+        })
+
+        test("returns result after print", function (done) {
+            pyEvaluator.onPrint = (stdout) => {
+                assert.equal(stdout, "hello world" + EOL)
+                assert.equal(pyEvaluator.executing, true)
+            }
+
+            pyEvaluator.onResult = () => {
+                assert.equal(pyEvaluator.executing, false)
+                done()
+            }
+
+            input.evalCode = "print('hello world')"
+            pyEvaluator.execCode(input)
+        })
+    })
+
     test("arepl_store works", function (done) {
         pyEvaluator.onPrint = (result) => {
             assert.strictEqual(result, "3" + EOL)
@@ -85,16 +193,15 @@ suite("python_evaluator Tests", () => {
         }
     })
 
-    // todo: FIX THIS!
-    // test("no encoding errors with utf16", function(done){
-    //     pyEvaluator.onResult = (result)=>{
-    //         assert.equal(result.userError, '')
-    //         assert.equal(result.internalError, null)
-    //         done()
-    //     }
-    //     input.evalCode = "#㍦"
-    //     pyEvaluator.execCode(input)
-    // })
+    test("no encoding errors with utf16", function (done) {
+        pyEvaluator.onResult = (result) => {
+            assert.equal(result.userErrorMsg, undefined)
+            assert.equal(result.internalError, null)
+            done()
+        }
+        input.evalCode = "#㍦"
+        pyEvaluator.execCode(input)
+    })
 
     test("dump returns result", function (done) {
         let gotDump = false
@@ -113,20 +220,24 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("nothing funky happens if dump called again", function (done) {
-        let gotDump = false
+    test("dump works properly when called repeatedly", function (done) {
+        let numResults = 0;
         pyEvaluator.onResult = (result) => {
-            if (gotDump) return
+            numResults += 1
+            if (numResults == 3) {
+                assert.equal(result.done, true)
+                done()
+                return
+            }
             assert.notEqual(result, null)
             assert.equal(isEmpty(result.userError), true)
             assert.equal(result.internalError, null)
-            assert.equal(result.userVariables['dump output'], 4)
+            assert.equal(result.userVariables['dump output'], numResults)
             assert.equal(result.caller, '<module>')
-            assert.equal(result.lineno, 1)
-            gotDump = true
-            done()
+            assert.equal(result.lineno, numResults)
         }
-        input.evalCode = "from arepl_dump import dump;dump(4)"
+        input.evalCode = `from arepl_dump import dump;dump(1)
+dump(2)`
         pyEvaluator.execCode(input)
     })
 
@@ -142,108 +253,20 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("returns user variables", function (done) {
-        pyEvaluator.onResult = (result) => {
-            assert.equal(result.userVariables['x'], 1)
-            done()
-        }
-        input.evalCode = "x=1"
-        pyEvaluator.execCode(input)
-    })
-
     test("uses previousRun variables asked", function (done) {
-        pyEvaluator.onResult = (result) => {
+        function onSecondResult(result) {
             assert.equal(result.userVariables['y'], 1)
             done()
         }
-        input.evalCode = "y=x"
-        input.usePreviousVariables = true
-        pyEvaluator.execCode(input)
-        input.usePreviousVariables = false
-    })
-
-    test("can print stdout", function (done) {
-        let hasPrinted = false
-        pyEvaluator.onPrint = (stdout) => {
-            assert.equal(stdout, "hello world" + EOL)
-            hasPrinted = true
-        }
-
-        pyEvaluator.onResult = () => {
-            if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
-            else done()
-        }
-
-        input.evalCode = "print('hello world')"
-        pyEvaluator.execCode(input)
-    })
-
-    test("can print stdout if no newline", function (done) {
-        let hasPrinted = false
-        pyEvaluator.onPrint = (stdout) => {
-            assert.equal(stdout, "hello world")
-            hasPrinted = true
-        }
-
-        pyEvaluator.onResult = () => {
-            if (!hasPrinted) assert.fail("program has returned result", "program should still be printing")
-            else done()
-        }
-
-        input.evalCode = "print('hello world', end='')"
-        pyEvaluator.execCode(input)
-    })
-
-    test("can print stderr", function (done) {
-        let hasLogged = false
-        pyEvaluator.onStderr = (stderr) => {
-            assert.equal(stderr, "hello world")
-            hasLogged = true
-            done()
-        }
-
         pyEvaluator.onResult = (result) => {
-            setTimeout(() => {
-                if (!hasLogged) assert.fail("program has returned result " + JSON.stringify(result), "program should still be logging")
-            }, 100); //to avoid race conditions wait a bit in case stderr arrives later
+            pyEvaluator.onResult = onSecondResult
+            input.usePreviousVariables = true
+            pyEvaluator.execCode(input)
+            input.usePreviousVariables = false
         }
-
-        input.evalCode = "import sys;sys.stderr.write('hello world')"
+        input.evalCode = "x=1"
         pyEvaluator.execCode(input)
-    })
-
-    test("can print multiple lines", function (done) {
-        let firstPrint = false
-
-        pyEvaluator.onPrint = (stdout) => {
-            // not sure why it is doing this.. stdout should be line buffered
-            // so we should get 1 and 2 seperately
-            assert.equal(stdout, '1' + EOL + '2' + EOL)
-            firstPrint = true
-        }
-
-        pyEvaluator.onResult = () => {
-            if (!firstPrint) assert.fail("program has returned result", "program should still be printing")
-            else done()
-        }
-
-        input.evalCode = "[print(x) for x in [1,2]]"
-        pyEvaluator.execCode(input)
-    })
-
-    test("returns result after print", function (done) {
-        pyEvaluator.onPrint = (stdout) => {
-            assert.equal(stdout, "hello world" + EOL)
-            assert.equal(pyEvaluator.executing, true)
-        }
-
-        pyEvaluator.onResult = () => {
-            assert.equal(pyEvaluator.executing, false)
-            done()
-        }
-
-        input.evalCode = "print('hello world')"
-        pyEvaluator.execCode(input)
+        input.evalCode = "y=x"
     })
 
     test("can restart", function (done) {
@@ -316,18 +339,6 @@ try:
 except Exception as e:
     fah`
 
-        pyEvaluator.execCode(input)
-    })
-
-    test("prints in real-time", function (done) {
-        let printed = false
-
-        pyEvaluator.onPrint = (stdout) => { printed = true }
-        pyEvaluator.onResult = () => { done() }
-
-        setTimeout(() => { if (!printed) assert.fail("") }, 25)
-
-        input.evalCode = "from time import sleep\nprint('a')\nsleep(.05)\nprint(b)"
         pyEvaluator.execCode(input)
     })
 
