@@ -14,12 +14,12 @@ matrix:
           dist: bionic
           sudo: true
           
+before_script: cd python
 script:
- - pip install -r python/requirements.txt
- - export PYTHONPATH=.
- - pytest python/test_python_evaluator.py
- - pytest python/test_arepl_dump.py
- - python -m python.arepl_stdlib_list.stdlibTest
+ - pip install -r requirements.txt
+ - pytest
+ - python -m arepl_stdlib_list.stdlibTest
+after_script: cd ../
 
 cache:
   directories:
