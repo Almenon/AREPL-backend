@@ -18,7 +18,6 @@ before_script: cd python
 script:
  - pip install -r requirements.txt
  - pytest
- - python -m arepl_stdlib_list.stdlibTest
 after_script: cd ../
 
 cache:
