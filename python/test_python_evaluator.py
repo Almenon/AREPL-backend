@@ -1,5 +1,4 @@
 from os import chdir, getcwd, listdir, path, pardir, remove
-from sys import modules
 from shutil import rmtree
 import tempfile
 
