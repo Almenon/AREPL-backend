@@ -1,5 +1,4 @@
 from os import chdir, getcwd, listdir, path, pardir, remove
-from sys import version_info, modules
 from shutil import rmtree
 import tempfile
 
@@ -174,28 +173,12 @@ def test_dump():
     assert jsonpickle.decode(return_info.userVariables)["x"] == 1
 
 
-def test_dump_when_exception():
-    # this test prevents rather specific error case where i forget to uncache dump during exception handling
-    # and it causes dump to not work properly second time around (see https://github.com/Almenon/AREPL-vscode/issues/91)
-    try:
-        python_evaluator.exec_input(
-            python_evaluator.ExecArgs(
-                "from arepl_dump import dump;dumpOut = dump('dump worked');x=1;raise Exception()"
-            )
+def test_arepl_dump_not_in_modules():
+    python_evaluator.exec_input(
+        python_evaluator.ExecArgs(
+            "from sys import modules;assert 'arepl_dump' not in modules"
         )
-    except Exception as e:
-        assert "dumpOut" in jsonpickle.decode(e.varsSoFar)
-    try:
-        python_evaluator.exec_input(
-            python_evaluator.ExecArgs(
-                "from arepl_dump import dump;dumpOut = dump('dump worked');raise Exception()"
-            )
-        )
-    except Exception as e:
-        assert (
-            "dumpOut" in jsonpickle.decode(e.varsSoFar)
-            and jsonpickle.decode(e.varsSoFar)["dumpOut"] is not None
-        )
+    )
 
 
 def test_import_does_not_show():
@@ -293,24 +276,6 @@ loop.close()
 x=1
     """
 
-    # the async def async_run would result
-    # in syntax error in python versions < 3.5
-    # so we use different test in that case
-    if version_info < (3, 5):
-        event_loop_code = """
-import asyncio
-
-@asyncio.coroutine
-def hello_world():
-    print("Hello World!")
-
-loop = asyncio.get_event_loop()
-# Blocking call which returns when the hello_world() coroutine is done
-loop.run_until_complete(hello_world())
-loop.close()
-x=1
-    """
-
     python_evaluator.exec_input(python_evaluator.ExecArgs(event_loop_code))
     return_info = python_evaluator.exec_input(
         python_evaluator.ExecArgs(event_loop_code)
@@ -319,23 +284,22 @@ x=1
     assert "x" in vars
 
 
-def test_builtinImportNotDeleted():
-    importStr = """
-import math
-from json import loads
-    """
+def test_builtinImportDeleted():
+    importStr = "from sys import modules;import decimal;assert 'decimal' in modules"
     python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-    assert "math" in modules
-    assert "json" in modules
+    importStr = "from sys import modules;assert 'decimal' not in modules"
+    python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
 
 
-def test_pipImportNotDeleted():
+def test_pipImportDeleted():
+    importStr = "from sys import modules;import praw;assert 'praw' in modules"
+    python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
     importStr = """
-import praw
+from sys import modules
+assert 'praw' not in modules
+assert 'praw.models.user' not in modules
     """
     python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-    assert "praw" in modules
-    assert "praw.models.user" in modules
 
 
 def test_user_import_deleted():
@@ -354,7 +318,6 @@ def test_user_import_deleted():
         assert (
             jsonpickle.decode(return_info.userVariables)["x"] == 2
         )  # just checking this for later on
-        assert "foo" not in modules  # user import should be deleted!
 
         # now that import is uncached i should be able to change code, rerun & get different result
         with open(file_path, "w") as f:
@@ -393,7 +356,6 @@ def test_user_var_import_deleted():
         assert (
             jsonpickle.decode(return_info.userVariables)["myVar"] == 5
         )  # just checking this for later on
-        assert "varToImport" not in modules  # user import should be deleted!
 
         # now that import is uncached i should be able to change code, rerun & get different result
         with open(varToImportFile_path, "w") as f:
@@ -409,6 +371,18 @@ def test_user_var_import_deleted():
         # restore file back to original
         with open(varToImportFile_path, "w") as f:
             f.write(origVarToImportFileText)
+
+
+def test_context_vars_cleared():
+    importStr = """
+import decimal
+x = float(decimal.Decimal("1.6") ** decimal.Decimal("1.6")) # 2.121...
+decimal.getcontext().prec = 2  # change precision so that above line would be 2.1
+    """
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
+    assert jsonpickle.decode(return_info.userVariables)["x"] == 2.1212505710975917
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
+    assert jsonpickle.decode(return_info.userVariables)["x"] == 2.1212505710975917
 
 
 def test_arepl_store():

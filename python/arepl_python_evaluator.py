@@ -1,7 +1,67 @@
-import decimal
+from sys import modules
+
+# MUST be done first thing to avoid other modules getting into cache
+modules_to_keep = set([module_name for module_name in modules])
+# below line needed so test_jsonpickle_err_doesnt_break_arepl test passes
+# we want to keep arepl imports in the cache
+modules_to_keep.update(
+    (
+        "arepl_overloads",
+        "arepl_pickler",
+        "arepl_saved",
+        "arepl_settings",
+        "arepl_user_error",
+        "arepl_result_stream",
+    )
+)
+# when arepl is ran via unit test/debugging some extra libraries might be in modules_to_keep
+# in normal run it is not in there so we remove it
+modules_to_keep.difference_update(
+    {
+        "arepl_dump",
+        "decimal",
+        "asyncio.constants",
+        "asyncio.format_helpers",
+        "asyncio.base_futures",
+        "asyncio.log",
+        "asyncio.coroutines",
+        "asyncio.exceptions",
+        "asyncio.base_tasks",
+        "_asyncio",
+        "asyncio.events",
+        "asyncio.futures",
+        "asyncio.protocols",
+        "asyncio.transports",
+        "asyncio.sslproto",
+        "asyncio.locks",
+        "asyncio.tasks",
+        "asyncio.staggered",
+        "asyncio.trsock",
+        "asyncio.base_events",
+        "asyncio.runners",
+        "asyncio.queues",
+        "asyncio.streams",
+        "asyncio.subprocess",
+        "asyncio.base_subprocess",
+        "asyncio.proactor_events",
+        "asyncio.selector_events",
+        "asyncio.windows_utils",
+        "asyncio.windows_events",
+        "asyncio",
+    }
+)
+
+import asyncio
+
+try:
+    # import fails in python 3.6
+    import contextvars
+except ImportError:
+    pass
 from copy import deepcopy
 from importlib import (
     util,
+    reload,
 )  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 import json
 import traceback
@@ -10,10 +70,9 @@ import asyncio
 from io import TextIOWrapper
 import os
 import sys
-from sys import path, modules, argv, version_info, exc_info
+from sys import path, argv, exc_info
 from typing import Any, Dict, FrozenSet, Set
 from contextlib import contextmanager
-from arepl_module_logic import get_non_user_modules
 
 # do NOT use from arepl_overloads import arepl_input_iterator
 # it will recreate arepl_input_iterator and we need the original
@@ -125,9 +184,6 @@ def script_path(script_dir: str):
                 pass
 
 
-nonUserModules = get_non_user_modules()
-origModules = frozenset(modules)
-
 saved.starting_locals["help"] = arepl_overloads.help_overload
 saved.starting_locals["input"] = arepl_overloads.input_overload
 saved.starting_locals["howdoi"] = arepl_overloads.howdoi_wrapper
@@ -136,6 +192,11 @@ eval_locals = deepcopy(saved.starting_locals)
 
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
+try:
+    run_context = contextvars.Context()
+except NameError:
+    run_context = None
+
 
 def exec_input(exec_args: ExecArgs):
     """
@@ -143,6 +204,7 @@ def exec_input(exec_args: ExecArgs):
     :rtype: returnInfo
     """
     global eval_locals
+    global run_context
 
     argv[0] = exec_args.filePath
     # see https://docs.python.org/3/library/sys.html#sys.argv
@@ -158,15 +220,26 @@ def exec_input(exec_args: ExecArgs):
         exec_args.evalCode, exec_args.savedCode
     )
 
-    # reset settings that persist between runs
-    # todo: figure out some generic way to always start fresh
+    # clear new modules from last run each run has same fresh start
+    current_module_names = set([module_name for module_name in modules])
+    new_modules = current_module_names - modules_to_keep
+    for module_name in new_modules:
+        del modules[module_name]
+
+    # not sure why i need to do this when module was deleted
+    # but if I don't next run will say event loop closed
     asyncio.set_event_loop(asyncio.new_event_loop())
-    decimal.setcontext(decimal.DefaultContext)
 
     with script_path(os.path.dirname(exec_args.filePath)):
+        if not exec_args.usePreviousVariables and run_context is not None:
+            run_context = contextvars.Context()
         try:
             start = time()
-            exec(exec_args.evalCode, eval_locals)
+            if run_context is not None:
+                run_context.run(exec, exec_args.evalCode, eval_locals)
+            else:
+                # python 3.6 fallback
+                exec(exec_args.evalCode, eval_locals)
             execTime = time() - start
         except BaseException:
             execTime = time() - start
@@ -184,32 +257,6 @@ def exec_input(exec_args: ExecArgs):
                 sys.stdout.flush()
 
             saved.arepl_store = eval_locals.get("arepl_store")
-
-            try:
-                # arepl_dump library keeps state internally
-                # because python caches imports the state is kept inbetween runs
-                # we do not want that, arepl_dump should reset each run
-                del modules["arepl_dump"]
-            except KeyError:
-                pass  # they have not imported it, whatever
-
-            importedModules = set(modules) - origModules
-            userModules = importedModules - nonUserModules
-
-            # user might have changed user module inbetween arepl runs
-            # so we clear them to reload import each time
-            for userModule in userModules:
-                try:
-                    # #70: nonUserModules does not list submodules
-                    # so we have to extract base module and use that
-                    # to skip any nonUserModules
-                    baseModule = userModule.split(".")[0]
-                    if len(baseModule) > 1:
-                        if baseModule in nonUserModules:
-                            continue
-                    del modules[userModule]
-                except KeyError:
-                    pass  # it's not worth failing AREPL over
 
             # clear mock stdin for next run
             arepl_overloads.arepl_input_iterator = None

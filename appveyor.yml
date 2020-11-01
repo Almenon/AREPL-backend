@@ -33,7 +33,7 @@ test_script:
   - npm run appveyorTest
 
 cache:
-  - node_modules -> package.json
+  - node_modules -> package-lock.json
 
 notifications:
   - provider: Email

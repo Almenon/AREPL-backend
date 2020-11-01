@@ -1,12 +1,6 @@
 language: python
 matrix:
     include:
-        - python: 3.5
-          dist: trusty
-          sudo: false
-        - python: 3.6
-          dist: trusty
-          sudo: false
         - python: 3.7
           dist: bionic
           sudo: true
@@ -18,7 +12,6 @@ before_script: cd python
 script:
  - pip install -r requirements.txt
  - pytest
- - python -m arepl_stdlib_list.stdlibTest
 after_script: cd ../
 
 cache:
