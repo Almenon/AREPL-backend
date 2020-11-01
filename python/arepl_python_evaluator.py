@@ -52,6 +52,12 @@ modules_to_keep.difference_update(
 )
 
 import asyncio
+
+try:
+    # import fails in python 3.6
+    import contextvars
+except ImportError:
+    pass
 from copy import deepcopy
 from importlib import (
     util,
@@ -186,6 +192,11 @@ eval_locals = deepcopy(saved.starting_locals)
 
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
+try:
+    run_context = contextvars.Context()
+except NameError:
+    run_context = None
+
 
 def exec_input(exec_args: ExecArgs):
     """
@@ -193,6 +204,7 @@ def exec_input(exec_args: ExecArgs):
     :rtype: returnInfo
     """
     global eval_locals
+    global run_context
 
     argv[0] = exec_args.filePath
     # see https://docs.python.org/3/library/sys.html#sys.argv
@@ -219,9 +231,15 @@ def exec_input(exec_args: ExecArgs):
     asyncio.set_event_loop(asyncio.new_event_loop())
 
     with script_path(os.path.dirname(exec_args.filePath)):
+        if not exec_args.usePreviousVariables and run_context is not None:
+            run_context = contextvars.Context()
         try:
             start = time()
-            exec(exec_args.evalCode, eval_locals)
+            if run_context is not None:
+                run_context.run(exec, exec_args.evalCode, eval_locals)
+            else:
+                # python 3.6 fallback
+                exec(exec_args.evalCode, eval_locals)
             execTime = time() - start
         except BaseException:
             execTime = time() - start

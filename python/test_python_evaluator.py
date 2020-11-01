@@ -373,6 +373,18 @@ def test_user_var_import_deleted():
             f.write(origVarToImportFileText)
 
 
+def test_context_vars_cleared():
+    importStr = """
+import decimal
+x = float(decimal.Decimal("1.6") ** decimal.Decimal("1.6")) # 2.121...
+decimal.getcontext().prec = 2  # change precision so that above line would be 2.1
+    """
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
+    assert jsonpickle.decode(return_info.userVariables)["x"] == 2.1212505710975917
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
+    assert jsonpickle.decode(return_info.userVariables)["x"] == 2.1212505710975917
+
+
 def test_arepl_store():
     python_evaluator.exec_input(python_evaluator.ExecArgs("arepl_store=5"))
     return_info = python_evaluator.exec_input(
