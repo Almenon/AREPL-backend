@@ -12,6 +12,19 @@ modules_to_keep.update(
         "arepl_settings",
         "arepl_user_error",
         "arepl_result_stream",
+        "arepl_jsonpickle",
+        "arepl_jsonpickle.util",
+        "arepl_jsonpickle.handlers",
+        "arepl_jsonpickle.version",
+        "arepl_jsonpickle.pickler",
+        "arepl_jsonpickle.backend",
+        "arepl_jsonpickle.tags",
+        "arepl_jsonpickle.compat",
+        "arepl_jsonpickle.unpickler",
+        "arepl_jsonpickle.ext",
+        "arepl_jsonpickle.ext.pandas",
+        "arepl_jsonpickle.ext.numpy",
+        "typing",  # for some reason i can't clear this or jsonpickle breaks
     )
 )
 # when arepl is ran via unit test/debugging some extra libraries might be in modules_to_keep
