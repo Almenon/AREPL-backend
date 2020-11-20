@@ -31,7 +31,7 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: lint w/ black
-      uses: psf/black@stable
+      run: black -l 120 python --exclude="/(testDataFiles|jsonpickle)/"
     - name: Test with pytest
       run: |
         pytest
