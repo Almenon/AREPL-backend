@@ -193,7 +193,11 @@ suite("python_evaluator Tests", () => {
         }
     })
 
-    test("no encoding errors with utf16", function (done) {
+    test("no encoding errors with utf8 on windows", function (done) {
+        if (process.platform != "win32") done()
+        // other platforms may have the locale encoding
+        // so we just test windows
+        // see https://docs.python.org/3/library/sys.html#sys.stdout
         pyEvaluator.onResult = (result) => {
             assert.equal(result.userErrorMsg, undefined)
             assert.equal(result.internalError, null)
