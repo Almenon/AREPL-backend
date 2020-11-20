@@ -34,9 +34,7 @@ jobs:
     - name: lint w/ black
       run: $(cat blackify.bat)
     - name: Test with pytest
-      run: |
-        pytest
-        python -m arepl_stdlib_list.stdlibTest
+      run: pytest
 
     - name: Use Node.js 12
       uses: actions/setup-node@v2.1.2
