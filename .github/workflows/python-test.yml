@@ -37,7 +37,6 @@ jobs:
         pytest
         python -m arepl_stdlib_list.stdlibTest
 
-    - uses: actions/checkout@v2
     - name: Use Node.js 12
       uses: actions/setup-node@v2.1.2
       with:
