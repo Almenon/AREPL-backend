@@ -145,15 +145,7 @@ class ExecArgs(object):
 
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
-    def __init__(
-        self,
-        evalCode: str,
-        savedCode="",
-        filePath="",
-        usePreviousVariables=False,
-        *args,
-        **kwargs
-    ):
+    def __init__(self, evalCode: str, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
         self.savedCode = savedCode
         self.evalCode = evalCode
         self.filePath = filePath
@@ -229,9 +221,7 @@ def exec_input(exec_args: ExecArgs):
         eval_locals = saved.get_eval_locals(exec_args.savedCode)
 
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
-    exec_args.evalCode = saved.copy_saved_imports_to_exec(
-        exec_args.evalCode, exec_args.savedCode
-    )
+    exec_args.evalCode = saved.copy_saved_imports_to_exec(exec_args.evalCode, exec_args.savedCode)
 
     # clear new modules from last run each run has same fresh start
     current_module_names = set([module_name for module_name in modules])
@@ -276,15 +266,11 @@ def exec_input(exec_args: ExecArgs):
 
     if get_settings().show_global_vars:
         userVariables = pickle_user_vars(
-            eval_locals,
-            get_settings().default_filter_vars,
-            get_settings().default_filter_types,
+            eval_locals, get_settings().default_filter_vars, get_settings().default_filter_types,
         )
     else:
         userVariables = pickle_user_vars(
-            noGlobalVarsMsg,
-            get_settings().default_filter_vars,
-            get_settings().default_filter_types,
+            noGlobalVarsMsg, get_settings().default_filter_vars, get_settings().default_filter_types,
         )
 
     return ReturnInfo("", userVariables, execTime, None)
@@ -296,9 +282,7 @@ def print_output(output: object):
     """
     # We use result stream because user might use stdout and we don't want to conflict
     print(
-        json.dumps(output, default=lambda x: x.__dict__),
-        file=arepl_result_stream.get_result_stream(),
-        flush=True,
+        json.dumps(output, default=lambda x: x.__dict__), file=arepl_result_stream.get_result_stream(), flush=True,
     )
 
 
@@ -320,9 +304,7 @@ def main(json_input: str):
         return_info.userVariables = e.varsSoFar
         return_info.execTime = e.execTime
     except Exception as e:
-        return_info.internalError = (
-            "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
-        )
+        return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
 
     return_info.totalPyTime = time() - start
 
@@ -341,9 +323,7 @@ if __name__ == "__main__":
     # arepl is ran via node so python thinks stdout is not a tty device and uses full buffering
     # We want users to see output in real time so we change to line buffering
     # todo: once python3.7 is supported use .reconfigure() instead
-    sys.stdout = TextIOWrapper(
-        open(sys.stdout.fileno(), "wb"), line_buffering=True, encoding=encoding
-    )
+    sys.stdout = TextIOWrapper(open(sys.stdout.fileno(), "wb"), line_buffering=True, encoding=encoding)
     # Arepl node code will spawn process with a extra pipe for results
     # This is to avoid results conflicting with user writes to stdout
     arepl_result_stream.open_result_stream()
