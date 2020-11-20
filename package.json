@@ -46,6 +46,6 @@
     "typescript": "^3.6.3"
   },
   "dependencies": {
-    "python-shell": "^2.0.2"
+    "python-shell": "^2.0.3"
   }
 }
