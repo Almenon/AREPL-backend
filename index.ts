@@ -170,8 +170,7 @@ export class PythonEvaluator {
 		console.log("Starting Python...")
 		this.pyshell = new PythonShell('arepl_python_evaluator.py', this.options)
 
-		// @ts-ignore node is badly typed, stdio can have more than 3 pipes
-		const resultPipe: Readable = this.pyshell.childProcess.stdio[3]
+		const resultPipe = this.pyshell.childProcess.stdio[3]
 		const newlineTransformer = new NewlineTransformer()
 		resultPipe.pipe(newlineTransformer).on('data', this.handleResult.bind(this))
 
