@@ -69,6 +69,15 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
+    test("returns user variables properly when there is a lot of content", function (done) {
+        pyEvaluator.onResult = (result) => {
+            assert.equal(result.userVariables['x'], 1)
+            done()
+        }
+        input.evalCode = "x=1;y='a'*80000"
+        pyEvaluator.execCode(input)
+    })
+
     suite("stdout/stderr tests", () => {
 
         test("can print stdout", function (done) {
