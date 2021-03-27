@@ -1,4 +1,4 @@
-# AREPL-backend [![Build Status](https://travis-ci.org/Almenon/AREPL-backend.svg?branch=master)](https://travis-ci.org/Almenon/AREPL-backend) [![Build status](https://ci.appveyor.com/api/projects/status/24o0d29l7ci9bif3?svg=true)](https://ci.appveyor.com/project/Almenon/arepl-backend) [![npm version](https://badge.fury.io/js/arepl-backend.svg)](https://badge.fury.io/js/arepl-backend)
+# AREPL-backend [![npm version](https://badge.fury.io/js/arepl-backend.svg)](https://badge.fury.io/js/arepl-backend)
 
 JS interface to python evaluator for AREPL. 
 
