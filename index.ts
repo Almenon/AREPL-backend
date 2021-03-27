@@ -1,4 +1,4 @@
-import { PythonShell, Options } from 'python-shell'
+import { PythonShell, Options, NewlineTransformer } from 'python-shell'
 import { EOL } from 'os'
 import { Readable } from 'stream'
 
@@ -57,22 +57,22 @@ export interface PythonResult {
 export class PythonEvaluator {
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
-    /**
-     * whether python is busy executing inputted code
-     */
+	/**
+	 * whether python is busy executing inputted code
+	 */
 	executing = false
 
-    /**
-     * whether python backend process is running / not running
-     */
+	/**
+	 * whether python backend process is running / not running
+	 */
 	running = false
 
 	restarting = false
 	private startTime: number
 
-    /**
-     * an instance of python-shell. See https://github.com/extrabacon/python-shell
-     */
+	/**
+	 * an instance of python-shell. See https://github.com/extrabacon/python-shell
+	 */
 	pyshell: PythonShell
 
 	/**
@@ -172,9 +172,8 @@ export class PythonEvaluator {
 
 		// @ts-ignore node is badly typed, stdio can have more than 3 pipes
 		const resultPipe: Readable = this.pyshell.childProcess.stdio[3]
-		resultPipe.on('data', (result: Buffer) => {
-			result.toString().trimRight().split(EOL).forEach(this.handleResult.bind(this))
-		})
+		const newlineTransformer = new NewlineTransformer()
+		resultPipe.pipe(newlineTransformer).on('data', this.handleResult.bind(this))
 
 		// not sure why exactly I have to wrap onPrint/onStderr w/ lambda
 		// but tests fail if I don't
