@@ -1,4 +1,4 @@
-# AREPL-backend [![npm version](https://badge.fury.io/js/arepl-backend.svg)](https://badge.fury.io/js/arepl-backend)
+# AREPL-backend [![npm version](https://badge.fury.io/js/arepl-backend.svg)](https://badge.fury.io/js/arepl-backend) ![example workflow](https://github.com/almenon/AREPL-backend/actions/workflows/tests.yml/badge.svg)
 
 JS interface to python evaluator for AREPL. 
 
