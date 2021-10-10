@@ -42,12 +42,12 @@ suite("python_evaluator Tests", () => {
     })
 
     test("sanity check: 1+1=2", () => {
-        assert.equal(1 + 1, 2)
+        assert.strictEqual(1 + 1, 2)
     })
 
     test("returns result", function (done) {
         pyEvaluator.onResult = (result) => {
-            assert.notEqual(result, null)
+            assert.notStrictEqual(result, null)
             done()
         }
         pyEvaluator.onStderr = (err: string) => {
@@ -62,7 +62,7 @@ suite("python_evaluator Tests", () => {
 
     test("returns user variables", function (done) {
         pyEvaluator.onResult = (result) => {
-            assert.equal(result.userVariables['x'], 1)
+            assert.strictEqual(result.userVariables['x'], 1)
             done()
         }
         input.evalCode = "x=1"
@@ -71,7 +71,7 @@ suite("python_evaluator Tests", () => {
 
     test("returns user variables properly when there is a lot of content", function (done) {
         pyEvaluator.onResult = (result) => {
-            assert.equal(result.userVariables['x'], 1)
+            assert.strictEqual(result.userVariables['x'], 1)
             done()
         }
         input.evalCode = "x=1;y='a'*80000"
@@ -83,7 +83,7 @@ suite("python_evaluator Tests", () => {
         test("can print stdout", function (done) {
             let hasPrinted = false
             pyEvaluator.onPrint = (stdout) => {
-                assert.equal(stdout, "hello world" + EOL)
+                assert.strictEqual(stdout, "hello world" + EOL)
                 hasPrinted = true
             }
 
@@ -99,7 +99,7 @@ suite("python_evaluator Tests", () => {
         test("can print stdout if no newline", function (done) {
             let hasPrinted = false
             pyEvaluator.onPrint = (stdout) => {
-                assert.equal(stdout, "hello world")
+                assert.strictEqual(stdout, "hello world")
                 hasPrinted = true
             }
 
@@ -115,7 +115,7 @@ suite("python_evaluator Tests", () => {
         test("can print stderr", function (done) {
             let hasLogged = false
             pyEvaluator.onStderr = (stderr) => {
-                assert.equal(stderr, "hello world")
+                assert.strictEqual(stderr, "hello world")
                 hasLogged = true
                 done()
             }
@@ -136,7 +136,7 @@ suite("python_evaluator Tests", () => {
             pyEvaluator.onPrint = (stdout) => {
                 // not sure why it is doing this.. stdout should be line buffered
                 // so we should get 1 and 2 seperately
-                assert.equal(stdout, '1' + EOL + '2' + EOL)
+                assert.strictEqual(stdout, '1' + EOL + '2' + EOL)
                 firstPrint = true
             }
 
@@ -163,12 +163,12 @@ suite("python_evaluator Tests", () => {
 
         test("returns result after print", function (done) {
             pyEvaluator.onPrint = (stdout) => {
-                assert.equal(stdout, "hello world" + EOL)
-                assert.equal(pyEvaluator.executing, true)
+                assert.strictEqual(stdout, "hello world" + EOL)
+                assert.strictEqual(pyEvaluator.executing, true)
             }
 
             pyEvaluator.onResult = () => {
-                assert.equal(pyEvaluator.executing, false)
+                assert.strictEqual(pyEvaluator.executing, false)
                 done()
             }
 
@@ -211,8 +211,8 @@ suite("python_evaluator Tests", () => {
             return
         }
         pyEvaluator.onResult = (result) => {
-            assert.equal(result.userErrorMsg, undefined)
-            assert.equal(result.internalError, null)
+            assert.strictEqual(result.userErrorMsg, undefined)
+            assert.strictEqual(result.internalError, null)
             done()
         }
         input.evalCode = "#㍦"
@@ -223,12 +223,12 @@ suite("python_evaluator Tests", () => {
         let gotDump = false
         pyEvaluator.onResult = (result) => {
             if (gotDump) return
-            assert.notEqual(result, null)
-            assert.equal(isEmpty(result.userError), true)
-            assert.equal(result.internalError, null)
-            assert.equal(result.userVariables['dump output'], 5)
-            assert.equal(result.caller, '<module>')
-            assert.equal(result.lineno, 1)
+            assert.notStrictEqual(result, null)
+            assert.strictEqual(isEmpty(result.userError), true)
+            assert.strictEqual(result.internalError, null)
+            assert.strictEqual(result.userVariables['dump output'], 5)
+            assert.strictEqual(result.caller, '<module>')
+            assert.strictEqual(result.lineno, 1)
             gotDump = true
             done()
         }
@@ -241,16 +241,16 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.onResult = (result) => {
             numResults += 1
             if (numResults == 3) {
-                assert.equal(result.done, true)
+                assert.strictEqual(result.done, true)
                 done()
                 return
             }
-            assert.notEqual(result, null)
-            assert.equal(isEmpty(result.userError), true)
-            assert.equal(result.internalError, null)
-            assert.equal(result.userVariables['dump output'], numResults)
-            assert.equal(result.caller, '<module>')
-            assert.equal(result.lineno, numResults)
+            assert.notStrictEqual(result, null)
+            assert.strictEqual(isEmpty(result.userError), true)
+            assert.strictEqual(result.internalError, null)
+            assert.strictEqual(result.userVariables['dump output'], numResults)
+            assert.strictEqual(result.caller, '<module>')
+            assert.strictEqual(result.lineno, numResults)
         }
         input.evalCode = `from arepl_dump import dump;dump(1)
 dump(2)`
@@ -259,10 +259,10 @@ dump(2)`
 
     test("returns syntax error when incorrect syntax", function (done) {
         pyEvaluator.onResult = (result) => {
-            assert.notEqual(result.userError, null)
-            assert.equal(result.userError.filename, '<string>')
-            assert.equal(result.userError.lineno, '1')
-            assert.equal(result.userError.msg, 'invalid syntax')
+            assert.notStrictEqual(result.userError, null)
+            assert.strictEqual(result.userError.filename, '<string>')
+            assert.strictEqual(result.userError.lineno, '1')
+            assert.strictEqual(result.userError.msg, 'invalid syntax')
             done()
         }
         input.evalCode = "x="
@@ -271,7 +271,7 @@ dump(2)`
 
     test("uses previousRun variables asked", function (done) {
         function onSecondResult(result) {
-            assert.equal(result.userVariables['y'], 1)
+            assert.strictEqual(result.userVariables['y'], 1)
             done()
         }
         pyEvaluator.onResult = (result) => {
@@ -289,13 +289,13 @@ dump(2)`
 
         this.timeout(this.timeout() + pythonStartupTime)
 
-        assert.equal(pyEvaluator.running, true)
-        assert.equal(pyEvaluator.restarting, false)
-        assert.equal(pyEvaluator.executing, false)
+        assert.strictEqual(pyEvaluator.running, true)
+        assert.strictEqual(pyEvaluator.restarting, false)
+        assert.strictEqual(pyEvaluator.executing, false)
 
         pyEvaluator.restart(() => {
-            assert.equal(pyEvaluator.running, true)
-            assert.equal(pyEvaluator.executing, false)
+            assert.strictEqual(pyEvaluator.running, true)
+            assert.strictEqual(pyEvaluator.executing, false)
 
             setTimeout(() => {
                 // by now python should be restarted and accepting input
@@ -308,7 +308,7 @@ dump(2)`
 
     test("strips out unnecessary error info", function (done) {
         pyEvaluator.onResult = (result) => {
-            assert.equal(result.userErrorMsg, "Traceback (most recent call last):\n  line 1, in <module>\nNameError: name 'x' is not defined\n")
+            assert.strictEqual(result.userErrorMsg, "Traceback (most recent call last):\n  line 1, in <module>\nNameError: name 'x' is not defined\n")
             done()
         }
         input.evalCode = "x"
@@ -320,10 +320,10 @@ dump(2)`
             // asserting the exact string would result in flaky tests
             // because internal python code could change & the traceback would be different
             // so we just do some generic checks
-            assert.equal(result.userErrorMsg.includes("TypeError"), true)
-            assert.equal(result.userErrorMsg.split('File ').length > 1, true)
-            assert.equal(result.userErrorMsg.includes("python_evaluator.py"), false)
-            assert.equal(result.userErrorMsg.includes("exec(data['evalCode'], evalLocals)"), false)
+            assert.strictEqual(result.userErrorMsg.includes("TypeError"), true)
+            assert.strictEqual(result.userErrorMsg.split('File ').length > 1, true)
+            assert.strictEqual(result.userErrorMsg.includes("python_evaluator.py"), false)
+            assert.strictEqual(result.userErrorMsg.includes("exec(data['evalCode'], evalLocals)"), false)
             done()
         }
         input.evalCode = "import json;json.dumps(json)"
@@ -332,7 +332,7 @@ dump(2)`
 
     test("strips out unnecessary error info even with multiple tracebacks", function (done) {
         pyEvaluator.onResult = (result) => {
-            assert.equal(result.userErrorMsg, `Traceback (most recent call last):
+            assert.strictEqual(result.userErrorMsg, `Traceback (most recent call last):
   line 6, in <module>
   line 3, in foo
 Exception
