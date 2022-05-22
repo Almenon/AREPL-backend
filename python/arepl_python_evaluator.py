@@ -156,12 +156,12 @@ class ExecArgs(object):
 @contextmanager
 def script_path(script_dir: str):
     """
-        Context manager for adding a dir to the sys path
-        and restoring it afterwards. This trick allows
-        relative imports to work on the target script.
-        if script_dir is empty function will do nothing
-        Slightly modified from wolf's script_path (see https://github.com/Duroktar/Wolf)
-        Exception-safe (os.error will not be raised)
+    Context manager for adding a dir to the sys path
+    and restoring it afterwards. This trick allows
+    relative imports to work on the target script.
+    if script_dir is empty function will do nothing
+    Slightly modified from wolf's script_path (see https://github.com/Duroktar/Wolf)
+    Exception-safe (os.error will not be raised)
     """
     if script_dir is None or script_dir == "":
         yield
@@ -266,11 +266,15 @@ def exec_input(exec_args: ExecArgs):
 
     if get_settings().show_global_vars:
         userVariables = pickle_user_vars(
-            eval_locals, get_settings().default_filter_vars, get_settings().default_filter_types,
+            eval_locals,
+            get_settings().default_filter_vars,
+            get_settings().default_filter_types,
         )
     else:
         userVariables = pickle_user_vars(
-            noGlobalVarsMsg, get_settings().default_filter_vars, get_settings().default_filter_types,
+            noGlobalVarsMsg,
+            get_settings().default_filter_vars,
+            get_settings().default_filter_types,
         )
 
     return ReturnInfo("", userVariables, execTime, None)
@@ -282,7 +286,9 @@ def print_output(output: object):
     """
     # We use result stream because user might use stdout and we don't want to conflict
     print(
-        json.dumps(output, default=lambda x: x.__dict__), file=arepl_result_stream.get_result_stream(), flush=True,
+        json.dumps(output, default=lambda x: x.__dict__),
+        file=arepl_result_stream.get_result_stream(),
+        flush=True,
     )
 
 

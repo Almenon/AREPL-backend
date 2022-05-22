@@ -1,6 +1,6 @@
 # AREPL-backend [![npm version](https://badge.fury.io/js/arepl-backend.svg)](https://badge.fury.io/js/arepl-backend) ![example workflow](https://github.com/almenon/AREPL-backend/actions/workflows/tests.yml/badge.svg)
 
-JS interface to python evaluator for AREPL. 
+JS interface to python evaluator for AREPL.
 
 Evaluates python code and sends back the user variables and/or any errors.
 
@@ -16,7 +16,7 @@ must have python 3.7 or greater
 
 ## Usage
 
-see <https://github.com/Almenon/AREPL-vscode> for example useage. 
+see <https://github.com/Almenon/AREPL-vscode> for example useage.
 
 ## For developers:
 
@@ -35,34 +35,34 @@ Semantic release cheatsheet:
 
 #### Table of Contents
 
--   [constructor](#constructor)
-    -   [Parameters](#parameters)
--   [executing](#executing)
--   [running](#running)
--   [debounce](#debounce)
--   [execCode](#execcode)
-    -   [Parameters](#parameters-1)
--   [sendStdin](#sendstdin)
-    -   [Parameters](#parameters-2)
--   [restart](#restart)
-    -   [Parameters](#parameters-3)
--   [stop](#stop)
--   [start](#start)
--   [onResult](#onresult)
-    -   [Parameters](#parameters-4)
--   [onPrint](#onprint)
-    -   [Parameters](#parameters-5)
--   [onStderr](#onstderr)
-    -   [Parameters](#parameters-6)
--   [handleResult](#handleresult)
-    -   [Parameters](#parameters-7)
--   [checkSyntax](#checksyntax)
-    -   [Parameters](#parameters-8)
--   [checkSyntaxFile](#checksyntaxfile)
-    -   [Parameters](#parameters-9)
--   [formatPythonException](#formatpythonexception)
-    -   [Parameters](#parameters-10)
-    -   [Examples](#examples)
+*   [constructor](#constructor)
+    *   [Parameters](#parameters)
+*   [executing](#executing)
+*   [running](#running)
+*   [debounce](#debounce)
+*   [execCode](#execcode)
+    *   [Parameters](#parameters-1)
+*   [sendStdin](#sendstdin)
+    *   [Parameters](#parameters-2)
+*   [restart](#restart)
+    *   [Parameters](#parameters-3)
+*   [stop](#stop)
+*   [start](#start)
+*   [onResult](#onresult)
+    *   [Parameters](#parameters-4)
+*   [onPrint](#onprint)
+    *   [Parameters](#parameters-5)
+*   [onStderr](#onstderr)
+    *   [Parameters](#parameters-6)
+*   [handleResult](#handleresult)
+    *   [Parameters](#parameters-7)
+*   [checkSyntax](#checksyntax)
+    *   [Parameters](#parameters-8)
+*   [checkSyntaxFile](#checksyntaxfile)
+    *   [Parameters](#parameters-9)
+*   [formatPythonException](#formatpythonexception)
+    *   [Parameters](#parameters-10)
+    *   [Examples](#examples)
 
 ### constructor
 
@@ -70,7 +70,7 @@ starts python_evaluator.py
 
 #### Parameters
 
--   `options`  Process / Python options. If not specified sensible defaults are inferred. (optional, default `{}`)
+*   `options`  Process / Python options. If not specified sensible defaults are inferred. (optional, default `{}`)
 
 ### executing
 
@@ -92,13 +92,13 @@ does not do anything if program is currently executing code
 
 #### Parameters
 
--   `code`  
+*   `code`  
 
 ### sendStdin
 
 #### Parameters
 
--   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ### restart
 
@@ -107,7 +107,7 @@ After process restarts the callback passed in is invoked
 
 #### Parameters
 
--   `callback`   (optional, default `()=>{}`)
+*   `callback`   (optional, default `()=>{}`)
 
 ### stop
 
@@ -125,7 +125,7 @@ is called when program fails or completes
 
 #### Parameters
 
--   `foo`  
+*   `foo`  
 
 ### onPrint
 
@@ -134,7 +134,7 @@ Is called when program prints
 
 #### Parameters
 
--   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ### onStderr
 
@@ -143,7 +143,7 @@ Is called when program logs stderr
 
 #### Parameters
 
--   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ### handleResult
 
@@ -151,7 +151,7 @@ handles pyshell results and calls onResult / onPrint
 
 #### Parameters
 
--   `results` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `results` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ### checkSyntax
 
@@ -159,7 +159,7 @@ checks syntax without executing code
 
 #### Parameters
 
--   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 
@@ -169,7 +169,7 @@ checks syntax without executing code
 
 #### Parameters
 
--   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 
@@ -179,7 +179,7 @@ gets rid of unnecessary File "<string>" message in exception
 
 #### Parameters
 
--   `err`  
+*   `err`  
 
 #### Examples
 

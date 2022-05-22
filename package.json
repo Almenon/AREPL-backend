@@ -11,8 +11,7 @@
     "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js --exit",
     "document": "documentation readme index.js --section=API",
     "prePublish": "npm run compileOnce && npm run test && npm run document",
-    "semantic-release": "semantic-release",
-    "travis-deploy-once": "travis-deploy-once"
+    "semantic-release": "semantic-release"
   },
   "repository": "https://github.com/Almenon/arepl-backend",
   "bugs": {
@@ -35,13 +34,12 @@
   "author": "Almenon",
   "license": "MIT",
   "devDependencies": {
-    "@types/mocha": "^5.2.5",
+    "@types/mocha": "^9.1.1",
     "@types/node": "^12.11.7",
-    "documentation": "^12.1.4",
-    "mocha": "^5.2.0",
+    "documentation": "^13.2.5",
+    "mocha": "^10.0.0",
     "mocha-appveyor-reporter": "^0.4.0",
     "semantic-release": "^17.2.3",
-    "travis-deploy-once": "^5.0.9",
     "ts-node": "^8.6.2",
     "typescript": "^3.6.3"
   },

@@ -29,10 +29,10 @@ arepl_input_iterator = None
 # This allows users to hardcode input by specifying a standard_input var
 def input_overload(prompt: str = None) -> str:
     """AREPL requires standard_input to be hardcoded, like so: standard_input = 'hello world'; print(input()). You can also hardcode standard_input as a generator or list.
-    
+
     Keyword Arguments:
         prompt {str} --  (default: {None})
-    
+
     Raises:
         StopIteration -- if there is no more input
     """
@@ -67,7 +67,7 @@ def input_overload(prompt: str = None) -> str:
 
 def howdoi_wrapper(query: str) -> str:
     """howdoi is meant to be called from the command line - this wrapper lets it be called programatically
-    
+
     Arguments:
         query {str} -- search term
     """

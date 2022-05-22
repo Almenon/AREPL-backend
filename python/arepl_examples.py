@@ -189,7 +189,7 @@ inputLayerSize, hiddenLayerSize, outputLayerSize = 2, 5, 1
 
 funcs = {
     "sigmoid": (lambda x: 1 / (1 + np.exp(-x)), lambda x: x * (1 - x), (0, 1), 0.45),
-    "tanh": (lambda x: np.tanh(x), lambda x: 1 - x ** 2, (0, -1), 0.005),
+    "tanh": (lambda x: np.tanh(x), lambda x: 1 - x**2, (0, -1), 0.005),
     "ReLU": (lambda x: x * (x > 0), lambda x: x > 0, (0, maxx), 0.0005),
 }
 (activate, activatePrime, (mina, maxa), L) = funcs[activation]
@@ -225,7 +225,7 @@ for i in range(epochs):  # Training:
         H = activate(np.dot(Xb, Wh))  # hidden layer results
         Z = activate(np.dot(H, Wz))  # output layer results
         E = Yb - Z  # how much we missed (error)
-        epochLoss.append(np.sum(E ** 2))
+        epochLoss.append(np.sum(E**2))
 
         dZ = E * activatePrime(Z)  # delta Z
         dH = dZ.dot(Wz.T) * activatePrime(H)  # delta H
