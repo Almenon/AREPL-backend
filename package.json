@@ -34,7 +34,7 @@
   "author": "Almenon",
   "license": "MIT",
   "devDependencies": {
-    "@types/mocha": "^5.2.5",
+    "@types/mocha": "^9.1.1",
     "@types/node": "^12.11.7",
     "documentation": "^13.2.5",
     "mocha": "^10.0.0",
