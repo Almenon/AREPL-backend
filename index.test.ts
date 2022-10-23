@@ -24,9 +24,7 @@ suite("python_evaluator Tests", () => {
         default_filter_vars: [],
         default_filter_types: ["<class 'module'>", "<class 'function'>"]
     }
-    const pythonStartupTime = 3500
-    // python 3.7 has much faster startup time
-    // when we drop support for 3.6 we can decrease this
+    const pythonStartupTime = 3000
 
     suiteSetup(function (done) {
         this.timeout(pythonStartupTime + 500)
@@ -66,6 +64,15 @@ suite("python_evaluator Tests", () => {
             done()
         }
         input.evalCode = "x=1"
+        pyEvaluator.execCode(input)
+    })
+
+    test("can import importlib", function (done) {
+        pyEvaluator.onResult = (result) => {
+            assert.strictEqual(result.userErrorMsg, undefined)
+            done()
+        }
+        input.evalCode = "import importlib.resources as rsrc"
         pyEvaluator.execCode(input)
     })
 
