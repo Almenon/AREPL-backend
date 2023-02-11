@@ -66,7 +66,7 @@ Semantic release cheatsheet:
 
 ### constructor
 
-starts python_evaluator.py
+starts python\_evaluator.py
 
 #### Parameters
 
@@ -92,13 +92,13 @@ does not do anything if program is currently executing code
 
 #### Parameters
 
-*   `code`  
+*   `code` &#x20;
 
 ### sendStdin
 
 #### Parameters
 
-*   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 ### restart
 
@@ -112,11 +112,11 @@ After process restarts the callback passed in is invoked
 ### stop
 
 kills python process.  force-kills if necessary after 50ms.
-you can check python_evaluator.running to see if process is dead yet
+you can check python\_evaluator.running to see if process is dead yet
 
 ### start
 
-starts python_evaluator.py. Will NOT WORK with python 2
+starts python\_evaluator.py. Will NOT WORK with python 2
 
 ### onResult
 
@@ -125,7 +125,7 @@ is called when program fails or completes
 
 #### Parameters
 
-*   `foo`  
+*   `foo` &#x20;
 
 ### onPrint
 
@@ -134,7 +134,7 @@ Is called when program prints
 
 #### Parameters
 
-*   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 ### onStderr
 
@@ -143,7 +143,7 @@ Is called when program logs stderr
 
 #### Parameters
 
-*   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `foo` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 ### handleResult
 
@@ -151,7 +151,7 @@ handles pyshell results and calls onResult / onPrint
 
 #### Parameters
 
-*   `results` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `results` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 ### checkSyntax
 
@@ -159,7 +159,7 @@ checks syntax without executing code
 
 #### Parameters
 
-*   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 
@@ -169,7 +169,7 @@ checks syntax without executing code
 
 #### Parameters
 
-*   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 
@@ -179,7 +179,7 @@ gets rid of unnecessary File "<string>" message in exception
 
 #### Parameters
 
-*   `err`  
+*   `err` &#x20;
 
 #### Examples
 
