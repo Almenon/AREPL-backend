@@ -1,6 +1,5 @@
 pytest==6.2.5
 praw==4.3.0 # not needed for code, just for a test	
-p5==0.6.0 # not needed for code, just for a test
 update_checker==0.17 
 # update checker pinned so py3.5 works
 # not needed for code, just for a test
