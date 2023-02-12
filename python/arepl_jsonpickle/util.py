@@ -9,24 +9,48 @@
 determining the type of an object.
 """
 from __future__ import absolute_import, division, unicode_literals
+
 import base64
 import collections
+import inspect
 import io
 import operator
+import sys
 import time
 import types
-import inspect
 
-from . import tags
-from . import compat
-from .compat import numeric_types, PY2, PY3, class_types
-from .compat import abc_iterator, iterator_types
-
-if PY2:
-    import __builtin__
+from . import compat, tags
+from .compat import abc_iterator, class_types, iterator_types, numeric_types
 
 SEQUENCES = (list, set, tuple)
-PRIMITIVES = (compat.ustr, bool, type(None)) + numeric_types
+SEQUENCES_SET = {list, set, tuple}
+PRIMITIVES = {compat.ustr, bool, type(None)} | set(numeric_types)
+FUNCTION_TYPES = {
+    types.FunctionType,
+    types.MethodType,
+    types.LambdaType,
+    types.BuiltinFunctionType,
+    types.BuiltinMethodType,
+}
+NON_REDUCIBLE_TYPES = (
+    {
+        list,
+        dict,
+        set,
+        tuple,
+        object,
+        bytes,
+    }
+    | PRIMITIVES
+    | FUNCTION_TYPES
+)
+NON_CLASS_TYPES = {
+    list,
+    dict,
+    set,
+    tuple,
+    bytes,
+} | PRIMITIVES
 
 
 def is_type(obj):
@@ -81,10 +105,9 @@ def has_method(obj, name):
         return True
 
     # at this point, the method has to be an instancemthod or a classmethod
-    self_attr = '__self__' if PY3 else 'im_self'
-    if not hasattr(func, self_attr):
+    if not hasattr(func, '__self__'):
         return False
-    bound_to = getattr(func, self_attr)
+    bound_to = getattr(func, '__self__')
 
     # class methods
     if isinstance(original, classmethod):
@@ -106,9 +129,16 @@ def is_object(obj):
     >>> is_object(lambda x: 1)
     False
     """
-    return (isinstance(obj, object) and
-            not isinstance(obj, (type, types.FunctionType,
-                                 types.BuiltinFunctionType)))
+    return isinstance(obj, object) and not isinstance(
+        obj, (type, types.FunctionType, types.BuiltinFunctionType)
+    )
+
+
+def is_not_class(obj):
+    """Determines if the object is not a class or a class instance.
+    Used for serializing properties.
+    """
+    return type(obj) in NON_CLASS_TYPES
 
 
 def is_primitive(obj):
@@ -122,6 +152,11 @@ def is_primitive(obj):
     False
     """
     return type(obj) in PRIMITIVES
+
+
+def is_enum(obj):
+    """Is the object an enum?"""
+    return 'enum' in sys.modules and isinstance(obj, sys.modules['enum'].Enum)
 
 
 def is_dictionary(obj):
@@ -141,7 +176,7 @@ def is_sequence(obj):
     True
 
     """
-    return type(obj) in SEQUENCES
+    return type(obj) in SEQUENCES_SET
 
 
 def is_list(obj):
@@ -194,9 +229,11 @@ def is_dictionary_subclass(obj):
     True
     """
     # TODO: add UserDict
-    return (hasattr(obj, '__class__')
-            and issubclass(obj.__class__, dict)
-            and type(obj) is not dict)
+    return (
+        hasattr(obj, '__class__')
+        and issubclass(obj.__class__, dict)
+        and type(obj) is not dict
+    )
 
 
 def is_sequence_subclass(obj):
@@ -209,12 +246,11 @@ def is_sequence_subclass(obj):
     >>> is_sequence_subclass(Temp())
     True
     """
-    return (hasattr(obj, '__class__')
-            and (
-                issubclass(obj.__class__, SEQUENCES)
-                or is_list_like(obj)
-            )
-            and not is_sequence(obj))
+    return (
+        hasattr(obj, '__class__')
+        and issubclass(obj.__class__, SEQUENCES)
+        and not is_sequence(obj)
+    )
 
 
 def is_noncomplex(obj):
@@ -244,14 +280,7 @@ def is_function(obj):
     >>> is_function(1)
     False
     """
-    function_types = (
-        types.FunctionType,
-        types.MethodType,
-        types.LambdaType,
-        types.BuiltinFunctionType,
-        types.BuiltinMethodType,
-    )
-    return type(obj) in function_types
+    return type(obj) in FUNCTION_TYPES
 
 
 def is_module_function(obj):
@@ -266,11 +295,13 @@ def is_module_function(obj):
 
     """
 
-    return (hasattr(obj, '__class__') and
-            isinstance(obj, (types.FunctionType, types.BuiltinFunctionType)) and
-            hasattr(obj, '__module__') and
-            hasattr(obj, '__name__') and
-            obj.__name__ != '<lambda>')
+    return (
+        hasattr(obj, '__class__')
+        and isinstance(obj, (types.FunctionType, types.BuiltinFunctionType))
+        and hasattr(obj, '__module__')
+        and hasattr(obj, '__name__')
+        and obj.__name__ != '<lambda>'
+    )
 
 
 def is_module(obj):
@@ -325,9 +356,7 @@ def is_list_like(obj):
 
 
 def is_iterator(obj):
-    is_file = PY2 and isinstance(obj, __builtin__.file)
-    return (isinstance(obj, abc_iterator) and
-            not isinstance(obj, io.IOBase) and not is_file)
+    return isinstance(obj, abc_iterator) and not isinstance(obj, io.IOBase)
 
 
 def is_collections(obj):
@@ -335,6 +364,10 @@ def is_collections(obj):
         return type(obj).__module__ == 'collections'
     except Exception:
         return False
+
+
+def is_reducible_sequence_subclass(obj):
+    return hasattr(obj, '__class__') and issubclass(obj.__class__, SEQUENCES)
 
 
 def is_reducible(obj):
@@ -345,25 +378,14 @@ def is_reducible(obj):
     # defaultdicts may contain functions which we cannot serialise
     if is_collections(obj) and not isinstance(obj, collections.defaultdict):
         return True
-    return (not
-            (is_list(obj) or
-                is_list_like(obj) or
-                is_primitive(obj) or
-                is_bytes(obj) or
-                is_unicode(obj) or
-                is_dictionary(obj) or
-                is_sequence(obj) or
-                is_set(obj) or
-                is_tuple(obj) or
-                is_dictionary_subclass(obj) or
-                is_sequence_subclass(obj) or
-                is_function(obj) or
-                is_module(obj) or
-                isinstance(getattr(obj, '__slots__', None), iterator_types) or
-                type(obj) is object or
-                obj is object or
-                (is_type(obj) and obj.__module__ == 'datetime')
-             ))
+    # We turn off the formatting in order to double the speed of the function.
+    # Condensing it into one line seems to save the parser a lot of time.
+    # fmt: off
+    # pylint: disable=line-too-long
+    if type(obj) in NON_REDUCIBLE_TYPES or obj is object or is_dictionary_subclass(obj) or isinstance(obj, types.ModuleType) or is_reducible_sequence_subclass(obj) or is_list_like(obj) or isinstance(getattr(obj, '__slots__', None), iterator_types) or (is_type(obj) and obj.__module__ == 'datetime'):  # noqa: E501
+        return False
+    # fmt: on
+    return True
 
 
 def in_dict(obj, key, default=False):
@@ -379,9 +401,7 @@ def in_slots(obj, key, default=False):
     Returns true if key exists in obj.__slots__; false if not in.
     If obj.__slots__ is absent, return default
     """
-    return (
-        (key in obj.__slots__) if getattr(obj, '__slots__', None) else default
-    )
+    return (key in obj.__slots__) if getattr(obj, '__slots__', None) else default
 
 
 def has_reduce(obj):
@@ -456,6 +476,14 @@ def translate_module_name(module):
     return lookup.get(module, module)
 
 
+def _0_9_6_compat_untranslate(module):
+    """Provide compatibility for pickles created with jsonpickle 0.9.6 and
+    earlier, remapping `exceptions` and `__builtin__` to `builtins`.
+    """
+    lookup = dict(__builtin__='builtins', exceptions='builtins')
+    return lookup.get(module, module)
+
+
 def untranslate_module_name(module):
     """Rename module names mention in JSON to names that we can import
 
@@ -463,17 +491,7 @@ def untranslate_module_name(module):
     a module name available to the current version of Python.
 
     """
-    module = _0_9_6_compat_untranslate(module)
-    lookup = dict(builtins='__builtin__') if PY2 else {}
-    return lookup.get(module, module)
-
-
-def _0_9_6_compat_untranslate(module):
-    """Provide compatibility for pickles created with jsonpickle 0.9.6 and
-    earlier, remapping `exceptions` and `__builtin__` to `builtins`.
-    """
-    lookup = dict(__builtin__='builtins', exceptions='builtins')
-    return lookup.get(module, module)
+    return _0_9_6_compat_untranslate(module)
 
 
 def importable_name(cls):
@@ -497,6 +515,9 @@ def importable_name(cls):
     # Use the fully-qualified name if available (Python >= 3.3)
     name = getattr(cls, '__qualname__', cls.__name__)
     module = translate_module_name(cls.__module__)
+    if not module:
+        if hasattr(cls, '__self__'):
+            module = cls.__self__.__class__.__module__
     return '{}.{}'.format(module, name)
 
 
@@ -518,8 +539,6 @@ def b85encode(data):
     """
     Encode binary data to ascii text in base85. Data must be bytes.
     """
-    if PY2:
-        raise NotImplementedError("Python 2 can't encode data in base85.")
     return base64.b85encode(data).decode('ascii')
 
 
@@ -527,10 +546,16 @@ def b85decode(payload):
     """
     Decode payload - must be ascii text.
     """
-    if PY2:
-        raise NotImplementedError("Python 2 can't decode base85-encoded data.")
     return base64.b85decode(payload)
 
 
 def itemgetter(obj, getter=operator.itemgetter(0)):
     return compat.ustr(getter(obj))
+
+
+def items(obj):
+    """
+    TODO: Replace all calls to this with plain dict.items()
+    """
+    for k, v in obj.items():
+        yield k, v
