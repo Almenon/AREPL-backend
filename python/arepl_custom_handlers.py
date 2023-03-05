@@ -90,11 +90,14 @@ class TextIOHandler(BaseHandler):
     """Serialize file descriptors as None because we cannot roundtrip"""
 
     def flatten(self, obj, data):
-        return {"py/object": "_io.TextIOWrapper",
+        obj_repr = {"py/object": "_io.TextIOWrapper",
                 "write_through": obj.write_through,
                 "line_buffering": obj.line_buffering,
                 "errors": obj.errors,
                 "encoding": obj.encoding}
+        if hasattr(obj, 'mode'):
+            obj_repr["mode"] = obj.mode
+        return obj_repr
 
 handlers = [
     {"type": datetime.date, "handler": DatetimeHandler},
