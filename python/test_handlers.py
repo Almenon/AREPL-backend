@@ -37,3 +37,12 @@ counter = count()
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(generator_code))
     vars = jsonpickle.decode(return_info.userVariables)
     assert vars["counter"]["py/object"] == "builtins.generator"
+
+
+def test_textio_handler():
+    generator_code = """
+with open(__file__) as f:
+    pass
+    """
+    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(generator_code, "", __file__))
+    assert '"f": {"py/object": "_io.TextIOWrapper", "mode": "r"}}' in return_info.userVariables
