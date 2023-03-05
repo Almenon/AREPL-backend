@@ -41,7 +41,7 @@ counter = count()
 
 def test_textio_handler():
     generator_code = """
-with open(__file__) as f:
+with open(__file__, encoding='cp1252') as f:
     pass
     """
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(generator_code, "", __file__))
