@@ -45,4 +45,4 @@ with open(__file__) as f:
     pass
     """
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(generator_code, "", __file__))
-    assert '"f": {"py/object": "_io.TextIOWrapper", "mode": "r"}}' in return_info.userVariables
+    assert '"f": {"py/object": "_io.TextIOWrapper", "write_through": false, "line_buffering": false, "errors": "strict", "encoding": "cp1252"}' in return_info.userVariables

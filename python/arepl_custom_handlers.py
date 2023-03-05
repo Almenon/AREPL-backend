@@ -2,6 +2,7 @@ import re
 import datetime
 import decimal
 from arepl_jsonpickle.handlers import BaseHandler
+from io import TextIOWrapper
 from types import CodeType, FrameType, GeneratorType
 
 NOT_SERIALIZABLE_MESSAGE = "not serializable by arepl"
@@ -85,6 +86,15 @@ class GeneratorHandler(BaseCustomHandler):
             "py/object": "builtins.generator",
         }
 
+class TextIOHandler(BaseHandler):
+    """Serialize file descriptors as None because we cannot roundtrip"""
+
+    def flatten(self, obj, data):
+        return {"py/object": "_io.TextIOWrapper",
+                "write_through": obj.write_through,
+                "line_buffering": obj.line_buffering,
+                "errors": obj.errors,
+                "encoding": obj.encoding}
 
 handlers = [
     {"type": datetime.date, "handler": DatetimeHandler},
@@ -95,4 +105,5 @@ handlers = [
     {"type": CodeType, "handler": CodeHandler},
     {"type": decimal.Decimal, "handler": DecimalHandler},
     {"type": GeneratorType, "handler": GeneratorHandler},
+    {"type": TextIOWrapper, "handler": TextIOHandler}
 ]
