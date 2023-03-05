@@ -18,7 +18,7 @@ This file sets up jsonpickle. Jsonpickle is used in pickle_user_vars for picking
 class CustomPickler(jsonpickle.pickler.Pickler):
     """
     encodes float values like inf / nan as strings to follow JSON spec while keeping meaning
-    Im doing this in custom class because handlers do not fire for floats
+    I'm doing this in custom class because handlers do not fire for floats
     """
 
     inf = float("inf")

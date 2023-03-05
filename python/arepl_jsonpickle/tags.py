@@ -8,7 +8,6 @@ that need to be specially handled.
 """
 from __future__ import absolute_import, division, unicode_literals
 
-
 BYTES = 'py/bytes'
 B64 = 'py/b64'
 B85 = 'py/b85'
@@ -21,6 +20,7 @@ NEWARGS = 'py/newargs'
 NEWARGSEX = 'py/newargsex'
 NEWOBJ = 'py/newobj'
 OBJECT = 'py/object'
+PROPERTY = 'py/property'
 REDUCE = 'py/reduce'
 REF = 'py/ref'
 REPR = 'py/repr'
@@ -41,6 +41,7 @@ RESERVED = {
     NEWARGSEX,
     NEWOBJ,
     OBJECT,
+    PROPERTY,
     REDUCE,
     REF,
     REPR,

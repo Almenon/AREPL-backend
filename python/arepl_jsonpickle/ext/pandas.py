@@ -1,10 +1,11 @@
 from __future__ import absolute_import
 
-import pandas as pd
-from io import StringIO
 import zlib
+from io import StringIO
 
-from .. import encode, decode
+import pandas as pd
+
+from .. import decode, encode
 from ..handlers import BaseHandler, register, unregister
 from ..util import b64decode, b64encode
 from .numpy import register_handlers as register_numpy_handlers
@@ -14,7 +15,6 @@ __all__ = ['register_handlers', 'unregister_handlers']
 
 
 class PandasProcessor(object):
-
     def __init__(self, size_threshold=500, compression=zlib):
         """
         :param size_threshold: nonnegative int or None
@@ -23,7 +23,7 @@ class PandasProcessor(object):
             dataframes are always stored as csv strings
         :param compression: a compression module or None
             valid values for 'compression' are {zlib, bz2, None}
-            if compresion is None, no compression is applied
+            if compression is None, no compression is applied
         """
         self.size_threshold = size_threshold
         self.compression = compression
@@ -54,21 +54,32 @@ class PandasProcessor(object):
         return (buf, meta)
 
 
-def make_read_csv_params(meta):
-    meta_dtypes = meta.get('dtypes', {})
-
+def make_read_csv_params(meta, context):
+    meta_dtypes = context.restore(meta.get('dtypes', {}), reset=False)
+    # The header is used to select the rows of the csv from which
+    # the columns names are retrieved
+    header = meta.get('header', [0])
     parse_dates = []
     converters = {}
+    timedeltas = []
     dtype = {}
     for k, v in meta_dtypes.items():
         if v.startswith('datetime'):
             parse_dates.append(k)
         elif v.startswith('complex'):
             converters[k] = complex
+        elif v.startswith('timedelta'):
+            timedeltas.append(k)
+            dtype[k] = 'object'
         else:
             dtype[k] = v
 
-    return dict(dtype=dtype, parse_dates=parse_dates, converters=converters)
+    return (
+        dict(
+            dtype=dtype, header=header, parse_dates=parse_dates, converters=converters
+        ),
+        timedeltas,
+    )
 
 
 class PandasDfHandler(BaseHandler):
@@ -77,19 +88,38 @@ class PandasDfHandler(BaseHandler):
     def flatten(self, obj, data):
         dtype = obj.dtypes.to_dict()
 
-        meta = {'dtypes': {k: str(dtype[k]) for k in dtype},
-                'index': encode(obj.index)}
+        meta = {
+            'dtypes': self.context.flatten(
+                {k: str(dtype[k]) for k in dtype}, reset=False
+            ),
+            'index': encode(obj.index),
+            'column_level_names': obj.columns.names,
+            'header': list(range(len(obj.columns.names))),
+        }
 
         data = self.pp.flatten_pandas(
-            obj.reset_index(drop=True).to_csv(index=False), data, meta)
+            obj.reset_index(drop=True).to_csv(index=False), data, meta
+        )
         return data
 
     def restore(self, data):
         csv, meta = self.pp.restore_pandas(data)
-        params = make_read_csv_params(meta)
-        df = pd.read_csv(
-          StringIO(csv), **params) if data['values'].strip() else pd.DataFrame()
+        params, timedeltas = make_read_csv_params(meta, self.context)
+        # None makes it compatible with objects serialized before
+        # column_levels_names has been introduced.
+        column_level_names = meta.get('column_level_names', None)
+        df = (
+            pd.read_csv(StringIO(csv), **params)
+            if data['values'].strip()
+            else pd.DataFrame()
+        )
+        for col in timedeltas:
+            df[col] = pd.to_timedelta(df[col])
+
         df.set_index(decode(meta['index']), inplace=True)
+        # restore the column level(s) name(s)
+        if column_level_names:
+            df.columns.names = column_level_names
         return df
 
 
@@ -130,7 +160,11 @@ class PandasIndexHandler(BaseHandler):
     def restore(self, data):
         buf, meta = self.pp.restore_pandas(data)
         dtype = meta.get('dtype', None)
-        name_bundle = {k: v for k, v in meta.items() if k in {'name', 'names'}}
+        name_bundle = {
+            'name': (tuple if v is not None else lambda x: x)(v)
+            for k, v in meta.items()
+            if k in {'name', 'names'}
+        }
         idx = self.index_constructor(decode(buf), dtype=dtype, **name_bundle)
         return idx
 
@@ -140,7 +174,6 @@ class PandasPeriodIndexHandler(PandasIndexHandler):
 
 
 class PandasMultiIndexHandler(PandasIndexHandler):
-
     def name_bundler(self, obj):
         return {'names': obj.names}
 
@@ -188,7 +221,7 @@ class PandasIntervalHandler(BaseHandler):
         meta = {
             'left': encode(obj.left),
             'right': encode(obj.right),
-            'closed': obj.closed
+            'closed': obj.closed,
         }
         buf = ''
         data = self.pp.flatten_pandas(buf, data, meta)
