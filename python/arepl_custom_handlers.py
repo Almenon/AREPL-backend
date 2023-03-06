@@ -86,18 +86,22 @@ class GeneratorHandler(BaseCustomHandler):
             "py/object": "builtins.generator",
         }
 
+
 class TextIOHandler(BaseHandler):
     """Serialize file descriptors as None because we cannot roundtrip"""
 
     def flatten(self, obj, data):
-        obj_repr = {"py/object": "_io.TextIOWrapper",
-                "write_through": obj.write_through,
-                "line_buffering": obj.line_buffering,
-                "errors": obj.errors,
-                "encoding": obj.encoding}
-        if hasattr(obj, 'mode'):
+        obj_repr = {
+            "py/object": "_io.TextIOWrapper",
+            "write_through": obj.write_through,
+            "line_buffering": obj.line_buffering,
+            "errors": obj.errors,
+            "encoding": obj.encoding,
+        }
+        if hasattr(obj, "mode"):
             obj_repr["mode"] = obj.mode
         return obj_repr
+
 
 handlers = [
     {"type": datetime.date, "handler": DatetimeHandler},
@@ -108,5 +112,5 @@ handlers = [
     {"type": CodeType, "handler": CodeHandler},
     {"type": decimal.Decimal, "handler": DecimalHandler},
     {"type": GeneratorType, "handler": GeneratorHandler},
-    {"type": TextIOWrapper, "handler": TextIOHandler}
+    {"type": TextIOWrapper, "handler": TextIOHandler},
 ]

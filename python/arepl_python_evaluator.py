@@ -25,7 +25,7 @@ modules_to_keep.update(
         "arepl_jsonpickle.ext.pandas",
         "arepl_jsonpickle.ext.numpy",
         "typing",  # for some reason i can't clear this or jsonpickle breaks
-        "typing.io", # if this gets cleared then py 3.8 & 3.10 breaks
+        "typing.io",  # if this gets cleared then py 3.8 & 3.10 breaks
     )
 )
 # when arepl is ran via unit test/debugging some extra libraries might be in modules_to_keep
