@@ -124,6 +124,7 @@ class ReturnInfo:
         lineno=-1,
         done=True,
         count=-1,
+        startResult=False,
         *args,
         **kwargs
     ):
@@ -140,6 +141,7 @@ class ReturnInfo:
         self.lineno = lineno
         self.done = done
         self.count = count
+        self.startResult = startResult
 
 
 class ExecArgs(object):
@@ -281,7 +283,7 @@ def exec_input(exec_args: ExecArgs):
     return ReturnInfo("", userVariables, execTime, None)
 
 
-def print_output(output: object):
+def print_output(output: ReturnInfo):
     """
     turns output into JSON and sends it to result stream
     """
@@ -334,5 +336,9 @@ if __name__ == "__main__":
     # Arepl node code will spawn process with a extra pipe for results
     # This is to avoid results conflicting with user writes to stdout
     arepl_result_stream.open_result_stream()
+
+    finished_starting = ReturnInfo("", {}, 0,0, startResult=True)
+    print_output(finished_starting)
+    
     while True:
         main(input())

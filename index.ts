@@ -51,7 +51,8 @@ export interface PythonResult {
 	internalError: string,
 	caller: string,
 	lineno: number,
-	done: boolean
+	done: boolean,
+	startResult: boolean,
 }
 
 export class PythonEvaluator {
@@ -168,14 +169,13 @@ export class PythonEvaluator {
 	 */
 	start() {
 		console.log("Starting Python...")
+		this.startTime = Date.now()
 		this.pyshell = new PythonShell('arepl_python_evaluator.py', this.options)
 
 		const resultPipe = this.pyshell.childProcess.stdio[3]
 		const newlineTransformer = new NewlineTransformer()
 		resultPipe.pipe(newlineTransformer).on('data', this.handleResult.bind(this))
 
-		// not sure why exactly I have to wrap onPrint/onStderr w/ lambda
-		// but tests fail if I don't
 		this.pyshell.stdout.on('data', (message: Buffer) => {
 			this.onPrint(message.toString())
 		})
@@ -220,7 +220,8 @@ export class PythonEvaluator {
 			internalError: "",
 			caller: "",
 			lineno: -1,
-			done: true
+			done: true,
+			startResult: false,
 		}
 
 		try {
@@ -229,6 +230,12 @@ export class PythonEvaluator {
 
 			pyResult.execTime = pyResult.execTime * 1000 // convert into ms
 			pyResult.totalPyTime = pyResult.totalPyTime * 1000
+
+			if(pyResult.startResult){
+				console.debug(`Finished starting in ${Date.now() - this.startTime}`)
+				// set state to free
+				return
+			}
 
 			//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
 			pyResult.userVariables = JSON.parse(pyResult.userVariables)
