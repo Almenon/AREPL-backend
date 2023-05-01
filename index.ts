@@ -55,20 +55,24 @@ export interface PythonResult {
 	startResult: boolean,
 }
 
+/**
+ * Starting = Starting or restarting. 
+ * Ending = Process is exiting. 
+ * Executing = Executing inputted code. 
+ * Free = Waiting for inputted code. 
+ */
+export enum PythonState {
+	Starting,
+	Ending,
+	Executing,
+	Free
+}
+
 export class PythonEvaluator {
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
-	/**
-	 * whether python is busy executing inputted code
-	 */
-	executing = false
-
-	/**
-	 * whether python backend process is running / not running
-	 */
-	running = false
-
-	restarting = false
+	state: PythonState = PythonState.Starting
+	finishedStartingCallback: Function
 	private startTime: number
 
 	/**
@@ -107,8 +111,11 @@ export class PythonEvaluator {
 	 * does not do anything if program is currently executing code 
 	 */
 	execCode(code: ExecArgs) {
-		if (this.executing) return
-		this.executing = true
+		if (this.state == PythonState.Executing){
+			console.error('Incoming code detected while process is still executing. \
+			This should never happen')
+		}
+		this.state = PythonState.Executing
 		this.startTime = Date.now()
 		this.pyshell.send(JSON.stringify(code) + EOL)
 	}
@@ -126,16 +133,13 @@ export class PythonEvaluator {
 	 */
 	restart(callback = () => { }) {
 
-		this.restarting = false
+		this.state = PythonState.Ending
 
 		// register callback for restart
 		// using childProcess callback instead of pyshell callback
 		// (pyshell callback only happens when process exits voluntarily)
 		this.pyshell.childProcess.on('exit', () => {
-			this.restarting = true
-			this.executing = false
-			this.start()
-			callback()
+			this.start(callback)
 		})
 
 		this.stop()
@@ -146,20 +150,14 @@ export class PythonEvaluator {
 	 * you can check python_evaluator.running to see if process is dead yet
 	 */
 	stop() {
-		// pyshell has 50 ms to die gracefully
+		this.state = PythonState.Ending
 		this.pyshell.childProcess.kill()
-		this.running = !this.pyshell.childProcess.killed
-		if (this.running) console.info("pyshell refused to die")
-		else this.executing = false
-
+		
+		// pyshell has 50 ms to die gracefully
 		setTimeout(() => {
-			if (this.running && !this.restarting) {
-				// murder the process with extreme prejudice
+			if (this.state == PythonState.Ending) {
+				// python didn't respect the SIGTERM, force-kill it
 				this.pyshell.childProcess.kill('SIGKILL')
-				if (this.pyshell.childProcess.killed) {
-					console.error("the python process simply cannot be killed!")
-				}
-				else this.executing = false
 			}
 		}, 50)
 	}
@@ -167,8 +165,10 @@ export class PythonEvaluator {
 	/**
 	 * starts python_evaluator.py. Will NOT WORK with python 2
 	 */
-	start() {
+	start(finishedStartingCallback) {
+		this.state = PythonState.Starting
 		console.log("Starting Python...")
+		this.finishedStartingCallback = finishedStartingCallback
 		this.startTime = Date.now()
 		this.pyshell = new PythonShell('arepl_python_evaluator.py', this.options)
 
@@ -182,7 +182,6 @@ export class PythonEvaluator {
 		this.pyshell.stderr.on('data', (log: Buffer) => {
 			this.onStderr(log.toString())
 		})
-		this.running = true
 	}
 
 	/**
@@ -226,16 +225,18 @@ export class PythonEvaluator {
 
 		try {
 			pyResult = JSON.parse(results)
-			this.executing = !pyResult['done']
+			if(pyResult.startResult){
+				console.log(`Finished starting in ${Date.now() - this.startTime}`)
+				this.state = PythonState.Free
+				this.finishedStartingCallback()
+				return
+			}
+			if(pyResult['done'] == true){
+				this.state = PythonState.Free
+			}
 
 			pyResult.execTime = pyResult.execTime * 1000 // convert into ms
 			pyResult.totalPyTime = pyResult.totalPyTime * 1000
-
-			if(pyResult.startResult){
-				console.debug(`Finished starting in ${Date.now() - this.startTime}`)
-				// set state to free
-				return
-			}
 
 			//@ts-ignore pyResult.userVariables is sent to as string, we convert to object
 			pyResult.userVariables = JSON.parse(pyResult.userVariables)

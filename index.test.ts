@@ -6,7 +6,7 @@
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert'
 
-import { PythonEvaluator } from './index'
+import { PythonEvaluator, PythonState } from './index'
 import { EOL } from 'os';
 
 function isEmpty(obj) {
@@ -28,9 +28,7 @@ suite("python_evaluator Tests", () => {
 
     suiteSetup(function (done) {
         this.timeout(pythonStartupTime + 500)
-        pyEvaluator.start()
-        // wait for for python to start
-        setTimeout(() => done(), pythonStartupTime)
+        pyEvaluator.start(done)
     })
 
     setup(function () {
@@ -171,11 +169,11 @@ suite("python_evaluator Tests", () => {
         test("returns result after print", function (done) {
             pyEvaluator.onPrint = (stdout) => {
                 assert.strictEqual(stdout, "hello world" + EOL)
-                assert.strictEqual(pyEvaluator.executing, true)
+                assert.strictEqual(pyEvaluator.state, PythonState.Executing)
             }
 
             pyEvaluator.onResult = () => {
-                assert.strictEqual(pyEvaluator.executing, false)
+                assert.strictEqual(pyEvaluator.state, PythonState.Free)
                 done()
             }
 
@@ -296,20 +294,15 @@ dump(2)`
 
         this.timeout(this.timeout() + pythonStartupTime)
 
-        assert.strictEqual(pyEvaluator.running, true)
-        assert.strictEqual(pyEvaluator.restarting, false)
-        assert.strictEqual(pyEvaluator.executing, false)
+        assert.strictEqual(pyEvaluator.state, PythonState.Free)
 
         pyEvaluator.restart(() => {
-            assert.strictEqual(pyEvaluator.running, true)
-            assert.strictEqual(pyEvaluator.executing, false)
-
-            setTimeout(() => {
-                // by now python should be restarted and accepting input
-                pyEvaluator.onResult = () => done()
-                input.evalCode = "x"
-                pyEvaluator.execCode(input)
-            }, 1500)
+            assert.strictEqual(pyEvaluator.state, PythonState.Free)
+            // by now python should be restarted and accepting input
+            pyEvaluator.onResult = () => done()
+            input.evalCode = "x"
+            assert.strictEqual(pyEvaluator.state, PythonState.Free)
+            pyEvaluator.execCode(input)
         })
     })
 

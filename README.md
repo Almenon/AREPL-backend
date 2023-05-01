@@ -35,10 +35,9 @@ Semantic release cheatsheet:
 
 #### Table of Contents
 
+*   [PythonState](#pythonstate)
 *   [constructor](#constructor)
     *   [Parameters](#parameters)
-*   [executing](#executing)
-*   [running](#running)
 *   [debounce](#debounce)
 *   [execCode](#execcode)
     *   [Parameters](#parameters-1)
@@ -48,21 +47,29 @@ Semantic release cheatsheet:
     *   [Parameters](#parameters-3)
 *   [stop](#stop)
 *   [start](#start)
-*   [onResult](#onresult)
     *   [Parameters](#parameters-4)
-*   [onPrint](#onprint)
+*   [onResult](#onresult)
     *   [Parameters](#parameters-5)
-*   [onStderr](#onstderr)
+*   [onPrint](#onprint)
     *   [Parameters](#parameters-6)
-*   [handleResult](#handleresult)
+*   [onStderr](#onstderr)
     *   [Parameters](#parameters-7)
-*   [checkSyntax](#checksyntax)
+*   [handleResult](#handleresult)
     *   [Parameters](#parameters-8)
-*   [checkSyntaxFile](#checksyntaxfile)
+*   [checkSyntax](#checksyntax)
     *   [Parameters](#parameters-9)
-*   [formatPythonException](#formatpythonexception)
+*   [checkSyntaxFile](#checksyntaxfile)
     *   [Parameters](#parameters-10)
+*   [formatPythonException](#formatpythonexception)
+    *   [Parameters](#parameters-11)
     *   [Examples](#examples)
+
+### PythonState
+
+Starting = Starting or restarting.
+Ending = Process is exiting.
+Executing = Executing inputted code.
+Free = Waiting for inputted code.
 
 ### constructor
 
@@ -71,14 +78,6 @@ starts python\_evaluator.py
 #### Parameters
 
 *   `options`  Process / Python options. If not specified sensible defaults are inferred. (optional, default `{}`)
-
-### executing
-
-whether python is busy executing inputted code
-
-### running
-
-whether python backend process is running / not running
 
 ### debounce
 
@@ -117,6 +116,10 @@ you can check python\_evaluator.running to see if process is dead yet
 ### start
 
 starts python\_evaluator.py. Will NOT WORK with python 2
+
+#### Parameters
+
+*   `finishedStartingCallback` &#x20;
 
 ### onResult
 
