@@ -1,6 +1,5 @@
 import { PythonShell, Options, NewlineTransformer } from 'python-shell'
 import { EOL } from 'os'
-import { Readable } from 'stream'
 
 export interface FrameSummary {
 	_line: string
@@ -146,20 +145,23 @@ export class PythonEvaluator {
 	}
 
 	/**
-	 * kills python process.  force-kills if necessary after 50ms.
-	 * you can check python_evaluator.running to see if process is dead yet
+	 * Kills python process.  Force-kills if necessary after 50ms.
+	 * You can check python_evaluator.running to see if process is dead yet
 	 */
-	stop() {
+	stop(kill_immediately=false) {
 		this.state = PythonState.Ending
-		this.pyshell.childProcess.kill()
+		const kill_signal = kill_immediately ? 'SIGKILL' : 'SIGTERM'
+		this.pyshell.childProcess.kill(kill_signal)
 		
-		// pyshell has 50 ms to die gracefully
-		setTimeout(() => {
-			if (this.state == PythonState.Ending) {
-				// python didn't respect the SIGTERM, force-kill it
-				this.pyshell.childProcess.kill('SIGKILL')
-			}
-		}, 50)
+		if(!kill_immediately){
+			// pyshell has 50 ms to die gracefully
+			setTimeout(() => {
+				if (this.state == PythonState.Ending) {
+					// python didn't respect the SIGTERM, force-kill it
+					this.pyshell.childProcess.kill('SIGKILL')
+				}
+			}, 50)
+		}
 	}
 
 	/**

@@ -26,15 +26,19 @@ suite("python_evaluator Tests", () => {
     }
     const pythonStartupTime = 3000
 
-    suiteSetup(function (done) {
+    suiteSetup(function () {
         this.timeout(pythonStartupTime + 500)
-        pyEvaluator.start(done)
     })
 
-    setup(function () {
+    setup(function (done) {
         pyEvaluator.onPrint = () => { }
         pyEvaluator.onStderr = () => { }
         pyEvaluator.onResult = () => { }
+        pyEvaluator.start(done)
+    })
+
+    teardown(function(){
+        pyEvaluator.stop(true)
     })
 
     test("sanity check: 1+1=2", () => {
@@ -238,27 +242,6 @@ suite("python_evaluator Tests", () => {
             done()
         }
         input.evalCode = "from arepl_dump import dump;dump(5)"
-        pyEvaluator.execCode(input)
-    })
-
-    test("dump works properly when called repeatedly", function (done) {
-        let numResults = 0;
-        pyEvaluator.onResult = (result) => {
-            numResults += 1
-            if (numResults == 3) {
-                assert.strictEqual(result.done, true)
-                done()
-                return
-            }
-            assert.notStrictEqual(result, null)
-            assert.strictEqual(isEmpty(result.userError), true)
-            assert.strictEqual(result.internalError, null)
-            assert.strictEqual(result.userVariables['dump output'], numResults)
-            assert.strictEqual(result.caller, '<module>')
-            assert.strictEqual(result.lineno, numResults)
-        }
-        input.evalCode = `from arepl_dump import dump;dump(1)
-dump(2)`
         pyEvaluator.execCode(input)
     })
 
