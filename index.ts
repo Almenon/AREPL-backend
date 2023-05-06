@@ -1,5 +1,6 @@
 import { PythonShell, Options, NewlineTransformer } from 'python-shell'
 import { EOL } from 'os'
+import { randomBytes } from 'crypto'
 
 export interface FrameSummary {
 	_line: string
@@ -52,6 +53,7 @@ export interface PythonResult {
 	lineno: number,
 	done: boolean,
 	startResult: boolean,
+	evaluatorName: string,
 }
 
 /**
@@ -72,6 +74,7 @@ export class PythonEvaluator {
 
 	state: PythonState = PythonState.Starting
 	finishedStartingCallback: Function
+	evaluatorName: string
 	private startTime: number
 
 	/**
@@ -103,6 +106,8 @@ export class PythonEvaluator {
 		this.options.stdio = ['pipe', 'pipe', 'pipe', 'pipe']
 		if (!options.pythonPath) this.options.pythonPath = PythonShell.defaultPythonPath
 		if (!options.scriptPath) this.options.scriptPath = PythonEvaluator.areplPythonBackendFolderPath
+
+		this.evaluatorName = randomBytes(16).toString('hex')
 	}
 
 
@@ -223,6 +228,7 @@ export class PythonEvaluator {
 			lineno: -1,
 			done: true,
 			startResult: false,
+			evaluatorName: this.evaluatorName
 		}
 
 		try {
