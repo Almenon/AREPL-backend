@@ -53,8 +53,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": ["-r", "ts-node/register", "${relativeFile}","--ui","tdd","--no-timeouts"],
-            "cwd": "${workspaceRoot}",
-            "protocol": "inspector"
+            "cwd": "${workspaceRoot}"
           }
     ]
 }
