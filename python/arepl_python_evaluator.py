@@ -1,91 +1,12 @@
-from sys import modules
-
-# MUST be done first thing to avoid other modules getting into cache
-modules_to_keep = set([module_name for module_name in modules])
-# below line needed so test_jsonpickle_err_doesnt_break_arepl test passes
-# we want to keep arepl imports in the cache
-modules_to_keep.update(
-    (
-        "arepl_overloads",
-        "arepl_pickler",
-        "arepl_saved",
-        "arepl_settings",
-        "arepl_user_error",
-        "arepl_result_stream",
-        "arepl_jsonpickle",
-        "arepl_jsonpickle.util",
-        "arepl_jsonpickle.handlers",
-        "arepl_jsonpickle.version",
-        "arepl_jsonpickle.pickler",
-        "arepl_jsonpickle.backend",
-        "arepl_jsonpickle.tags",
-        "arepl_jsonpickle.compat",
-        "arepl_jsonpickle.unpickler",
-        "arepl_jsonpickle.ext",
-        "arepl_jsonpickle.ext.pandas",
-        "arepl_jsonpickle.ext.numpy",
-        "typing",  # for some reason i can't clear this or jsonpickle breaks
-        "typing.io",  # if this gets cleared then py 3.8 & 3.10 breaks
-    )
-)
-# when arepl is ran via unit test/debugging some extra libraries might be in modules_to_keep
-# in normal run it is not in there so we remove it
-modules_to_keep.difference_update(
-    {
-        "arepl_dump",
-        "decimal",
-        "asyncio.constants",
-        "asyncio.format_helpers",
-        "asyncio.base_futures",
-        "asyncio.log",
-        "asyncio.coroutines",
-        "asyncio.exceptions",
-        "asyncio.base_tasks",
-        "_asyncio",
-        "asyncio.events",
-        "asyncio.futures",
-        "asyncio.protocols",
-        "asyncio.transports",
-        "asyncio.sslproto",
-        "asyncio.locks",
-        "asyncio.tasks",
-        "asyncio.staggered",
-        "asyncio.trsock",
-        "asyncio.base_events",
-        "asyncio.runners",
-        "asyncio.queues",
-        "asyncio.streams",
-        "asyncio.subprocess",
-        "asyncio.base_subprocess",
-        "asyncio.proactor_events",
-        "asyncio.selector_events",
-        "asyncio.windows_utils",
-        "asyncio.windows_events",
-        "asyncio",
-    }
-)
-
-import asyncio
-
-try:
-    # import fails in python 3.6
-    import contextvars
-except ImportError:
-    pass
 from copy import deepcopy
-from importlib import (
-    util,
-    reload,
-)  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
+from importlib import util  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 import json
 import traceback
 from time import time
-import asyncio
 from io import TextIOWrapper
 import os
 import sys
 from sys import path, argv, exc_info
-from typing import Any, Dict, FrozenSet, Set
 from contextlib import contextmanager
 
 # do NOT use from arepl_overloads import arepl_input_iterator
@@ -200,11 +121,6 @@ eval_locals = deepcopy(saved.starting_locals)
 
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
-try:
-    run_context = contextvars.Context()
-except NameError:
-    run_context = None
-
 
 def exec_input(exec_args: ExecArgs):
     """
@@ -226,26 +142,10 @@ def exec_input(exec_args: ExecArgs):
     # re-import imports. (pickling imports from saved code was unfortunately not possible)
     exec_args.evalCode = saved.copy_saved_imports_to_exec(exec_args.evalCode, exec_args.savedCode)
 
-    # clear new modules from last run each run has same fresh start
-    current_module_names = set([module_name for module_name in modules])
-    new_modules = current_module_names - modules_to_keep
-    for module_name in new_modules:
-        del modules[module_name]
-
-    # not sure why i need to do this when module was deleted
-    # but if I don't next run will say event loop closed
-    asyncio.set_event_loop(asyncio.new_event_loop())
-
     with script_path(os.path.dirname(exec_args.filePath)):
-        if not exec_args.usePreviousVariables and run_context is not None:
-            run_context = contextvars.Context()
         try:
             start = time()
-            if run_context is not None:
-                run_context.run(exec, exec_args.evalCode, eval_locals)
-            else:
-                # python 3.6 fallback
-                exec(exec_args.evalCode, eval_locals)
+            exec(exec_args.evalCode, eval_locals)
             execTime = time() - start
         except BaseException:
             execTime = time() - start
