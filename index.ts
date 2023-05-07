@@ -60,13 +60,15 @@ export interface PythonResult {
  * Starting = Starting or restarting. 
  * Ending = Process is exiting. 
  * Executing = Executing inputted code. 
- * Free = Waiting for inputted code. 
+ * DirtyFree = evaluator may have been polluted by side-effects from previous code, but is free for more code. 
+ * FreshFree = evaluator is ready for the first run of code
  */
 export enum PythonState {
 	Starting,
 	Ending,
 	Executing,
-	Free
+	DirtyFree,
+	FreshFree
 }
 
 export class PythonEvaluator {
@@ -235,12 +237,12 @@ export class PythonEvaluator {
 			pyResult = JSON.parse(results)
 			if(pyResult.startResult){
 				console.log(`Finished starting in ${Date.now() - this.startTime}`)
-				this.state = PythonState.Free
+				this.state = PythonState.FreshFree
 				this.finishedStartingCallback()
 				return
 			}
 			if(pyResult['done'] == true){
-				this.state = PythonState.Free
+				this.state = PythonState.DirtyFree
 			}
 
 			pyResult.execTime = pyResult.execTime * 1000 // convert into ms

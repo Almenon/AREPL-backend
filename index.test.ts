@@ -177,7 +177,7 @@ suite("python_evaluator Tests", () => {
             }
 
             pyEvaluator.onResult = () => {
-                assert.strictEqual(pyEvaluator.state, PythonState.Free)
+                assert.strictEqual(pyEvaluator.state, PythonState.DirtyFree)
                 done()
             }
 
@@ -277,14 +277,12 @@ suite("python_evaluator Tests", () => {
 
         this.timeout(this.timeout() + pythonStartupTime)
 
-        assert.strictEqual(pyEvaluator.state, PythonState.Free)
+        assert.strictEqual(pyEvaluator.state, PythonState.FreshFree)
 
         pyEvaluator.restart(() => {
-            assert.strictEqual(pyEvaluator.state, PythonState.Free)
-            // by now python should be restarted and accepting input
+            assert.strictEqual(pyEvaluator.state, PythonState.FreshFree)
             pyEvaluator.onResult = () => done()
             input.evalCode = "x"
-            assert.strictEqual(pyEvaluator.state, PythonState.Free)
             pyEvaluator.execCode(input)
         })
     })
