@@ -277,19 +277,6 @@ export class PythonEvaluator {
 	}
 
 	/**
-	 * checks syntax without executing code
-	 * @param {string} filePath
-	 * @returns {Promise} rejects w/ stderr if syntax failure
-	 */
-	async checkSyntaxFile(filePath: string) {
-		// note that this should really be done in python_evaluator.py
-		// but communication with that happens through just one channel (stdin/stdout)
-		// so for now i prefer to keep this seperate
-
-		return PythonShell.checkSyntaxFile(filePath);
-	}
-
-	/**
 	 * gets rid of unnecessary File "<string>" message in exception
 	 * @example err:
 	 * Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nNameError: name \'x\' is not defined\n
