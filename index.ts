@@ -281,22 +281,9 @@ export class PythonEvaluator {
 	 * @example err:
 	 * Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nNameError: name \'x\' is not defined\n
 	 */
-	formatPythonException(err: string) {
+	private formatPythonException(err: string) {
 		//replace File "<string>" (pointless)
 		err = err.replace(/File \"<string>\", /g, "")
 		return err
 	}
-
-	/**
-	 * delays execution of function by ms milliseconds, resetting clock every time it is called
-	 * Useful for real-time execution so execCode doesn't get called too often
-	 * thanks to https://stackoverflow.com/a/1909508/6629672
-	 */
-	debounce = (function () {
-		let timer: any = 0;
-		return function (callback, ms: number, ...args: any[]) {
-			clearTimeout(timer);
-			timer = setTimeout(callback, ms, args);
-		};
-	})();
 }
