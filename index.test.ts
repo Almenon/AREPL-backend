@@ -6,7 +6,7 @@
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert'
 
-import { PythonEvaluator, PythonState } from './index'
+import { PythonExecutor, PythonState } from './index'
 import { EOL } from 'os';
 
 function isEmpty(obj) {
@@ -14,7 +14,7 @@ function isEmpty(obj) {
 }
 
 suite("python_evaluator Tests", () => {
-    let pyEvaluator = new PythonEvaluator()
+    let pyEvaluator = new PythonExecutor()
     let input = {
         evalCode: "",
         savedCode: "",
