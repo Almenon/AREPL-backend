@@ -1,5 +1,5 @@
 import { Options, PythonShell } from "python-shell";
-import { ExecArgs, PythonEvaluator, PythonResult, PythonState } from ".";
+import { ExecArgs, PythonExecutor, PythonResult, PythonState } from ".";
 
 /**
  * Starts multiple python executors for running user code. 
@@ -7,7 +7,7 @@ import { ExecArgs, PythonEvaluator, PythonResult, PythonState } from ".";
  * as a single executor.
  */
 export class PythonExecutors {
-    private executors: PythonEvaluator[]
+    private executors: PythonExecutor[]
     private currentExecutorIndex: number = 0
     private waitForFreeExecutor: NodeJS.Timeout
 
@@ -18,7 +18,7 @@ export class PythonExecutors {
         if(this.executors.length != 0) throw Error('already started!')
 
         for(let i=0;i++;i<numExecutors){
-            const pyExecutor = new PythonEvaluator(options)
+            const pyExecutor = new PythonExecutor(options)
             pyExecutor.start(()=>{})
             pyExecutor.evaluatorName = i.toString()
             pyExecutor.onResult = result => {

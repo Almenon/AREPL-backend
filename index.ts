@@ -71,7 +71,7 @@ export enum PythonState {
 	FreshFree
 }
 
-export class PythonEvaluator {
+export class PythonExecutor {
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
 	state: PythonState = PythonState.Starting
@@ -107,7 +107,7 @@ export class PythonEvaluator {
 		this.options.mode = 'binary'
 		this.options.stdio = ['pipe', 'pipe', 'pipe', 'pipe']
 		if (!options.pythonPath) this.options.pythonPath = PythonShell.defaultPythonPath
-		if (!options.scriptPath) this.options.scriptPath = PythonEvaluator.areplPythonBackendFolderPath
+		if (!options.scriptPath) this.options.scriptPath = PythonExecutor.areplPythonBackendFolderPath
 
 		this.evaluatorName = randomBytes(16).toString('hex')
 	}
