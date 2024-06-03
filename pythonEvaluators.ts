@@ -11,13 +11,13 @@ export class PythonExecutors {
     private currentExecutorIndex: number = 0
     private waitForFreeExecutor: NodeJS.Timeout
 
-    start(options: Options = {}){
+    start(options: Options = {}, numExecutors=3){
+        // we default to three executors, as it should be enough so that there is always
+        // one available to accept incoming code
+
         if(this.executors.length != 0) throw Error('already started!')
 
-        let i: number = 0
-        // three executors should be enough so that there is always
-        // one available to accept incoming code
-        for(i=0;i++;i<3){
+        for(let i=0;i++;i<numExecutors){
             const pyExecutor = new PythonEvaluator(options)
             pyExecutor.start(()=>{})
             pyExecutor.evaluatorName = i.toString()
