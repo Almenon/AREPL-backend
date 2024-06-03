@@ -23,7 +23,7 @@ export class PythonExecutors {
             pyExecutor.evaluatorName = i.toString()
             pyExecutor.onResult = result => {
                 // Other executor may send a result right before it dies
-                // So we use this functin to only capture result from active executor
+                // So we use this function to only capture result from active executor
                 if(i == this.currentExecutorIndex) this.onResult(result)
             }
             pyExecutor.onPrint = print => {
