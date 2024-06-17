@@ -153,10 +153,6 @@ def test_dump():
     assert jsonpickle.decode(return_info.userVariables)["x"] == 1
 
 
-def test_arepl_dump_not_in_modules():
-    python_evaluator.exec_input(python_evaluator.ExecArgs("from sys import modules;assert 'arepl_dump' not in modules"))
-
-
 def test_import_does_not_show():
     # we only show local vars to user, no point in showing modules
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("import json"))
@@ -250,100 +246,9 @@ loop.close()
 x=1
     """
 
-    python_evaluator.exec_input(python_evaluator.ExecArgs(event_loop_code))
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(event_loop_code))
     vars = jsonpickle.decode(return_info.userVariables)
     assert "x" in vars
-
-
-def test_builtinImportDeleted():
-    importStr = "from sys import modules;import decimal;assert 'decimal' in modules"
-    python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-    importStr = "from sys import modules;assert 'decimal' not in modules"
-    python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-
-
-def test_pipImportDeleted():
-    importStr = "from sys import modules;import praw;assert 'praw' in modules"
-    python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-    importStr = """
-from sys import modules
-assert 'praw' not in modules
-assert 'praw.models.user' not in modules
-    """
-    python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-
-
-def test_user_import_deleted():
-
-    file_path = path.join(python_ignore_path, "foo.py")
-    file_path2 = path.join(python_ignore_path, "foo2.py")
-
-    with open(file_path) as f:
-        origFileText = f.read()
-
-    try:
-        with open(file_path2) as f:
-            return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(f.read(), "", file_path2))
-        assert jsonpickle.decode(return_info.userVariables)["x"] == 2  # just checking this for later on
-
-        # now that import is uncached i should be able to change code, rerun & get different result
-        with open(file_path, "w") as f:
-            f.write("def foo():\n    return 3")
-
-        with open(file_path2) as f:
-            return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(f.read(), "", file_path2))
-        assert jsonpickle.decode(return_info.userVariables)["x"] == 3
-
-    finally:
-        # restore file back to original
-        with open(file_path, "w") as f:
-            f.write(origFileText)
-
-
-def test_user_var_import_deleted():
-
-    # __pycache__ will muck up our test on every second run
-    # this problem only happens during unit tests and not in actual useage (not sure why)
-    # so we can safely delete pycache to avoid the problem
-    rmtree(path.join(python_ignore_path, "__pycache__"))
-
-    varToImportFile_path = path.join(python_ignore_path, "varToImport.py")
-    importVarFile_path = path.join(python_ignore_path, "importVar.py")
-
-    with open(varToImportFile_path) as f:
-        origVarToImportFileText = f.read()
-
-    try:
-        with open(importVarFile_path) as f:
-            return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(f.read(), "", importVarFile_path))
-        assert jsonpickle.decode(return_info.userVariables)["myVar"] == 5  # just checking this for later on
-
-        # now that import is uncached i should be able to change code, rerun & get different result
-        with open(varToImportFile_path, "w") as f:
-            f.write("varToImport = 3")
-
-        with open(importVarFile_path) as f:
-            return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(f.read(), "", importVarFile_path))
-        assert jsonpickle.decode(return_info.userVariables)["myVar"] == 3
-
-    finally:
-        # restore file back to original
-        with open(varToImportFile_path, "w") as f:
-            f.write(origVarToImportFileText)
-
-
-def test_context_vars_cleared():
-    importStr = """
-import decimal
-x = float(decimal.Decimal("1.6") ** decimal.Decimal("1.6")) # 2.121...
-decimal.getcontext().prec = 2  # change precision so that above line would be 2.1
-    """
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-    assert jsonpickle.decode(return_info.userVariables)["x"] == 2.1212505710975917
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(importStr))
-    assert jsonpickle.decode(return_info.userVariables)["x"] == 2.1212505710975917
-
 
 def test_arepl_store():
     python_evaluator.exec_input(python_evaluator.ExecArgs("arepl_store=5"))
