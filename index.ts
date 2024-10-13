@@ -1,6 +1,6 @@
 import { PythonShell, Options, NewlineTransformer } from 'python-shell'
 import { EOL } from 'os'
-import { Readable } from 'stream'
+import { randomBytes } from 'crypto'
 
 export interface FrameSummary {
 	_line: string
@@ -51,23 +51,32 @@ export interface PythonResult {
 	internalError: string,
 	caller: string,
 	lineno: number,
-	done: boolean
+	done: boolean,
+	startResult: boolean,
+	evaluatorName: string,
 }
 
-export class PythonEvaluator {
+/**
+ * Starting = Starting or restarting. 
+ * Ending = Process is exiting. 
+ * Executing = Executing inputted code. 
+ * DirtyFree = evaluator may have been polluted by side-effects from previous code, but is free for more code. 
+ * FreshFree = evaluator is ready for the first run of code
+ */
+export enum PythonState {
+	Starting,
+	Ending,
+	Executing,
+	DirtyFree,
+	FreshFree
+}
+
+export class PythonExecutor {
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
 
-	/**
-	 * whether python is busy executing inputted code
-	 */
-	executing = false
-
-	/**
-	 * whether python backend process is running / not running
-	 */
-	running = false
-
-	restarting = false
+	state: PythonState = PythonState.Starting
+	finishedStartingCallback: Function
+	evaluatorName: string
 	private startTime: number
 
 	/**
@@ -98,7 +107,9 @@ export class PythonEvaluator {
 		this.options.mode = 'binary'
 		this.options.stdio = ['pipe', 'pipe', 'pipe', 'pipe']
 		if (!options.pythonPath) this.options.pythonPath = PythonShell.defaultPythonPath
-		if (!options.scriptPath) this.options.scriptPath = PythonEvaluator.areplPythonBackendFolderPath
+		if (!options.scriptPath) this.options.scriptPath = PythonExecutor.areplPythonBackendFolderPath
+
+		this.evaluatorName = randomBytes(16).toString('hex')
 	}
 
 
@@ -106,8 +117,11 @@ export class PythonEvaluator {
 	 * does not do anything if program is currently executing code 
 	 */
 	execCode(code: ExecArgs) {
-		if (this.executing) return
-		this.executing = true
+		if (this.state == PythonState.Executing){
+			console.error('Incoming code detected while process is still executing. \
+			This should never happen')
+		}
+		this.state = PythonState.Executing
 		this.startTime = Date.now()
 		this.pyshell.send(JSON.stringify(code) + EOL)
 	}
@@ -125,64 +139,58 @@ export class PythonEvaluator {
 	 */
 	restart(callback = () => { }) {
 
-		this.restarting = false
+		this.state = PythonState.Ending
 
 		// register callback for restart
 		// using childProcess callback instead of pyshell callback
 		// (pyshell callback only happens when process exits voluntarily)
 		this.pyshell.childProcess.on('exit', () => {
-			this.restarting = true
-			this.executing = false
-			this.start()
-			callback()
+			this.start(callback)
 		})
 
 		this.stop()
 	}
 
 	/**
-	 * kills python process.  force-kills if necessary after 50ms.
-	 * you can check python_evaluator.running to see if process is dead yet
+	 * Kills python process.  Force-kills if necessary after 50ms.
+	 * You can check python_evaluator.running to see if process is dead yet
 	 */
-	stop() {
-		// pyshell has 50 ms to die gracefully
-		this.pyshell.childProcess.kill()
-		this.running = !this.pyshell.childProcess.killed
-		if (this.running) console.info("pyshell refused to die")
-		else this.executing = false
-
-		setTimeout(() => {
-			if (this.running && !this.restarting) {
-				// murder the process with extreme prejudice
-				this.pyshell.childProcess.kill('SIGKILL')
-				if (this.pyshell.childProcess.killed) {
-					console.error("the python process simply cannot be killed!")
+	stop(kill_immediately=false) {
+		this.state = PythonState.Ending
+		const kill_signal = kill_immediately ? 'SIGKILL' : 'SIGTERM'
+		this.pyshell.childProcess.kill(kill_signal)
+		
+		if(!kill_immediately){
+			// pyshell has 50 ms to die gracefully
+			setTimeout(() => {
+				if (this.state == PythonState.Ending) {
+					// python didn't respect the SIGTERM, force-kill it
+					this.pyshell.childProcess.kill('SIGKILL')
 				}
-				else this.executing = false
-			}
-		}, 50)
+			}, 50)
+		}
 	}
 
 	/**
 	 * starts python_evaluator.py. Will NOT WORK with python 2
 	 */
-	start() {
+	start(finishedStartingCallback) {
+		this.state = PythonState.Starting
 		console.log("Starting Python...")
+		this.finishedStartingCallback = finishedStartingCallback
+		this.startTime = Date.now()
 		this.pyshell = new PythonShell('arepl_python_evaluator.py', this.options)
 
 		const resultPipe = this.pyshell.childProcess.stdio[3]
 		const newlineTransformer = new NewlineTransformer()
 		resultPipe.pipe(newlineTransformer).on('data', this.handleResult.bind(this))
 
-		// not sure why exactly I have to wrap onPrint/onStderr w/ lambda
-		// but tests fail if I don't
 		this.pyshell.stdout.on('data', (message: Buffer) => {
 			this.onPrint(message.toString())
 		})
 		this.pyshell.stderr.on('data', (log: Buffer) => {
 			this.onStderr(log.toString())
 		})
-		this.running = true
 	}
 
 	/**
@@ -220,12 +228,22 @@ export class PythonEvaluator {
 			internalError: "",
 			caller: "",
 			lineno: -1,
-			done: true
+			done: true,
+			startResult: false,
+			evaluatorName: this.evaluatorName
 		}
 
 		try {
 			pyResult = JSON.parse(results)
-			this.executing = !pyResult['done']
+			if(pyResult.startResult){
+				console.log(`Finished starting in ${Date.now() - this.startTime}`)
+				this.state = PythonState.FreshFree
+				this.finishedStartingCallback()
+				return
+			}
+			if(pyResult['done'] == true){
+				this.state = PythonState.DirtyFree
+			}
 
 			pyResult.execTime = pyResult.execTime * 1000 // convert into ms
 			pyResult.totalPyTime = pyResult.totalPyTime * 1000
@@ -259,39 +277,13 @@ export class PythonEvaluator {
 	}
 
 	/**
-	 * checks syntax without executing code
-	 * @param {string} filePath
-	 * @returns {Promise} rejects w/ stderr if syntax failure
-	 */
-	async checkSyntaxFile(filePath: string) {
-		// note that this should really be done in python_evaluator.py
-		// but communication with that happens through just one channel (stdin/stdout)
-		// so for now i prefer to keep this seperate
-
-		return PythonShell.checkSyntaxFile(filePath);
-	}
-
-	/**
 	 * gets rid of unnecessary File "<string>" message in exception
 	 * @example err:
 	 * Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nNameError: name \'x\' is not defined\n
 	 */
-	formatPythonException(err: string) {
+	private formatPythonException(err: string) {
 		//replace File "<string>" (pointless)
 		err = err.replace(/File \"<string>\", /g, "")
 		return err
 	}
-
-	/**
-	 * delays execution of function by ms milliseconds, resetting clock every time it is called
-	 * Useful for real-time execution so execCode doesn't get called too often
-	 * thanks to https://stackoverflow.com/a/1909508/6629672
-	 */
-	debounce = (function () {
-		let timer: any = 0;
-		return function (callback, ms: number, ...args: any[]) {
-			clearTimeout(timer);
-			timer = setTimeout(callback, ms, args);
-		};
-	})();
 }
