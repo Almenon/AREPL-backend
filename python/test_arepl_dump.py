@@ -31,10 +31,10 @@ def test_dump_at():
     for i in range(10):
         output = dump("yo")
         output2 = dump(i, 3)
-        if i is 0:
+        if i == 0:
             output = output
             assert loads(output.userVariables)["dump output"] == "yo"
-        elif i is 3:
+        elif i == 3:
             output2 = output2
             assert loads(output2.userVariables)["dump output"] == 3
         else:
@@ -44,10 +44,10 @@ def test_dump_at():
 def test_dump_at_list():
     for i in range(10):
         output = dump(i, [2, 3])
-        if i is 2:
+        if i == 2:
             output = output
             assert loads(output.userVariables)["dump output"] == 2
-        elif i is 3:
+        elif i == 3:
             output = output
             assert loads(output.userVariables)["dump output"] == 3
         else:
