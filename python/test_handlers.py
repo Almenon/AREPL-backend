@@ -24,7 +24,7 @@ b.run('x=1+5',{},{})
     vars = jsonpickle.decode(return_info.userVariables)
     # todo: assert == 1 once python 3.12.8 is released
     # (see https://github.com/python/cpython/issues/125422)
-    assert vars["f"]["f_lineno"] is int
+    assert type(vars["f"]["f_lineno"]) is int
 
 
 def test_generator_handler():
