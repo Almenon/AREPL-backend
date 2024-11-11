@@ -6,7 +6,7 @@
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert'
 
-import { PythonExecutor, PythonState } from './index'
+import { PythonExecutor, PythonState } from './PythonExecutor'
 import { EOL } from 'os';
 
 function isEmpty(obj) {
