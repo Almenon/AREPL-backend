@@ -64,7 +64,7 @@ export class PythonExecutors {
         // we should stop waiting
         clearInterval(this.waitForFreeExecutor)
         // executors running old code are now irrelevant, restart them
-        this.executors.filter(executor => executor.state == PythonState.Executing || PythonState.DirtyFree)
+        this.executors.filter(executor => executor.state == PythonState.Executing || executor.state == PythonState.DirtyFree)
             .forEach(executor => executor.restart())
         if(!freeExecutor){
             this.waitForFreeExecutor = setInterval(()=>{
@@ -83,6 +83,7 @@ export class PythonExecutors {
     }
 
     stop(kill_immediately=false){
+        clearInterval(this.waitForFreeExecutor)
         this.executors.forEach(executor => executor.stop(kill_immediately))
         this.executors = []
     }
