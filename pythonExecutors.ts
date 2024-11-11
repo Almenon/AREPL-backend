@@ -21,7 +21,7 @@ export class PythonExecutors {
 
         if(this.executors.length != 0) throw Error('already started!')
 
-        for(let i=0;i++;i<numExecutors){
+        for(let i = 0; i < numExecutors; i++){
             console.log('starting executor ' + i.toString())
             const pyExecutor = new PythonExecutor(this.options)
             pyExecutor.start(()=>{})
