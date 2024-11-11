@@ -11,14 +11,16 @@ export class PythonExecutors {
     private currentExecutorIndex: number = 0
     private waitForFreeExecutor: NodeJS.Timeout
 
-    start(options: Options = {}, numExecutors=3){
+    constructor(public options: Options = {}){}
+
+    start(numExecutors=3){
         // we default to three executors, as it should be enough so that there is always
         // one available to accept incoming code
 
         if(this.executors.length != 0) throw Error('already started!')
 
         for(let i=0;i++;i<numExecutors){
-            const pyExecutor = new PythonExecutor(options)
+            const pyExecutor = new PythonExecutor(this.options)
             pyExecutor.start(()=>{})
             pyExecutor.evaluatorName = i.toString()
             pyExecutor.onResult = result => {
@@ -41,7 +43,7 @@ export class PythonExecutors {
     }
 
     /**
-     * Sends code to the current executor
+     * Sends code to the current executor. 
      * If current executor is busy, nothing happens
      */
     execCodeCurrent(code: ExecArgs){
