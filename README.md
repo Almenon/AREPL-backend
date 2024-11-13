@@ -38,7 +38,6 @@ Semantic release cheatsheet:
 *   [PythonState](#pythonstate)
 *   [constructor](#constructor)
     *   [Parameters](#parameters)
-*   [debounce](#debounce)
 *   [execCode](#execcode)
     *   [Parameters](#parameters-1)
 *   [sendStdin](#sendstdin)
@@ -46,19 +45,18 @@ Semantic release cheatsheet:
 *   [restart](#restart)
     *   [Parameters](#parameters-3)
 *   [stop](#stop)
-*   [start](#start)
     *   [Parameters](#parameters-4)
-*   [onResult](#onresult)
+*   [start](#start)
     *   [Parameters](#parameters-5)
-*   [onPrint](#onprint)
+*   [onResult](#onresult)
     *   [Parameters](#parameters-6)
-*   [onStderr](#onstderr)
+*   [onPrint](#onprint)
     *   [Parameters](#parameters-7)
-*   [handleResult](#handleresult)
+*   [onStderr](#onstderr)
     *   [Parameters](#parameters-8)
-*   [checkSyntax](#checksyntax)
+*   [handleResult](#handleresult)
     *   [Parameters](#parameters-9)
-*   [checkSyntaxFile](#checksyntaxfile)
+*   [checkSyntax](#checksyntax)
     *   [Parameters](#parameters-10)
 *   [formatPythonException](#formatpythonexception)
     *   [Parameters](#parameters-11)
@@ -69,7 +67,8 @@ Semantic release cheatsheet:
 Starting = Starting or restarting.
 Ending = Process is exiting.
 Executing = Executing inputted code.
-Free = Waiting for inputted code.
+DirtyFree = evaluator may have been polluted by side-effects from previous code, but is free for more code.
+FreshFree = evaluator is ready for the first run of code
 
 ### constructor
 
@@ -78,12 +77,6 @@ starts python\_evaluator.py
 #### Parameters
 
 *   `options`  Process / Python options. If not specified sensible defaults are inferred. (optional, default `{}`)
-
-### debounce
-
-delays execution of function by ms milliseconds, resetting clock every time it is called
-Useful for real-time execution so execCode doesn't get called too often
-thanks to <https://stackoverflow.com/a/1909508/6629672>
 
 ### execCode
 
@@ -110,8 +103,12 @@ After process restarts the callback passed in is invoked
 
 ### stop
 
-kills python process.  force-kills if necessary after 50ms.
-you can check python\_evaluator.running to see if process is dead yet
+Kills python process.  Force-kills if necessary after 50ms.
+You can check python\_evaluator.running to see if process is dead yet
+
+#### Parameters
+
+*   `kill_immediately`   (optional, default `false`)
 
 ### start
 
@@ -163,16 +160,6 @@ checks syntax without executing code
 #### Parameters
 
 *   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
-
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
-
-### checkSyntaxFile
-
-checks syntax without executing code
-
-#### Parameters
-
-*   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 
