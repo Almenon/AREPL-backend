@@ -1,11 +1,9 @@
 # Copyright (C) 2008 John Paulett (john -at- paulett.org)
-# Copyright (C) 2009-2018 David Aguilar (davvid -at- gmail.com)
+# Copyright (C) 2009-2024 David Aguilar (davvid -at- gmail.com)
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution.
-from __future__ import absolute_import, division, unicode_literals
-
 import decimal
 import inspect
 import itertools
@@ -36,6 +34,7 @@ def encode(
     indent=None,
     separators=None,
     include_properties=False,
+    handle_readonly=False,
 ):
     """Return a JSON formatted representation of value, a Python object.
 
@@ -47,13 +46,13 @@ def encode(
         objects to be equal by ``==``, such as when serializing sklearn
         instances. If you experience (de)serialization being incorrect when you
         use numpy, pandas, or sklearn handlers, this should be set to ``False``.
-        If you want the output to not include the dtype for numpy arrays, add
-        ``jsonpickle.register(numpy.generic,
-         UnpicklableNumpyGenericHandler, base=True)`` before your pickling code.
-    :param max_depth: If set to a non-negative integer then jsonpickle will
-        not recurse deeper than 'max_depth' steps into the object.  Anything
-        deeper than 'max_depth' is represented using a Python repr() of the
-        object.
+        If you want the output to not include the dtype for numpy arrays, add::
+
+            jsonpickle.register(
+                numpy.generic, UnpicklableNumpyGenericHandler, base=True
+            )
+
+        before your pickling code.
     :param make_refs: If set to False jsonpickle's referencing support is
         disabled.  Objects that are id()-identical won't be preserved across
         encode()/decode(), but the resulting JSON stream will be conceptually
@@ -63,15 +62,25 @@ def encode(
         dictionary keys instead of coercing them into strings via `repr()`.
         This is typically what you want if you need to support Integer or
         objects as dictionary keys.
-    :param numeric_keys: Only use this option if the backend supports integer
-        dict keys natively.  This flag tells jsonpickle to leave numeric keys
-        as-is rather than conforming them to json-friendly strings.
-        Using ``keys=True`` is the typical solution for integer keys, so only
-        use this if you have a specific use case where you want to allow the
-        backend to handle serialization of numeric dict keys.
+    :param max_depth: If set to a non-negative integer then jsonpickle will
+        not recurse deeper than 'max_depth' steps into the object.  Anything
+        deeper than 'max_depth' is represented using a Python repr() of the
+        object.
+    :param reset: Custom pickle handlers that use the `Pickler.flatten` method or
+        `jsonpickle.encode` function must call `encode` with `reset=False`
+        in order to retain object references during pickling.
+        This flag is not typically used outside of a custom handler or
+        `__getstate__` implementation.
+    :param backend: If set to an instance of jsonpickle.backend.JSONBackend,
+        jsonpickle will use that backend for deserialization.
     :param warn: If set to True then jsonpickle will warn when it
         returns None for an object which it cannot pickle
         (e.g. file descriptors).
+    :param context: Supply a pre-built Pickler or Unpickler object to the
+        `jsonpickle.encode` and `jsonpickle.decode` machinery instead
+        of creating a new instance. The `context` represents the currently
+        active Pickler and Unpickler objects when custom handlers are
+        invoked by jsonpickle.
     :param max_iter: If set to a non-negative integer then jsonpickle will
         consume at most `max_iter` items when pickling iterators.
     :param use_decimal: If set to True jsonpickle will allow Decimal
@@ -87,6 +96,12 @@ def encode(
 
         NOTE: A side-effect of the above settings is that float values will be
         converted to Decimal when converting to json.
+    :param numeric_keys: Only use this option if the backend supports integer
+        dict keys natively.  This flag tells jsonpickle to leave numeric keys
+        as-is rather than conforming them to json-friendly strings.
+        Using ``keys=True`` is the typical solution for integer keys, so only
+        use this if you have a specific use case where you want to allow the
+        backend to handle serialization of numeric dict keys.
     :param use_base85:
         If possible, use base85 to encode binary data. Base85 bloats binary data
         by 1/4 as opposed to base64, which expands it by 1/3. This argument is
@@ -111,8 +126,14 @@ def encode(
     :param include_properties:
         Include the names and values of class properties in the generated json.
         Properties are unpickled properly regardless of this setting, this is
-        meant to be used if processing the json outside of Python. Defaults to
-        ``False``.
+        meant to be used if processing the json outside of Python. Certain types
+        such as sets will not pickle due to not having a native-json equivalent.
+        Defaults to ``False``.
+    :param handle_readonly:
+        Handle objects with readonly methods, such as Django's SafeString. This
+        basically prevents jsonpickle from raising an exception for such objects.
+        You MUST set ``handle_readonly=True`` for the decoding if you encode with
+        this flag set to ``True``.
 
     >>> encode('my string') == '"my string"'
     True
@@ -138,6 +159,8 @@ def encode(
         use_base85=use_base85,
         fail_safe=fail_safe,
         include_properties=include_properties,
+        handle_readonly=handle_readonly,
+        original_object=value,
     )
     return backend.encode(
         context.flatten(value, reset=reset), indent=indent, separators=separators
@@ -170,7 +193,7 @@ def _wrap_string_slot(string):
     return string
 
 
-class Pickler(object):
+class Pickler:
     def __init__(
         self,
         unpicklable=True,
@@ -185,6 +208,8 @@ class Pickler(object):
         use_base85=False,
         fail_safe=None,
         include_properties=False,
+        handle_readonly=False,
+        original_object=None,
     ):
         self.unpicklable = unpicklable
         self.make_refs = make_refs
@@ -207,6 +232,8 @@ class Pickler(object):
         self._use_decimal = use_decimal
         # A cache of objects that have already been flattened.
         self._flattened = {}
+        # Used for util.is_readonly, see +483
+        self.handle_readonly = handle_readonly
 
         if self.use_base85:
             self._bytes_tag = tags.B85
@@ -219,8 +246,10 @@ class Pickler(object):
         self.fail_safe = fail_safe
         self.include_properties = include_properties
 
+        self._original_object = original_object
+
     def _determine_sort_keys(self):
-        for _, options in self.backend._encoder_options.values():
+        for _, options in getattr(self.backend, '_encoder_options', {}).values():
             if options.get("sort_keys", False):
                 # the user has set one of the backends to sort keys
                 return True
@@ -288,9 +317,11 @@ class Pickler(object):
         return pretend_new or is_new
 
     def _getref(self, obj):
+        """Return a "py/id" entry for the specified object"""
         return {tags.ID: self._objs.get(id(obj))}
 
     def _flatten(self, obj):
+        """Flatten an object and its guts into a json-safe representation"""
         if self.unpicklable and self.make_refs:
             result = self._flatten_impl(obj)
         else:
@@ -368,7 +399,6 @@ class Pickler(object):
         max_reached = self._max_reached()
 
         try:
-
             in_cycle = _in_cycle(obj, self._objs, max_reached, self.make_refs)
             if in_cycle:
                 # break the cycle
@@ -413,6 +443,14 @@ class Pickler(object):
         """Flatten a key/value pair into the passed-in dictionary."""
         if not util.is_picklable(k, v):
             return data
+        # TODO: use inspect.getmembers_static on 3.11+ because it avoids dynamic
+        # attribute lookups
+        if (
+            self.handle_readonly
+            and k in {attr for attr, val in inspect.getmembers(self._original_object)}
+            and util.is_readonly(self._original_object, k, v)
+        ):
+            return data
 
         if k is None:
             k = 'null'  # for compatibility with common json encoders
@@ -454,7 +492,7 @@ class Pickler(object):
 
         # i don't like lambdas
         def valid_property(x):
-            return not x[0].startswith("__") and x[0] not in allslots_set
+            return not x[0].startswith('__') and x[0] not in allslots_set
 
         properties = [
             x[0] for x in inspect.getmembers(obj.__class__) if valid_property(x)
@@ -501,6 +539,7 @@ class Pickler(object):
         has_getnewargs_ex = util.has_method(obj, '__getnewargs_ex__')
         has_getinitargs = util.has_method(obj, '__getinitargs__')
         has_reduce, has_reduce_ex = util.has_reduce(obj)
+        exclude = set(getattr(obj, '_jsonpickle_exclude', ()))
 
         # Support objects with __getstate__(); this ensures that
         # both __setstate__() and __getstate__() are implemented
@@ -607,7 +646,9 @@ class Pickler(object):
                 data[tags.OBJECT] = class_name
 
             if has_getnewargs_ex:
-                data[tags.NEWARGSEX] = list(map(self._flatten, obj.__getnewargs_ex__()))
+                data[tags.NEWARGSEX] = [
+                    self._flatten(arg) for arg in obj.__getnewargs_ex__()
+                ]
 
             if has_getnewargs and not has_getnewargs_ex:
                 data[tags.NEWARGS] = self._flatten(obj.__getnewargs__())
@@ -629,13 +670,13 @@ class Pickler(object):
 
         if util.is_module(obj):
             if self.unpicklable:
-                data[tags.REPR] = '{name}/{name}'.format(name=obj.__name__)
+                data[tags.MODULE] = '{name}/{name}'.format(name=obj.__name__)
             else:
                 data = compat.ustr(obj)
             return data
 
         if util.is_dictionary_subclass(obj):
-            self._flatten_dict_obj(obj, data)
+            self._flatten_dict_obj(obj, data, exclude=exclude)
             return data
 
         if util.is_sequence_subclass(obj):
@@ -653,7 +694,7 @@ class Pickler(object):
 
             # hack for zope persistent objects; this unghostifies the object
             getattr(obj, '_', None)
-            return self._flatten_dict_obj(obj.__dict__, data)
+            return self._flatten_dict_obj(obj.__dict__, data, exclude=exclude)
 
         if has_slots:
             return self._flatten_newstyle_with_slots(obj, data)
@@ -730,7 +771,7 @@ class Pickler(object):
         data[k] = self._flatten(v)
         return data
 
-    def _flatten_dict_obj(self, obj, data=None):
+    def _flatten_dict_obj(self, obj, data=None, exclude=()):
         """Recursively call flatten() and return json-friendly dict"""
         if data is None:
             data = obj.__class__()
@@ -740,17 +781,17 @@ class Pickler(object):
         if self.keys:
             # Phase 1: serialize regular objects, ignore fancy keys.
             flatten = self._flatten_string_key_value_pair
-            for k, v in util.items(obj):
+            for k, v in util.items(obj, exclude=exclude):
                 flatten(k, v, data)
 
             # Phase 2: serialize non-string keys.
             flatten = self._flatten_non_string_key_value_pair
-            for k, v in util.items(obj):
+            for k, v in util.items(obj, exclude=exclude):
                 flatten(k, v, data)
         else:
             # If we have string keys only then we only need a single pass.
             flatten = self._flatten_key_value_pair
-            for k, v in util.items(obj):
+            for k, v in util.items(obj, exclude=exclude):
                 flatten(k, v, data)
 
         # the collections.defaultdict protocol
@@ -774,10 +815,13 @@ class Pickler(object):
             data['default_factory'] = value
 
         # Sub-classes of dict
-        if hasattr(obj, '__dict__') and self.unpicklable:
-            dict_data = {}
-            self._flatten_dict_obj(obj.__dict__, dict_data)
-            data['__dict__'] = dict_data
+        if hasattr(obj, '__dict__') and self.unpicklable and obj != obj.__dict__:
+            if self._mkref(obj.__dict__):
+                dict_data = {}
+                self._flatten_dict_obj(obj.__dict__, dict_data, exclude=exclude)
+                data['__dict__'] = dict_data
+            else:
+                data['__dict__'] = self._getref(obj.__dict__)
 
         return data
 
@@ -788,7 +832,6 @@ class Pickler(object):
                     self._list_recurse if type(obj) is list else self._flatten_dict_obj
                 )
             else:
-                self._push()
                 return self._getref
 
         # We handle tuples and sets by encoding them in a "(tuple|set)dict"
@@ -796,19 +839,19 @@ class Pickler(object):
             if not self.unpicklable:
                 return self._list_recurse
             return lambda obj: {
-                tags.TUPLE
-                if type(obj) is tuple
-                else tags.SET: [self._flatten(v) for v in obj]
+                tags.TUPLE if type(obj) is tuple else tags.SET: [
+                    self._flatten(v) for v in obj
+                ]
             }
+
+        elif util.is_module_function(obj):
+            return self._flatten_function
 
         elif util.is_object(obj):
             return self._ref_obj_instance
 
         elif util.is_type(obj):
             return _mktyperef
-
-        elif util.is_module_function(obj):
-            return self._flatten_function
 
         # instance methods, lambdas, old style classes...
         self._pickle_warning(obj)
