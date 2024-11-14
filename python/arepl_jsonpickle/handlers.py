@@ -7,7 +7,6 @@ A handler can be bound to other types by calling
 :func:`jsonpickle.handlers.register`.
 
 """
-from __future__ import absolute_import, division, unicode_literals
 
 import array
 import copy
@@ -21,7 +20,7 @@ import uuid
 from . import compat, util
 
 
-class Registry(object):
+class Registry:
     def __init__(self):
         self._handlers = {}
         self._base_handlers = {}
@@ -69,7 +68,7 @@ class Registry(object):
 
             return _register
         if not util.is_type(cls):
-            raise TypeError('{!r} is not a class/type'.format(cls))
+            raise TypeError(f'{cls!r} is not a class/type')
         # store both the name and the actual type for the ugly cases like
         # _sre.SRE_Pattern that cannot be loaded back directly
         self._handlers[util.importable_name(cls)] = self._handlers[cls] = handler
@@ -89,7 +88,7 @@ unregister = registry.unregister
 get = registry.get
 
 
-class BaseHandler(object):
+class BaseHandler:
     def __init__(self, context):
         """
         Initialize a new handler to handle a registered type.
@@ -162,7 +161,6 @@ ArrayHandler.handles(array.array)
 
 
 class DatetimeHandler(BaseHandler):
-
     """Custom handler for datetime objects
 
     Datetime objects use __reduce__, and they generate binary strings encoding
@@ -233,7 +231,7 @@ class QueueHandler(BaseHandler):
 QueueHandler.handles(compat.queue.Queue)
 
 
-class CloneFactory(object):
+class CloneFactory:
     """Serialization proxy for collections.defaultdict's default_factory"""
 
     def __init__(self, exemplar):
@@ -244,7 +242,7 @@ class CloneFactory(object):
         return clone(self.exemplar)
 
     def __repr__(self):
-        return '<CloneFactory object at 0x{:x} ({})>'.format(id(self), self.exemplar)
+        return f'<CloneFactory object at 0x{id(self):x} ({self.exemplar})>'
 
 
 class UUIDHandler(BaseHandler):

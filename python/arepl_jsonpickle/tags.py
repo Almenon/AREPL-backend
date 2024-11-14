@@ -6,7 +6,6 @@ created by the Pickler class.  The Unpickler uses
 these custom key names to identify dictionaries
 that need to be specially handled.
 """
-from __future__ import absolute_import, division, unicode_literals
 
 BYTES = 'py/bytes'
 B64 = 'py/b64'
@@ -16,6 +15,7 @@ ID = 'py/id'
 INITARGS = 'py/initargs'
 ITERATOR = 'py/iterator'
 JSON_KEY = 'json://'
+MODULE = 'py/mod'
 NEWARGS = 'py/newargs'
 NEWARGSEX = 'py/newargsex'
 NEWOBJ = 'py/newobj'
@@ -37,6 +37,7 @@ RESERVED = {
     ID,
     INITARGS,
     ITERATOR,
+    MODULE,
     NEWARGS,
     NEWARGSEX,
     NEWOBJ,

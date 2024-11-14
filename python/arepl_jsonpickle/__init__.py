@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Copyright (C) 2008 John Paulett (john -at- paulett.org)
 # Copyright (C) 2009, 2011, 2013 David Aguilar (davvid -at- gmail.com)
 # All rights reserved.
@@ -67,8 +65,6 @@ added to JSON::
    that contain non-string dictionary keys.
 
 """
-from __future__ import absolute_import, division, unicode_literals
-
 # Export other names not in __all__
 from .backend import JSONBackend  # noqa: F401
 from .backend import json

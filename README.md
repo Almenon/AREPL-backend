@@ -12,7 +12,7 @@ Although it is meant for AREPL, it is not dependent upon AREPL and can be used b
 
 > npm install [arepl-backend](https://www.npmjs.com/package/arepl-backend)
 
-must have python 3.7 or greater
+Must have python 3.7 or greater
 
 ## Usage
 
@@ -35,11 +35,9 @@ Semantic release cheatsheet:
 
 #### Table of Contents
 
+*   [PythonState](#pythonstate)
 *   [constructor](#constructor)
     *   [Parameters](#parameters)
-*   [executing](#executing)
-*   [running](#running)
-*   [debounce](#debounce)
 *   [execCode](#execcode)
     *   [Parameters](#parameters-1)
 *   [sendStdin](#sendstdin)
@@ -47,22 +45,30 @@ Semantic release cheatsheet:
 *   [restart](#restart)
     *   [Parameters](#parameters-3)
 *   [stop](#stop)
-*   [start](#start)
-*   [onResult](#onresult)
     *   [Parameters](#parameters-4)
-*   [onPrint](#onprint)
+*   [start](#start)
     *   [Parameters](#parameters-5)
-*   [onStderr](#onstderr)
+*   [onResult](#onresult)
     *   [Parameters](#parameters-6)
-*   [handleResult](#handleresult)
+*   [onPrint](#onprint)
     *   [Parameters](#parameters-7)
-*   [checkSyntax](#checksyntax)
+*   [onStderr](#onstderr)
     *   [Parameters](#parameters-8)
-*   [checkSyntaxFile](#checksyntaxfile)
+*   [handleResult](#handleresult)
     *   [Parameters](#parameters-9)
-*   [formatPythonException](#formatpythonexception)
+*   [checkSyntax](#checksyntax)
     *   [Parameters](#parameters-10)
+*   [formatPythonException](#formatpythonexception)
+    *   [Parameters](#parameters-11)
     *   [Examples](#examples)
+
+### PythonState
+
+Starting = Starting or restarting.
+Ending = Process is exiting.
+Executing = Executing inputted code.
+DirtyFree = evaluator may have been polluted by side-effects from previous code, but is free for more code.
+FreshFree = evaluator is ready for the first run of code
 
 ### constructor
 
@@ -71,20 +77,6 @@ starts python\_evaluator.py
 #### Parameters
 
 *   `options`  Process / Python options. If not specified sensible defaults are inferred. (optional, default `{}`)
-
-### executing
-
-whether python is busy executing inputted code
-
-### running
-
-whether python backend process is running / not running
-
-### debounce
-
-delays execution of function by ms milliseconds, resetting clock every time it is called
-Useful for real-time execution so execCode doesn't get called too often
-thanks to <https://stackoverflow.com/a/1909508/6629672>
 
 ### execCode
 
@@ -111,12 +103,20 @@ After process restarts the callback passed in is invoked
 
 ### stop
 
-kills python process.  force-kills if necessary after 50ms.
-you can check python\_evaluator.running to see if process is dead yet
+Kills python process.  Force-kills if necessary after 50ms.
+You can check python\_evaluator.running to see if process is dead yet
+
+#### Parameters
+
+*   `kill_immediately`   (optional, default `false`)
 
 ### start
 
 starts python\_evaluator.py. Will NOT WORK with python 2
+
+#### Parameters
+
+*   `finishedStartingCallback` &#x20;
 
 ### onResult
 
@@ -160,16 +160,6 @@ checks syntax without executing code
 #### Parameters
 
 *   `code` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
-
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
-
-### checkSyntaxFile
-
-checks syntax without executing code
-
-#### Parameters
-
-*   `filePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**&#x20;
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)** rejects w/ stderr if syntax failure
 

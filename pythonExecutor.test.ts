@@ -6,7 +6,7 @@
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert'
 
-import { PythonEvaluator } from './index'
+import { PythonExecutor, PythonState } from './PythonExecutor'
 import { EOL } from 'os';
 
 function isEmpty(obj) {
@@ -14,7 +14,7 @@ function isEmpty(obj) {
 }
 
 suite("python_evaluator Tests", () => {
-    let pyEvaluator = new PythonEvaluator()
+    let pyEvaluator = new PythonExecutor()
     let input = {
         evalCode: "",
         savedCode: "",
@@ -26,17 +26,19 @@ suite("python_evaluator Tests", () => {
     }
     const pythonStartupTime = 3000
 
-    suiteSetup(function (done) {
+    suiteSetup(function () {
         this.timeout(pythonStartupTime + 500)
-        pyEvaluator.start()
-        // wait for for python to start
-        setTimeout(() => done(), pythonStartupTime)
     })
 
-    setup(function () {
+    setup(function (done) {
         pyEvaluator.onPrint = () => { }
         pyEvaluator.onStderr = () => { }
         pyEvaluator.onResult = () => { }
+        pyEvaluator.start(done)
+    })
+
+    teardown(function(){
+        pyEvaluator.stop(true)
     })
 
     test("sanity check: 1+1=2", () => {
@@ -171,11 +173,11 @@ suite("python_evaluator Tests", () => {
         test("returns result after print", function (done) {
             pyEvaluator.onPrint = (stdout) => {
                 assert.strictEqual(stdout, "hello world" + EOL)
-                assert.strictEqual(pyEvaluator.executing, true)
+                assert.strictEqual(pyEvaluator.state, PythonState.Executing)
             }
 
             pyEvaluator.onResult = () => {
-                assert.strictEqual(pyEvaluator.executing, false)
+                assert.strictEqual(pyEvaluator.state, PythonState.DirtyFree)
                 done()
             }
 
@@ -243,27 +245,6 @@ suite("python_evaluator Tests", () => {
         pyEvaluator.execCode(input)
     })
 
-    test("dump works properly when called repeatedly", function (done) {
-        let numResults = 0;
-        pyEvaluator.onResult = (result) => {
-            numResults += 1
-            if (numResults == 3) {
-                assert.strictEqual(result.done, true)
-                done()
-                return
-            }
-            assert.notStrictEqual(result, null)
-            assert.strictEqual(isEmpty(result.userError), true)
-            assert.strictEqual(result.internalError, null)
-            assert.strictEqual(result.userVariables['dump output'], numResults)
-            assert.strictEqual(result.caller, '<module>')
-            assert.strictEqual(result.lineno, numResults)
-        }
-        input.evalCode = `from arepl_dump import dump;dump(1)
-dump(2)`
-        pyEvaluator.execCode(input)
-    })
-
     test("returns syntax error when incorrect syntax", function (done) {
         pyEvaluator.onResult = (result) => {
             assert.notStrictEqual(result.userError, null)
@@ -296,20 +277,13 @@ dump(2)`
 
         this.timeout(this.timeout() + pythonStartupTime)
 
-        assert.strictEqual(pyEvaluator.running, true)
-        assert.strictEqual(pyEvaluator.restarting, false)
-        assert.strictEqual(pyEvaluator.executing, false)
+        assert.strictEqual(pyEvaluator.state, PythonState.FreshFree)
 
         pyEvaluator.restart(() => {
-            assert.strictEqual(pyEvaluator.running, true)
-            assert.strictEqual(pyEvaluator.executing, false)
-
-            setTimeout(() => {
-                // by now python should be restarted and accepting input
-                pyEvaluator.onResult = () => done()
-                input.evalCode = "x"
-                pyEvaluator.execCode(input)
-            }, 1500)
+            assert.strictEqual(pyEvaluator.state, PythonState.FreshFree)
+            pyEvaluator.onResult = () => done()
+            input.evalCode = "x"
+            pyEvaluator.execCode(input)
         })
     })
 

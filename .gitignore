@@ -10,12 +10,8 @@ src/python/.idea
 npm-debug.log.*
 .idea
 .coverage
-index.js
-index.js.map
-pyShellType.js
-pyShellType.js.map
-*.test.js
-*.test.js.map
+*.js
+*.js.map
 *.d.ts
 .pytest_cache
 .vscode/settings.json
