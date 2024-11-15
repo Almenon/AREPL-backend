@@ -172,7 +172,7 @@ export class PythonExecutor {
 	}
 
 	/**
-	 * starts python_evaluator.py. Will NOT WORK with python 2
+	 * starts python_evaluator.py.
 	 */
 	start(finishedStartingCallback) {
 		this.state = PythonState.Starting
