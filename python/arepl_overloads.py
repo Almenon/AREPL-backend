@@ -6,6 +6,7 @@ This file contains overloads of certain python functions for arepl purposes
 For example, arepl doesn't support stdin so we overload input and help
 """
 
+
 # AREPL-vscode does not support stdin yet so help breaks it
 # by overridding help with a non-stdin version we can prevent AREPL-vscode from freezing up
 # just a temp fix untill AREPL-vscode supports stdin
@@ -24,6 +25,7 @@ But AREPL's help can still give you information on functions / modules / objects
 
 
 arepl_input_iterator = None
+
 
 # AREPL doesn't support input so we overload input
 # This allows users to hardcode input by specifying a standard_input var

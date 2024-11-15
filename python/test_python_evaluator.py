@@ -250,6 +250,7 @@ x=1
     vars = jsonpickle.decode(return_info.userVariables)
     assert "x" in vars
 
+
 def test_arepl_store():
     python_evaluator.exec_input(python_evaluator.ExecArgs("arepl_store=5"))
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x=arepl_store"))

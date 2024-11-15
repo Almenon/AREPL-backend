@@ -220,7 +220,7 @@ lossHistory = []
 for i in range(epochs):  # Training:
     epochLoss = []
 
-    for (Xb, Yb) in next_batch(X, Y):
+    for Xb, Yb in next_batch(X, Y):
 
         H = activate(np.dot(Xb, Wh))  # hidden layer results
         Z = activate(np.dot(H, Wz))  # output layer results
