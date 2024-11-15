@@ -1,5 +1,7 @@
 from copy import deepcopy
-from importlib import util  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
+from importlib import (
+    util,
+)  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 import json
 import traceback
 from time import time
@@ -237,8 +239,8 @@ if __name__ == "__main__":
     # This is to avoid results conflicting with user writes to stdout
     arepl_result_stream.open_result_stream()
 
-    finished_starting = ReturnInfo("", {}, 0,0, startResult=True)
+    finished_starting = ReturnInfo("", {}, 0, 0, startResult=True)
     print_output(finished_starting)
-    
+
     while True:
         main(input())
