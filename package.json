@@ -8,7 +8,6 @@
     "compileOnce": "tsc",
     "declaration": "tsc --target es6 --declaration index.ts",
     "test": "mocha -r ts-node/register --ui tdd *.test.ts --exit",
-    "appveyorTest": "mocha --ui tdd --reporter mocha-appveyor-reporter *.test.js --exit",
     "document": "documentation readme index.js --section=API",
     "prePublish": "npm run compileOnce && npm run test && npm run document",
     "semantic-release": "semantic-release"
@@ -38,7 +37,6 @@
     "@types/node": "^20.17.6",
     "documentation": "^14.0.1",
     "mocha": "^10.2.0",
-    "mocha-appveyor-reporter": "^0.4.0",
     "semantic-release": "^24.2.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.6.3"
