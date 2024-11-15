@@ -1,6 +1,6 @@
 {
   "name": "arepl-backend",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "JS interface to python evaluator for AREPL",
   "main": "PythonExecutors.js",
   "scripts": {
