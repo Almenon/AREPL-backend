@@ -1,7 +1,7 @@
 import { Options, PythonShell } from "python-shell";
-import { ExecArgs, PythonExecutor, PythonResult, PythonState } from "./PythonExecutor";
+import { ExecArgs, PythonExecutor, PythonResult, PythonState } from "./pythonExecutor";
 
-export * from './PythonExecutor'
+export * from './pythonExecutor'
 
 /**
  * Starts multiple python executors for running user code. 
