@@ -19,7 +19,6 @@ suite("python_evaluator Tests", () => {
         evalCode: "",
         savedCode: "",
         filePath: "",
-        usePreviousVariables: false,
         show_global_vars: true,
         default_filter_vars: [],
         default_filter_types: ["<class 'module'>", "<class 'function'>"]
@@ -255,22 +254,6 @@ suite("python_evaluator Tests", () => {
         }
         input.evalCode = "x="
         pyEvaluator.execCode(input)
-    })
-
-    test("uses previousRun variables asked", function (done) {
-        function onSecondResult(result) {
-            assert.strictEqual(result.userVariables['y'], 1)
-            done()
-        }
-        pyEvaluator.onResult = (result) => {
-            pyEvaluator.onResult = onSecondResult
-            input.usePreviousVariables = true
-            pyEvaluator.execCode(input)
-            input.usePreviousVariables = false
-        }
-        input.evalCode = "x=1"
-        pyEvaluator.execCode(input)
-        input.evalCode = "y=x"
     })
 
     test("can restart", function (done) {
