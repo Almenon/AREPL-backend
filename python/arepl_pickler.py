@@ -59,7 +59,7 @@ jsonpickle.set_encoder_options("json", allow_nan=False)  # nan is not deseriazab
 for handler in handlers:
     jsonpickle.handlers.register(handler["type"], handler["handler"])
 
-specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__", "arepl_store"]
+specialVars = ["__doc__", "__file__", "__loader__", "__name__", "__package__", "__spec__"]
 
 
 def pickle_user_vars(

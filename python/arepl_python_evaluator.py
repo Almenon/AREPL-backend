@@ -14,8 +14,8 @@ from contextlib import contextmanager
 # do NOT use from arepl_overloads import arepl_input_iterator
 # it will recreate arepl_input_iterator and we need the original
 import arepl_overloads
-from arepl_pickler import specialVars, pickle_user_vars, pickle_user_error
-import arepl_saved as saved
+from arepl_pickler import pickle_user_vars, pickle_user_error
+from arepl_custom_locals import get_normal_starting_locals, inject_overloads
 from arepl_settings import get_settings, update_settings
 from arepl_user_error import UserError
 import arepl_result_stream
@@ -114,13 +114,6 @@ def script_path(script_dir: str):
             except os.error:
                 pass
 
-
-saved.starting_locals["help"] = arepl_overloads.help_overload
-saved.starting_locals["input"] = arepl_overloads.input_overload
-saved.starting_locals["howdoi"] = arepl_overloads.howdoi_wrapper
-
-eval_locals = deepcopy(saved.starting_locals)
-
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
 
@@ -129,25 +122,16 @@ def exec_input(exec_args: ExecArgs):
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
-    global eval_locals
-    global run_context
 
-    argv[0] = exec_args.filePath
     # see https://docs.python.org/3/library/sys.html#sys.argv
-    saved.starting_locals["__file__"] = exec_args.filePath
-    if exec_args.filePath:
-        saved.starting_locals["__loader__"].path = os.path.basename(exec_args.filePath)
-
-    if not exec_args.usePreviousVariables:
-        eval_locals = saved.get_eval_locals(exec_args.savedCode)
-
-    # re-import imports. (pickling imports from saved code was unfortunately not possible)
-    exec_args.evalCode = saved.copy_saved_imports_to_exec(exec_args.evalCode, exec_args.savedCode)
+    argv[0] = exec_args.filePath
+    exec_locals = get_normal_starting_locals(exec_args.filePath)
+    inject_overloads(exec_locals)
 
     with script_path(os.path.dirname(exec_args.filePath)):
         try:
             start = time()
-            exec(exec_args.evalCode, eval_locals)
+            exec(exec_args.evalCode, exec_locals)
             execTime = time() - start
         except BaseException:
             execTime = time() - start
@@ -155,23 +139,18 @@ def exec_input(exec_args: ExecArgs):
             if not get_settings().show_global_vars:
                 raise UserError(exc_obj, exc_tb, noGlobalVarsMsg, execTime)
             else:
-                raise UserError(exc_obj, exc_tb, eval_locals, execTime)
-
+                raise UserError(exc_obj, exc_tb, exec_locals, execTime)
         finally:
-
             if sys.stdout.flush and callable(sys.stdout.flush):
                 # a normal program will flush at the end of the run
-                # arepl never stops so we have to do it manually
                 sys.stdout.flush()
-
-            saved.arepl_store = eval_locals.get("arepl_store")
 
             # clear mock stdin for next run
             arepl_overloads.arepl_input_iterator = None
 
     if get_settings().show_global_vars:
         userVariables = pickle_user_vars(
-            eval_locals,
+            exec_locals,
             get_settings().default_filter_vars,
             get_settings().default_filter_types,
         )

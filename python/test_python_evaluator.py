@@ -158,23 +158,6 @@ def test_import_does_not_show():
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("import json"))
     assert jsonpickle.decode(return_info.userVariables) == {}
 
-
-def test_save():
-    return_info = python_evaluator.exec_input(
-        python_evaluator.ExecArgs("", "from random import random\nx=random()#$save")
-    )
-    randomVal = jsonpickle.decode(return_info.userVariables)["x"]
-    return_info = python_evaluator.exec_input(
-        python_evaluator.ExecArgs("z=3", "from random import random\nx=random()#$save")
-    )
-    assert jsonpickle.decode(return_info.userVariables)["x"] == randomVal
-
-
-def test_save_import():  # imports in saved section should be able to be referenced in exec section
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("z=math.sin(0)", "import math#$save"))
-    assert jsonpickle.decode(return_info.userVariables)["z"] == 0
-
-
 def test_various_types():
     various_types = """
 a = 1
@@ -249,13 +232,6 @@ x=1
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(event_loop_code))
     vars = jsonpickle.decode(return_info.userVariables)
     assert "x" in vars
-
-
-def test_arepl_store():
-    python_evaluator.exec_input(python_evaluator.ExecArgs("arepl_store=5"))
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x=arepl_store"))
-    assert jsonpickle.decode(return_info.userVariables)["x"] == 5
-
 
 def test_howdoiArepl():
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x=howdoi('use arepl')"))
