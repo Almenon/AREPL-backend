@@ -33,7 +33,6 @@ export interface UserError {
 
 export interface ExecArgs {
 	evalCode: string,
-	savedCode: string,
 	filePath: string,
 	show_global_vars?: boolean,
 	default_filter_vars: string[],
@@ -72,6 +71,9 @@ export enum PythonState {
 
 export class PythonExecutor {
 	private static readonly areplPythonBackendFolderPath = __dirname + '/python/'
+
+	// how long between SIGTERM and SIGKILL, in ms
+	static GRACE_PERIOD = 50
 
 	state: PythonState = PythonState.Starting
 	finishedStartingCallback: Function
@@ -166,7 +168,7 @@ export class PythonExecutor {
 					// python didn't respect the SIGTERM, force-kill it
 					this.pyshell.childProcess.kill('SIGKILL')
 				}
-			}, 50)
+			}, PythonExecutor.GRACE_PERIOD)
 		}
 	}
 

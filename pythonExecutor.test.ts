@@ -17,7 +17,6 @@ suite("python_evaluator Tests", () => {
     let pyEvaluator = new PythonExecutor()
     let input = {
         evalCode: "",
-        savedCode: "",
         filePath: "",
         show_global_vars: true,
         default_filter_vars: [],

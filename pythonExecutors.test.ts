@@ -12,7 +12,6 @@ suite("PythonExecutors", () => {
     let pyExecutors = new PythonExecutors()
     let input = {
         evalCode: "",
-        savedCode: "",
         filePath: "",
         show_global_vars: true,
         default_filter_vars: [],
