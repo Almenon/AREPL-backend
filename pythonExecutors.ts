@@ -12,6 +12,7 @@ export class PythonExecutors {
     private executors: PythonExecutor[] = []
     private currentExecutorIndex: number = 0
     private waitForFreeExecutor: NodeJS.Timeout
+    private wait_for_other_runs_to_complete: NodeJS.Timeout
 
     constructor(public options: Options = {}){}
 
@@ -58,14 +59,32 @@ export class PythonExecutors {
      * Side-effect: restarts dirty executors
      */
     execCode(code: ExecArgs){
-        let freeExecutor = this.executors.find(executor=>executor.state == PythonState.FreshFree)
-
         // old code is now irrelevant, if we are still waiting to send old code
         // we should stop waiting
         clearInterval(this.waitForFreeExecutor)
+        // this timeout should definitely not still be going on, but we clear it just in case
+        clearTimeout(this.wait_for_other_runs_to_complete)
+
+        let last_run_still_executing = false
+        if(this.executors.some(executor => executor.state == PythonState.Executing)){
+            last_run_still_executing = true
+        }
         // executors running old code are now irrelevant, restart them
         this.executors.filter(executor => executor.state == PythonState.Executing || executor.state == PythonState.DirtyFree)
             .forEach(executor => executor.restart())
+
+        if(last_run_still_executing){
+            // wait for last run to complete
+            // we don't want to run two programs at once
+            // which could cause a race condition
+            this.wait_for_other_runs_to_complete = setTimeout(this.exec_when_free_executor.bind(this, code), PythonExecutor.GRACE_PERIOD+5)
+        } else{
+            this.exec_when_free_executor(code)
+        }
+    }
+
+    private exec_when_free_executor(code: ExecArgs){
+        let freeExecutor = this.executors.find(executor=>executor.state == PythonState.FreshFree)
         if(!freeExecutor){
             this.waitForFreeExecutor = setInterval(()=>{
                 freeExecutor = this.executors.find(executor=>executor.state == PythonState.FreshFree)

@@ -17,9 +17,7 @@ suite("python_evaluator Tests", () => {
     let pyEvaluator = new PythonExecutor()
     let input = {
         evalCode: "",
-        savedCode: "",
         filePath: "",
-        usePreviousVariables: false,
         show_global_vars: true,
         default_filter_vars: [],
         default_filter_types: ["<class 'module'>", "<class 'function'>"]
@@ -186,31 +184,6 @@ suite("python_evaluator Tests", () => {
         })
     })
 
-    test("arepl_store works", function (done) {
-        pyEvaluator.onPrint = (result) => {
-            assert.strictEqual(result, "3" + EOL)
-        }
-
-        input.evalCode = "arepl_store=3"
-        pyEvaluator.onResult = () => { }
-        pyEvaluator.execCode(input)
-
-        let onSecondRun = false
-        pyEvaluator.onResult = (result) => {
-            if (result.userErrorMsg) {
-                done(result.userErrorMsg)
-            }
-            else if (!onSecondRun) {
-                input.evalCode = "print(arepl_store)"
-                pyEvaluator.execCode(input)
-                onSecondRun = true
-            }
-            else {
-                done()
-            }
-        }
-    })
-
     test("no encoding errors with utf8 on windows", function (done) {
         // other platforms may have the locale encoding
         // so we just test windows
@@ -255,22 +228,6 @@ suite("python_evaluator Tests", () => {
         }
         input.evalCode = "x="
         pyEvaluator.execCode(input)
-    })
-
-    test("uses previousRun variables asked", function (done) {
-        function onSecondResult(result) {
-            assert.strictEqual(result.userVariables['y'], 1)
-            done()
-        }
-        pyEvaluator.onResult = (result) => {
-            pyEvaluator.onResult = onSecondResult
-            input.usePreviousVariables = true
-            pyEvaluator.execCode(input)
-            input.usePreviousVariables = false
-        }
-        input.evalCode = "x=1"
-        pyEvaluator.execCode(input)
-        input.evalCode = "y=x"
     })
 
     test("can restart", function (done) {
