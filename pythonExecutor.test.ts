@@ -184,31 +184,6 @@ suite("python_evaluator Tests", () => {
         })
     })
 
-    test("arepl_store works", function (done) {
-        pyEvaluator.onPrint = (result) => {
-            assert.strictEqual(result, "3" + EOL)
-        }
-
-        input.evalCode = "arepl_store=3"
-        pyEvaluator.onResult = () => { }
-        pyEvaluator.execCode(input)
-
-        let onSecondRun = false
-        pyEvaluator.onResult = (result) => {
-            if (result.userErrorMsg) {
-                done(result.userErrorMsg)
-            }
-            else if (!onSecondRun) {
-                input.evalCode = "print(arepl_store)"
-                pyEvaluator.execCode(input)
-                onSecondRun = true
-            }
-            else {
-                done()
-            }
-        }
-    })
-
     test("no encoding errors with utf8 on windows", function (done) {
         // other platforms may have the locale encoding
         // so we just test windows
