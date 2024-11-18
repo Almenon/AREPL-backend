@@ -114,6 +114,7 @@ def script_path(script_dir: str):
             except os.error:
                 pass
 
+
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
 

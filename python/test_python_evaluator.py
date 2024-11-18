@@ -158,6 +158,7 @@ def test_import_does_not_show():
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("import json"))
     assert jsonpickle.decode(return_info.userVariables) == {}
 
+
 def test_various_types():
     various_types = """
 a = 1
@@ -232,6 +233,7 @@ x=1
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(event_loop_code))
     vars = jsonpickle.decode(return_info.userVariables)
     assert "x" in vars
+
 
 def test_howdoiArepl():
     return_info = python_evaluator.exec_input(python_evaluator.ExecArgs("x=howdoi('use arepl')"))

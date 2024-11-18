@@ -7,6 +7,7 @@ _starting_locals = {}
 for var in specialVars:
     _starting_locals[var] = locals()[var]
 
+
 def get_normal_starting_locals(filePath: str):
     """
     returns the starting locals one would see on a normal run of python (without arepl)
@@ -21,6 +22,7 @@ def get_normal_starting_locals(filePath: str):
         custom_locals["__loader__"].path = path.basename(filePath)
 
     return custom_locals
+
 
 def inject_overloads(custom_locals):
     custom_locals["help"] = arepl_overloads.help_overload
