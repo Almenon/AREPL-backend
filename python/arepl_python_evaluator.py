@@ -125,8 +125,9 @@ def exec_input(exec_args: ExecArgs):
 
     # see https://docs.python.org/3/library/sys.html#sys.argv
     argv[0] = exec_args.filePath
-    exec_locals = get_normal_starting_locals(exec_args.filePath)
-    inject_overloads(exec_locals)
+    if not exec_args.usePreviousVariables:
+        exec_locals = get_normal_starting_locals(exec_args.filePath)
+        inject_overloads(exec_locals)
 
     with script_path(os.path.dirname(exec_args.filePath)):
         try:
