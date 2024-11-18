@@ -114,19 +114,27 @@ def script_path(script_dir: str):
             except os.error:
                 pass
 
+
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
+exec_locals = None
 
 def exec_input(exec_args: ExecArgs):
     """
     returns info about the executed code (local vars, errors, and timing)
     :rtype: returnInfo
     """
+    global exec_locals
 
     # see https://docs.python.org/3/library/sys.html#sys.argv
     argv[0] = exec_args.filePath
-    exec_locals = get_normal_starting_locals(exec_args.filePath)
-    inject_overloads(exec_locals)
+
+    first_run = exec_locals == None
+    if first_run or not exec_args.usePreviousVariables:
+        # We have to set this on first run.
+        # Also if we are not reusing previous variables, we reset this for unit tests
+        exec_locals = get_normal_starting_locals(exec_args.filePath)
+        inject_overloads(exec_locals)
 
     with script_path(os.path.dirname(exec_args.filePath)):
         try:

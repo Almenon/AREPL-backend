@@ -13,6 +13,7 @@ suite("PythonExecutors", () => {
     let input = {
         evalCode: "",
         filePath: "",
+        usePreviousVariables: false,
         show_global_vars: true,
         default_filter_vars: [],
         default_filter_types: ["<class 'module'>", "<class 'function'>"]
