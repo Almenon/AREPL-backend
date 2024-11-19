@@ -48,8 +48,6 @@ class ReturnInfo:
         done=True,
         count=-1,
         startResult=False,
-        *args,
-        **kwargs
     ):
         """
         :param userVariables: JSON string
@@ -118,6 +116,7 @@ def script_path(script_dir: str):
 noGlobalVarsMsg = {"zz status": "AREPL is configured to not show global vars"}
 
 exec_locals = None
+
 
 def exec_input(exec_args: ExecArgs):
     """

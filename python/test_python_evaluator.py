@@ -1,5 +1,4 @@
-from os import chdir, getcwd, listdir, path, pardir, remove
-from shutil import rmtree
+from os import path
 import tempfile
 
 import pytest
