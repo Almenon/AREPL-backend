@@ -1,4 +1,4 @@
-from arepl_pickler import specialVars, pickle_user_vars, pickle_user_error
+from arepl_pickler import pickle_user_vars, pickle_user_error
 import arepl_python_evaluator as python_evaluator
 import arepl_jsonpickle as jsonpickle
 

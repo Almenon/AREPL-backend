@@ -1,4 +1,3 @@
-import pytest
 from json import loads
 
 from arepl_dump import dump

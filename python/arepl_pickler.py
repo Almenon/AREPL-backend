@@ -2,7 +2,6 @@ from importlib import (
     util,
 )  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
 from math import isnan
-from types import ModuleType, FunctionType
 from typing import Any, Dict, List
 
 import arepl_jsonpickle as jsonpickle
