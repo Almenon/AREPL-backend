@@ -33,7 +33,6 @@ Along the way I check if I haved saved the locals from a previous run and use th
 
 
 class ReturnInfo:
-
     # HALT! do NOT change this without changing corresponding type in the frontend!
     # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(
@@ -66,7 +65,6 @@ class ReturnInfo:
 
 
 class ExecArgs(object):
-
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(self, evalCode: str, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):

@@ -66,7 +66,6 @@ def pickle_user_vars(
     default_filter_vars: List[str] = [],
     default_filter_types: List[str] = ["<class 'module'>", "<class 'function'>"],
 ):
-
     default_filter_vars += userVars.get("arepl_filter", [])
     default_filter_types += userVars.get("arepl_filter_type", [])
     custom_filter_function = userVars.get("arepl_filter_function", lambda x: x)
@@ -102,7 +101,6 @@ def pickle_user_vars(
 
 
 def pickle_user_error(error):
-
     # error needs to have context/cause
     # as a actual attribute so it gets pickled
     originalError = error
