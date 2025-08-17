@@ -44,7 +44,7 @@ foo()
     except (KeyboardInterrupt, SystemExit):
         raise
     except python_evaluator.UserError as e:
-        assert e.traceback_exception.exc_type == NameError
+        assert e.traceback_exception.exc_type is NameError
         assert len(e.traceback_exception.stack) == 2
         assert e.traceback_exception.stack[0].lineno == 4
         assert e.traceback_exception.stack[1].lineno == 3

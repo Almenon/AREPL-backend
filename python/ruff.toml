@@ -32,3 +32,6 @@ exclude = [
 
 # Same as Black.
 line-length = 120
+
+[lint]
+exclude = ["arepl_examples.py"]

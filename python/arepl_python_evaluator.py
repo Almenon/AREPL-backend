@@ -1,4 +1,3 @@
-from copy import deepcopy
 from importlib import (
     util,
 )  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
@@ -198,7 +197,7 @@ def main(json_input: str):
         return_info.userErrorMsg = e.friendly_message
         return_info.userVariables = e.varsSoFar
         return_info.execTime = e.execTime
-    except Exception as e:
+    except Exception:
         return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
 
     return_info.totalPyTime = time() - start

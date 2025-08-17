@@ -169,7 +169,8 @@ total = t2 - t1
 #   Alan Richmond @ Python3.codes
 import numpy as np
 import matplotlib.pyplot as plt
-import math, time
+import math
+import time
 
 epochs = 3000
 batchSize = 4
@@ -297,7 +298,7 @@ with open("stocks.csv", "r") as f:
 """
 import random as r
 import matplotlib.pyplot as plt
-from numpy import arange, sin, cos, exp, pi
+from numpy import arange, sin, pi
 
 plt.rcParams["figure.figsize"] = 8, 6  # size of plot in inches
 
@@ -401,7 +402,6 @@ span = search.span()
 ################################################
 
 import turtle
-import random
 
 painter = turtle.Turtle()
 

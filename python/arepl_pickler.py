@@ -24,7 +24,7 @@ class CustomPickler(jsonpickle.pickler.Pickler):
     negativeInf = float("-inf")
 
     def _flatten(self, obj):
-        if type(obj) == float:
+        if type(obj) is float:
             if obj == self.inf:
                 return "Infinity"
             if obj == self.negativeInf:
