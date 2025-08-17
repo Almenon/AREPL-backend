@@ -2,7 +2,6 @@ from typing import List
 
 
 class Settings(object):
-
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     def __init__(
         self,
@@ -10,7 +9,7 @@ class Settings(object):
         default_filter_vars: List[str] = [],
         default_filter_types: List[str] = [],
         *args,
-        **kwargs
+        **kwargs,
     ):
         self.show_global_vars = show_global_vars
         self.default_filter_vars = default_filter_vars

@@ -50,7 +50,6 @@ def input_overload(prompt: str = None) -> str:
                 # give simple user-friendly error, we dont want users worry about error in arepl source code
                 raise StopIteration("There is no more input") from None
         else:
-
             callingFrame = inspect.currentframe().f_back
             standard_input = callingFrame.f_globals["standard_input"]
 

@@ -1,4 +1,3 @@
-from copy import deepcopy
 from importlib import (
     util,
 )  # https://stackoverflow.com/questions/39660934/error-when-using-importlib-util-to-check-for-library
@@ -33,7 +32,6 @@ Along the way I check if I haved saved the locals from a previous run and use th
 
 
 class ReturnInfo:
-
     # HALT! do NOT change this without changing corresponding type in the frontend!
     # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(
@@ -66,7 +64,6 @@ class ReturnInfo:
 
 
 class ExecArgs(object):
-
     # HALT! do NOT change this without changing corresponding type in the frontend! <----
     # Also note that this uses camelCase because that is standard in JS frontend
     def __init__(self, evalCode: str, savedCode="", filePath="", usePreviousVariables=False, *args, **kwargs):
@@ -200,7 +197,7 @@ def main(json_input: str):
         return_info.userErrorMsg = e.friendly_message
         return_info.userVariables = e.varsSoFar
         return_info.execTime = e.execTime
-    except Exception as e:
+    except Exception:
         return_info.internalError = "Sorry, AREPL has ran into an error\n\n" + traceback.format_exc()
 
     return_info.totalPyTime = time() - start

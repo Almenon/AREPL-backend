@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -24,14 +24,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
           pip install -r python/linter_req.txt
-      - name: lint w/ black
-        run: $(cat blackify.bat)
+      - name: lint w/ ruff
+        run: $(cat python/ruffify.bat)
       - name: Test with pytest
         run: pytest
 
       - name: Setup Node
         uses: actions/setup-node@v4.1.0
         with:
-          node-version: "20"
+          node-version: "22"
       - run: npm ci
       - run: npm test
