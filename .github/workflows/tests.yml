@@ -32,6 +32,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.1.0
         with:
-          node-version: "20"
+          node-version: "22"
       - run: npm ci
       - run: npm test
