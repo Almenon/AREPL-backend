@@ -30,7 +30,6 @@ exclude = [
     "arepl_jsonpickle"
 ]
 
-# Same as Black.
 line-length = 120
 
 [lint]
