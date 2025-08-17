@@ -25,7 +25,7 @@ jobs:
           pip install -r python/requirements.txt
           pip install -r python/linter_req.txt
       - name: lint w/ ruff
-        run: $(cat ruffify.bat)
+        run: $(cat python/ruffify.bat)
       - name: Test with pytest
         run: pytest
 
