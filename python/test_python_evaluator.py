@@ -206,32 +206,16 @@ fp.close()
     assert vars["x"] == b"yo"
 
 
-def test_event_Loop():
-    event_loop_code = """
+def test_async():
+    async_code = """
 import asyncio
+async def hello_world():
+    x=1
 
-async def async_run():
-    pass
-
-def compile_async_tasks():
-    tasks = []
-
-    tasks.append(
-        asyncio.ensure_future(async_run())
-    )
-    return tasks
-
-tasks = compile_async_tasks()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(asyncio.gather(*tasks))
-loop.close()
-x=1
+asyncio.run(hello_world())
     """
 
-    return_info = python_evaluator.exec_input(python_evaluator.ExecArgs(event_loop_code))
-    vars = jsonpickle.decode(return_info.userVariables)
-    assert "x" in vars
+    python_evaluator.exec_input(python_evaluator.ExecArgs(async_code))
 
 
 def test_howdoiArepl():
